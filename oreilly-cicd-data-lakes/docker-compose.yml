@@ -73,7 +73,7 @@ services:
     volumes:
       - ./jupyter/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py
       - ./jupyter/hive-site.xml:/usr/local/spark/conf/hive-site.xml
-      - ./jupyter/init.ipynb:/home/jovyan/⭐️ START YOUR LAKEFS DATA + AI SUMMIT 2022 CHALLENGE HERE ⭐️.ipynb
+      - ./jupyter/init.ipynb:/home/jovyan/⭐️ START YOUR LAKEFS CHALLENGE HERE ⭐️.ipynb
     ports:
       - 8898:8888
       - 4050:4040

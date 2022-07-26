@@ -1,0 +1,22 @@
+# Welcome to the lakeFS data challenge! You've found the first dataset to explore.
+
+In order to succeed you'd need to know the following:
+
+1. Familiarity with Spark (using pySpark) and Jupyter notebooks
+2. Basic understanding of lakeFS - a good place to start is https://docs.lakefs.io/
+
+Your challenge, should you agree to accept it, is do accomplish the following:
+
+1. On the main branch, find the users that have done less than 50 events.
+2. The events table has a new version available, on the `improvedDataJune2020` branch!
+3. Find the number of users that have over 50 events in this new version, but that had less than 50 events on main! Only count users that have events in BOTH versions.
+4. This number opens a treasure chest! you'll need to find it and use it to unlock the chest and complete the challenge
+
+To open the lakeFS UI and start exploring:
+
+URL: http://localhost:8010/
+Access Key ID: AKIAIOSFODNN7EXAMPLE
+Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+Good luck!
+

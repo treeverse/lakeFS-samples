@@ -15,7 +15,7 @@ echo "📂 Downloading challenge datasets..."
 export LAKECTL_BASE_URI="lakefs://oreilly-challenge/"
 
 # Instructions
-lakectl fs upload --source <(zcat /data/int.gz) main/instructions.txt > /dev/null
+lakectl fs upload --source <(gzip -dc /data/int.gz) main/instructions.txt > /dev/null
 lakectl commit main -m "initial commit: Added instructions!" --meta "format=text" >/dev/null
 
 # Download and set up datasets:
