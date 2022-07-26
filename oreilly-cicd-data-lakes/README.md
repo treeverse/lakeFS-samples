@@ -1,4 +1,6 @@
-# 💫 Welcome to the lakeFS Data + AI Summit 2022 Challenge!
+# 💫 Welcome to the O'Reilly CI/CD for Data Lakes - lakeFS Course Challenge!
+
+Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
 ## Setup
 
