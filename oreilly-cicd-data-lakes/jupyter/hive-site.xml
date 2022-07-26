@@ -1,0 +1,28 @@
+<configuration>
+    <!-- s3a configuration (lakeFS S3 Gateway) -->
+    <property>
+        <name>fs.s3a.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+    </property>
+    <property>
+        <name>fs.s3a.endpoint</name>
+        <value>http://lakefs:8000</value>
+    </property>
+    <property>
+        <name>fs.s3a.access.key</name>
+        <value>AKIAIOSFODNN7EXAMPLE</value>
+    </property>
+    <property>
+        <name>fs.s3a.secret.key</name>
+        <value>wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY</value>
+    </property>
+    <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>fs.lakefs.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+    </property>
+</configuration>
+

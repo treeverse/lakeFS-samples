@@ -1,0 +1,84 @@
+version: "3"
+services:
+
+  minio:
+    image: minio/minio
+    container_name: lakefs-oreilly-minio
+    ports:
+      - "9112:9000"
+      - "9211:9001"
+    entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
+
+
+  minio-setup:
+    image: minio/mc
+    container_name: lakefs-oreilly-minio-setup
+    environment:
+        - MC_HOST_lakefs=http://minioadmin:minioadmin@minio:9000
+    depends_on:
+      - minio
+    command: ["mb", "lakefs/oreilly-challenge-storage"]
+
+  lakefs:
+    image: treeverse/lakefs:0.66.0
+    container_name: lakefs-oreilly-lakefs
+    ports:
+      - "8010:8000"
+    depends_on:
+      - postgres
+      - minio
+    environment:
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
+      - LAKEFS_BLOCKSTORE_S3_DISCOVER_BUCKET_REGION=false
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_DATABASE_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKEFS_STATS_ENABLED=false
+      - LAKEFS_LOGGING_LEVEL=NONE
+    entrypoint: ["/app/wait-for", "postgres:5432", "--", "/app/lakefs", "run"]
+
+  postgres:
+    image: postgres:13
+    container_name: lakefs-oreilly-postgres
+    command: -c log_min_messages=panic
+    environment:
+      POSTGRES_USER: lakefs
+      POSTGRES_PASSWORD: lakefs
+
+  lakefs-setup:
+    image: treeverse/lakefs:0.66.0
+    container_name: lakefs-oreilly-lakefs-setup
+    depends_on:
+      - postgres
+      - minio-setup
+    environment:
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_DATABASE_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://lakefs:8000
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_LOGGING_LEVEL=error
+    entrypoint: ["/app/wait-for", "lakefs:8000", "--", "sh", "/lakefs_setup.sh"]
+    volumes:
+      - ./lakefs/data:/data
+      - ./lakefs/setup.sh:/lakefs_setup.sh
+
+  jupyter:
+    container_name: lakefs-oreilly-jupyter
+    build: jupyter
+    volumes:
+      - ./jupyter/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py
+      - ./jupyter/hive-site.xml:/usr/local/spark/conf/hive-site.xml
+      - ./jupyter/init.ipynb:/home/jovyan/⭐️ START YOUR LAKEFS DATA + AI SUMMIT 2022 CHALLENGE HERE ⭐️.ipynb
+    ports:
+      - 8898:8888
+      - 4050:4040
+
+networks:
+  default:
+    name: oreilly
+
