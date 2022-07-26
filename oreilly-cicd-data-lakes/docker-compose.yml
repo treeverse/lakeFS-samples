@@ -74,6 +74,8 @@ services:
       - ./jupyter/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py
       - ./jupyter/hive-site.xml:/usr/local/spark/conf/hive-site.xml
       - ./jupyter/init.ipynb:/home/jovyan/⭐️ START YOUR LAKEFS CHALLENGE HERE ⭐️.ipynb
+      - ./jupyter/solution.ipynb:/home/jovyan/📚 SOLUTION 📚 .ipynb
+      
     ports:
       - 8898:8888
       - 4050:4040
