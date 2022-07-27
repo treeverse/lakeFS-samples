@@ -7,7 +7,7 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 Start by cloning this repository:
 
 ```bash
-$ git clone https://github.com/treeverse/lakeFS-samples && cd cd lakeFS-samples/oreilly-cicd-data-lakes
+$ git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/oreilly-cicd-data-lakes
 ```
 
 To spin up the environment, make sure you have [Docker Compose installed on your computer](https://docs.docker.com/compose/install/), and run:
