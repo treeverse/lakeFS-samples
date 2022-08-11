@@ -43,3 +43,8 @@ This repository includes Jupyter Notebooks and a sample CSV file to demonstrate 
 5. Open [http://127.0.0.1:8888/](http://127.0.0.1:8888/) in your web browser.
 
 6. Use the token returned by “jupyter server list” command to login to JupyterLab UI and open “Installation” notebook and run it.
+
+## Demo Instructions
+
+Once you have successfully completed setup then open "Spark Demo" or "Delta Lake Demo" notebook from JupyterLab UI and follow the instructions.
+
