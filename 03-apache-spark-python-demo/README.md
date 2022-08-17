@@ -16,33 +16,15 @@ This repository includes Jupyter Notebooks and a sample CSV file to demonstrate 
    git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/03-apache-spark-python-demo
    ```
 
-2. Run one of the following commands to download and run Spark Docker container which includes Python, Jupyter Notebook, pyspark, JDK and Hadoop binaries (Docker image size is around 3.8GB):
-
-	2.1. Run this command if using amd64 (x86_64) CPU Architectures platforms e.g macOS with Intel chip:
-   ```bash
-   docker run -d -p 8888:8888 -p 4040:4040 --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan --name lakefs-spark-python-demo jupyter/pyspark-notebook
-   ```
-
-	2.2. Run this command if using aarch64 CPU Architectures platforms e.g. macOS with Apple chip:
-   ```bash
-   docker run -d -p 8888:8888 -p 4040:4040 --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan --name lakefs-spark-python-demo jupyter/pyspark-notebook:aarch64-python-3.10.5
-   ```
-
-3. Launch a Bash terminal within a Docker container:
+2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client (Docker image size is around 4GB):
 
    ```bash
-   docker exec -it lakefs-spark-python-demo /bin/bash
+      docker build -t lakefs-spark-python-demo .
+
+      docker run -d -p 8888:8888 -p 4040:4040 -p 8080:8080 --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan -v $PWD/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py --name lakefs-spark-python-demo lakefs-spark-python-demo
    ```
 
-4. Display the currently running server along with the tokens:
-
-   ```bash
-   jupyter server list
-   ```
-
-5. Open [http://127.0.0.1:8888/](http://127.0.0.1:8888/) in your web browser.
-
-6. Use the token returned by “jupyter server list” command to login to JupyterLab UI and open “Installation” notebook and run it.
+3. Open [http://127.0.0.1:8888/](http://127.0.0.1:8888/) in your web browser.
 
 ## Demo Instructions
 
