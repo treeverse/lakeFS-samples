@@ -28,5 +28,5 @@ This repository includes Jupyter Notebooks and a sample CSV file to demonstrate 
 
 ## Demo Instructions
 
-Once you have successfully completed setup then open "Spark Demo" or "Delta Lake Demo" notebook from JupyterLab UI and follow the instructions.
+Once you have successfully completed setup then open "Spark Demo", "Delta Lake Demo" or "Airflow Demo" notebook from JupyterLab UI and follow the instructions.
 
