@@ -1,0 +1,15 @@
+name: ParquetOnlyInProduction
+description: This webhook ensures that only parquet files are written under production/
+on:
+  pre-merge:
+    branches:
+      - main
+hooks:
+  - id: production_format_validator
+    type: webhook
+    description: Validate file formats
+    properties:
+      url: "lakefs-webhooks:5000/webhooks/format"
+      query_params:
+        allow: ["parquet", "delta_lake"]
+        prefix: production/
