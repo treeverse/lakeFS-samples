@@ -12,4 +12,4 @@ hooks:
       url: "lakefs-webhooks:5000/webhooks/format"
       query_params:
         allow: ["parquet", "delta_lake"]
-        prefix: production/
+        prefix: analytics/
