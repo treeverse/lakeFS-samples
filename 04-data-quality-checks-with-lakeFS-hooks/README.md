@@ -5,7 +5,7 @@
 * Get a flask server running locally. THe following commands can be run in your terminal to get the hooks image.
   * `$ git clone https://github.com/treeverse/lakeFS-hooks.git`
   * `$ cd lakeFS-hooks/`
-  * `docker build -t lakefs-hooks-image .
+  * `docker build -t <lakefs-hooks-image-name> .` That is, `docker build -t lakefs-hooks .`
 * lakeFS webhooks need a separate hooks server to serve the http requests from lakeFS server. 
 
 ### Setup lakeFS server and hooks server using "Everything Bagel" docker
@@ -18,10 +18,10 @@
 * Edit the `docker-compose.yaml` to add the following section. The environment variables access key id and secret access key are set to the same lakeFS credentials present in `lakefs-setup` service of the `docker-compose.yaml`.
 ```
   lakefs-webhooks:
-    image: lakefs-hooks-image
-    container_name: lakefs-hooks-server
+    image: <lakefs-hooks-image-name>
+    container_name: lakefs-hooks
     ports:
-      - 5000:5000
+      - 5001:5001
     environment:
       - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
       - LAKEFS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
@@ -34,7 +34,7 @@
   * **minio**:
     `http://localhost:9001` in your browser. The username and password are found in the `docker_compose.yaml` file in the `minio-setup` section.
   * **jupyter notebook**:
-    `http://localhost:8888` in your browser.
+    `http://localhost:8888` in your browser. The password to login to notebook is found in `docker_compose.yaml` file in `notebook` section.
 
 ### Running lakeFS webhooks
 
