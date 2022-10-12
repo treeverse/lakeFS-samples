@@ -82,7 +82,7 @@ class NamedStringIO(StringIO):
      start_date=days_ago(2),
      schedule_interval=None,
      tags=['testing'])
-def lakeFS_workflow():
+def lakefs_new_dag():
     """
     ### Example lakeFS DAG
 
@@ -392,7 +392,7 @@ def lakeFS_workflow():
     task_etl_task1 = SparkSubmitOperator(
         task_id='etl_task1',
         conn_id='conn_spark',
-        application="./Airflow/etl_task1.py",
+        application="./airflow/New_DAG/etl_task1.py",
         application_args=[default_args.get('branch') + '_etl_task1'],
         jars=jars_partition_data
     )
@@ -408,7 +408,7 @@ def lakeFS_workflow():
     task_etl_task2_1 = SparkSubmitOperator(
         task_id='etl_task2_1',
         conn_id='conn_spark',
-        application="./Airflow/etl_task2_1.py",
+        application="./airflow/New_DAG/etl_task2_1.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -424,7 +424,7 @@ def lakeFS_workflow():
     task_etl_task2_2 = SparkSubmitOperator(
         task_id='etl_task2_2',
         conn_id='conn_spark',
-        application="./Airflow/etl_task2_2.py",
+        application="./airflow/New_DAG/etl_task2_2.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -440,7 +440,7 @@ def lakeFS_workflow():
     task_etl_task2_3 = SparkSubmitOperator(
         task_id='etl_task2_3',
         conn_id='conn_spark',
-        application="./Airflow/etl_task2_3.py",
+        application="./airflow/New_DAG/etl_task2_3.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -456,7 +456,7 @@ def lakeFS_workflow():
     task_etl_task3 = SparkSubmitOperator(
         task_id='etl_task3',
         conn_id='conn_spark',
-        application="./Airflow/etl_task3.py",
+        application="./airflow/New_DAG/etl_task3.py",
         application_args=[default_args.get('branch') + '_etl_task3'],
         jars=jars_partition_data
     )
@@ -492,4 +492,4 @@ def lakeFS_workflow():
     task_sense_commit_etl >> task_merge_etl_branch \
         >> [task_check_logs_bulk, task_check_logs_individually]
 
-sample_workflow_dag = lakeFS_workflow()
+sample_workflow_dag = lakefs_new_dag()

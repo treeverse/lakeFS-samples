@@ -13,6 +13,5 @@ RUN pip install lakefs-client==0.70.2
 RUN pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 RUN pip install airflow-provider-lakefs==0.44.0
 RUN pip install apache-airflow-providers-apache-spark==3.0.0
-RUN mkdir -p /root/airflow/dags
 
 USER $NB_UID
