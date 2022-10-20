@@ -9,7 +9,7 @@ hooks:
     type: webhook
     description: Validate file formats
     properties:
-      url: "http://lakefs-hooks:5001/webhooks/format"
+      url: "http://lakefs-hooks:5000/webhooks/format"
       query_params:
         allow: ["parquet", "delta_lake"]
         prefix: analytics/
