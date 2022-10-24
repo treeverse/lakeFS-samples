@@ -1,0 +1,425 @@
+﻿Employee_ID,Job_Title,Department,Manager_ID
+120101,Director,Sales Management,120261
+120102,Sales Manager,Sales Management,120101
+120103,Sales Manager,Sales Management,120101
+120104,Administration Manager,Administration,120101
+120105,Secretary I,Administration,120101
+120106,Office Assistant II,Administration,120104
+120107,Office Assistant III,Administration,120104
+120108,Warehouse Assistant II,Administration,120104
+120109,Warehouse Assistant I,Administration,120104
+120110,Warehouse Assistant III,Administration,120104
+120111,Security Guard II,Administration,120104
+120112,Security Guard I,Administration,120104
+120113,Security Guard II,Administration,120104
+120114,Security Manager,Administration,120104
+120115,Service Assistant I,Administration,120104
+120116,Service Assistant II,Administration,120104
+120117,Cabinet Maker III,Engineering,120104
+120118,Cabinet Maker II,Engineering,120104
+120119,Electrician IV,Engineering,120104
+120120,Electrician II,Engineering,120104
+120121,Sales Rep. II,Sales,120102
+120122,Sales Rep. II,Sales,120102
+120123,Sales Rep. I,Sales,120102
+120124,Sales Rep. I,Sales,120102
+120125,Sales Rep. IV,Sales,120102
+120126,Sales Rep. II,Sales,120102
+120127,Sales Rep. II,Sales,120102
+120128,Sales Rep. IV,Sales,120102
+120129,Sales Rep. III,Sales,120102
+120130,Sales Rep. I,Sales,120102
+120131,Sales Rep. I,Sales,120102
+120132,Sales Rep. III,Sales,120102
+120133,Sales Rep. II,Sales,120102
+120134,Sales Rep. II,Sales,120102
+120135,Sales Rep. IV,Sales,120102
+120136,Sales Rep. I,Sales,120102
+120137,Sales Rep. III,Sales,120102
+120138,Sales Rep. I,Sales,120102
+120139,Sales Rep. II,Sales,120102
+120140,Sales Rep. I,Sales,120103
+120141,Sales Rep. II,Sales,120103
+120142,Sales Rep. III,Sales,120103
+120143,Sales Rep. II,Sales,120103
+120144,Sales Rep. III,Sales,120103
+120145,Sales Rep. II,Sales,120103
+120146,Sales Rep. I,Sales,120103
+120147,Sales Rep. II,Sales,120103
+120148,Sales Rep. III,Sales,120103
+120149,Sales Rep. I,Sales,120103
+120150,Sales Rep. III,Sales,120103
+120151,Sales Rep. II,Sales,120103
+120152,Sales Rep. I,Sales,120102
+120153,Sales Rep. I,Sales,120102
+120154,Sales Rep. III,Sales,120102
+120155,Sales Rep. III,Sales,120102
+120156,Sales Rep. I,Sales,120102
+120157,Sales Rep. II,Sales,120102
+120158,Sales Rep. III,Sales,120102
+120159,Sales Rep. IV,Sales,120102
+120160,Sales Rep. I,Sales,120102
+120161,Sales Rep. III,Sales,120102
+120162,Sales Rep. I,Sales,120102
+120163,Sales Rep. II,Sales,120102
+120164,Sales Rep. II,Sales,120102
+120165,Sales Rep. I,Sales,120102
+120166,Sales Rep. IV,Sales,120102
+120167,Sales Rep. I,Sales,120102
+120168,Sales Rep. I,Sales,120102
+120169,Sales Rep. III,Sales,120102
+120170,Sales Rep. III,Sales,120102
+120171,Sales Rep. II,Sales,120102
+120172,Sales Rep. III,Sales,120102
+120173,Sales Rep. I,Sales,120102
+120174,Sales Rep. I,Sales,120102
+120175,Sales Rep. I,Sales,120102
+120176,Sales Rep. I,Sales,120102
+120177,Sales Rep. III,Sales,120102
+120178,Sales Rep. II,Sales,120102
+120179,Sales Rep. III,Sales,120102
+120180,Sales Rep. II,Sales,120102
+120181,Temp. Sales Rep.,Sales,120103
+120182,Temp. Sales Rep.,Sales,120103
+120183,Temp. Sales Rep.,Sales,120103
+120184,Temp. Sales Rep.,Sales,120103
+120185,Temp. Sales Rep.,Sales,120103
+120186,Temp. Sales Rep.,Sales,120103
+120187,Temp. Sales Rep.,Sales,120103
+120188,Temp. Sales Rep.,Sales,120103
+120189,Temp. Sales Rep.,Sales,120103
+120190,Trainee,Sales,120103
+120191,Trainee,Sales,120103
+120192,Trainee,Sales,120103
+120193,Trainee,Sales,120103
+120194,Trainee,Sales,120103
+120195,Trainee,Sales,120103
+120196,Trainee,Sales,120103
+120197,Trainee,Sales,120103
+120198,Sales Rep. III,Sales,120103
+120259,Chief Executive Officer,Executives,
+120260,Chief Marketing Officer,Executives,120259
+120261,Chief Sales Officer,Executives,120259
+120262,Chief Financial Officer,Executives,120259
+120263,Financial Analyst III,Group Financials,120262
+120264,Financial Analyst II,Group Financials,120262
+120265,Auditor III,Group Financials,120262
+120266,Secretary IV,Secretary of the Board,120259
+120267,Secretary III,Secretary of the Board,120259
+120268,Senior Strategist,Strategy,120260
+120269,Strategist II,Strategy,120260
+120270,Concession Director,Concession Management,120261
+120271,Concession Manager,Concession Management,120270
+120272,Concession Consultant II,Concession Management,120271
+120273,Concession Assistant III,Concession Management,120271
+120274,Concession Assistant I,Concession Management,120271
+120275,Concession Consultant II,Concession Management,120271
+120276,Concession Assistant II,Concession Management,120271
+120277,Concession Consultant I,Concession Management,120271
+120278,Concession Assistant III,Concession Management,120271
+120279,Concession Consultant I,Concession Management,120271
+120280,Concession Consultant III,Concession Management,120271
+120656,Logistics Coordinator II,Logistics Management,120660
+120657,Logistics Coordinator I,Logistics Management,120660
+120658,Logistics Coordinator II,Logistics Management,120660
+120659,Director,Logistics Management,120259
+120660,Logistics Manager,Logistics Management,120659
+120661,Senior Logistics Manager,Logistics Management,120659
+120662,Secretary II,Logistics Management,120659
+120663,Pricing Manager,Logistics Management,120659
+120664,Pricing Specialist,Logistics Management,120663
+120665,Senior Logistics Manager,Logistics Management,120659
+120666,Logistics Manager,Logistics Management,120659
+120667,Office Assistant III,Logistics Management,120666
+120668,Services Manager,Logistics Management,120659
+120669,Services Assistant IV,Logistics Management,120668
+120670,Shipping Manager,Stock & Shipping,120659
+120671,Shipping Agent III,Stock & Shipping,120670
+120672,Shipping Manager,Stock & Shipping,120659
+120673,Shipping Agent II,Stock & Shipping,120672
+120677,Shipping Manager,Stock & Shipping,120659
+120678,Shipping Agent III,Stock & Shipping,120677
+120679,Shipping Manager,Stock & Shipping,120659
+120680,Shipping Agent I,Stock & Shipping,120679
+120681,Shipping Agent II,Stock & Shipping,120679
+120682,Shipping Agent I,Stock & Shipping,120679
+120683,Shipping Agent III,Stock & Shipping,120679
+120684,Warehouse Assistant I,Stock & Shipping,120679
+120685,Warehouse Assistant I,Stock & Shipping,120679
+120686,Warehouse Assistant II,Stock & Shipping,120679
+120687,Warehouse Assistant I,Stock & Shipping,120679
+120688,Warehouse Assistant I,Stock & Shipping,120679
+120689,Warehouse Assistant III,Stock & Shipping,120679
+120690,Warehouse Assistant I,Stock & Shipping,120679
+120691,Shipping Manager,Stock & Shipping,120659
+120692,Shipping Agent II,Stock & Shipping,120691
+120693,Shipping Agent I,Stock & Shipping,120691
+120694,Warehouse Assistant I,Stock & Shipping,120691
+120695,Warehouse Assistant II,Stock & Shipping,120691
+120696,Warehouse Assistant I,Stock & Shipping,120691
+120697,Warehouse Assistant IV,Stock & Shipping,120691
+120698,Warehouse Assistant I,Stock & Shipping,120691
+120710,Business Analyst II,Marketing,120719
+120711,Business Analyst III,Marketing,120719
+120712,Marketing Manager,Marketing,120719
+120713,Marketing Assistant III,Marketing,120712
+120714,Marketing Manager,Marketing,120719
+120715,Marketing Assistant II,Marketing,120714
+120716,Events Manager,Marketing,120719
+120717,Marketing Assistant II,Marketing,120716
+120718,Marketing Assistant II,Marketing,120716
+120719,Senior Marketing Manager,Marketing,120260
+120720,Corp. Comm. Manager,Marketing,120719
+120721,Marketing Assistant II,Marketing,120720
+120722,Corp. Comm. Specialist I,Marketing,120720
+120723,Corp. Comm. Specialist II,Marketing,120720
+120724,Marketing Manager,Marketing,120719
+120725,Marketing Assistant II,Marketing,120724
+120726,Marketing Assistant I,Marketing,120724
+120727,Marketing Assistant IV,Marketing,120724
+120728,Purchasing Agent II,Purchasing,120735
+120729,Purchasing Agent I,Purchasing,120735
+120730,Purchasing Agent I,Purchasing,120735
+120731,Purchasing Agent II,Purchasing,120735
+120732,Purchasing Agent III,Purchasing,120736
+120733,Purchasing Agent I,Purchasing,120736
+120734,Purchasing Agent III,Purchasing,120736
+120735,Purchasing Manager,Purchasing,120261
+120736,Purchasing Manager,Purchasing,120261
+120737,Purchasing Manager,Purchasing,120261
+120738,Purchasing Agent I,Purchasing,120737
+120739,Purchasing Agent III,Purchasing,120737
+120740,Purchasing Agent II,Purchasing,120737
+120741,Purchasing Agent III,Purchasing,120737
+120742,Purchasing Agent I,Purchasing,120737
+120743,Purchasing Agent II,Purchasing,120737
+120744,Purchasing Agent II,Purchasing,120737
+120745,Purchasing Agent I,Purchasing,120737
+120746,Account Manager,Accounts,120262
+120747,Financial Controller I,Accounts,120746
+120748,Building Admin. Manager,Accounts,120262
+120749,Office Assistant II,Accounts,120748
+120750,Accountant I,Accounts,120751
+120751,Finance Manager,Accounts,120262
+120752,Accountant I,Accounts,120751
+120753,Financial Controller II,Accounts,120751
+120754,Accountant II,Accounts,120751
+120755,Accountant III,Accounts,120751
+120756,Financial Controller III,Accounts,120751
+120757,Accountant III,Accounts,120751
+120758,Accountant II,Accounts,120751
+120759,Accountant II,Accounts,120746
+120760,Financial Controller III,Accounts,120746
+120761,Accountant I,Accounts,120746
+120762,Accountant I,Accounts,120746
+120763,Auditor II,Accounts Management,120766
+120764,Auditor I,Accounts Management,120766
+120765,Financial Controller III,Accounts Management,120766
+120766,Auditing Manager,Accounts Management,120262
+120767,Accountant I,Accounts Management,120766
+120768,Accountant II,Accounts Management,120766
+120769,Auditor II,Accounts Management,120766
+120770,Auditor I,Accounts Management,120766
+120771,Accountant II,Accounts Management,120766
+120772,HR Generalist I,Group HR Management,120780
+120773,HR Generalist II,Group HR Management,120780
+120774,HR Specialist II,Group HR Management,120780
+120775,HR Analyst II,Group HR Management,120780
+120776,HR Generalist III,Group HR Management,120780
+120777,HR Specialist I,Group HR Management,120780
+120778,HR Specialist I,Group HR Management,120780
+120779,HR Analyst II,Group HR Management,120780
+120780,HR Manager,Group HR Management,120262
+120781,Recruiter I,Group HR Management,120782
+120782,Recruitment Manager,Group HR Management,120262
+120783,Recruiter III,Group HR Management,120782
+120784,Recruiter II,Group HR Management,120782
+120785,Training Manager,Group HR Management,120780
+120786,Trainer I,Group HR Management,120785
+120787,Trainer II,Group HR Management,120785
+120788,Trainer I,Group HR Management,120785
+120789,Trainer III,Group HR Management,120785
+120790,ETL Specialist II,IS,120791
+120791,Systems Architect IV,IS,120798
+120792,Systems Architect II,IS,120791
+120793,ETL Specialist I,IS,120791
+120794,Applications Developer IV,IS,120800
+120795,Applications Developer II,IS,120794
+120796,Applications Developer II,IS,120794
+120797,Applications Developer I,IS,120794
+120798,Senior Project Manager,IS,120800
+120799,Office Assistant III,IS,120800
+120800,IS Director,IS,120262
+120801,Applications Developer I,IS,120798
+120802,Applications Developer IV,IS,120798
+120803,Applications Developer I,IS,120798
+120804,IS Administrator III,IS,120798
+120805,BI Administrator IV,IS,120798
+120806,IS Administrator II,IS,120798
+120807,IS Administrator I,IS,120798
+120808,BI Specialist II,IS,120798
+120809,BI Architect II,IS,120798
+120810,IS Architect III,IS,120798
+120811,Applications Developer I,IS,120814
+120812,Applications Developer II,IS,120814
+120813,Applications Developer IV,IS,120814
+120814,Project Manager,IS,120800
+120815,Service Administrator III,Marketing,120719
+120816,Service Administrator I,Marketing,120719
+120992,Office Assistant I,Administration,120996
+120993,Office Assistant I,Administration,120996
+120994,Office Administrator I,Administration,120996
+120995,Office Administrator II,Administration,120996
+120996,Office Assistant IV,Administration,121000
+120997,Shipping Administrator I,Administration,121000
+120998,Clerk I,Administration,120997
+120999,Clerk I,Administration,120997
+121000,Administration Manager,Administration,121141
+121001,Warehouse Manager,Administration,121000
+121002,Warehouse Assistant II,Administration,121001
+121003,Warehouse Assistant I,Administration,121001
+121004,Security Manager,Administration,121000
+121005,Security Guard I,Administration,121004
+121006,Security Guard I,Administration,121004
+121007,Security Guard II,Administration,121004
+121008,Security Guard II,Administration,121004
+121009,Service Administrator I,Administration,121000
+121010,Service Assistant I,Administration,121009
+121011,Service Assistant I,Administration,121009
+121012,Service Assistant II,Administration,121009
+121013,Electrician II,Engineering,121016
+121014,Electrician III,Engineering,121016
+121015,Technician I,Engineering,121016
+121016,Technical Manager,Engineering,121000
+121017,Technician II,Engineering,121016
+121018,Sales Rep. II,Sales,121144
+121019,Sales Rep. IV,Sales,121144
+121020,Sales Rep. IV,Sales,121144
+121021,Sales Rep. IV,Sales,121144
+121022,Sales Rep. IV,Sales,121144
+121023,Sales Rep. I,Sales,121144
+121024,Sales Rep. II,Sales,121144
+121025,Sales Rep. II,Sales,121144
+121026,Sales Rep. IV,Sales,121144
+121027,Sales Rep. II,Sales,121144
+121028,Sales Rep. I,Sales,121144
+121029,Sales Rep. I,Sales,121144
+121030,Sales Rep. I,Sales,121144
+121031,Sales Rep. III,Sales,121144
+121032,Sales Rep. IV,Sales,121144
+121033,Sales Rep. III,Sales,121144
+121034,Sales Rep. II,Sales,121144
+121035,Sales Rep. II,Sales,121144
+121036,Sales Rep. I,Sales,121144
+121037,Sales Rep. III,Sales,121144
+121038,Sales Rep. I,Sales,121144
+121039,Sales Rep. II,Sales,121144
+121040,Sales Rep. III,Sales,121144
+121041,Sales Rep. II,Sales,121144
+121042,Sales Rep. III,Sales,121144
+121043,Sales Rep. II,Sales,121144
+121044,Sales Rep. I,Sales,121144
+121045,Sales Rep. II,Sales,121143
+121046,Sales Rep. I,Sales,121143
+121047,Sales Rep. I,Sales,121143
+121048,Sales Rep. I,Sales,121143
+121049,Sales Rep. I,Sales,121143
+121050,Sales Rep. II,Sales,121143
+121051,Sales Rep. I,Sales,121143
+121052,Sales Rep. II,Sales,121143
+121053,Sales Rep. III,Sales,121143
+121054,Sales Rep. III,Sales,121143
+121055,Sales Rep. III,Sales,121143
+121056,Sales Rep. II,Sales,121143
+121057,Sales Rep. I,Sales,121143
+121058,Sales Rep. I,Sales,121143
+121059,Sales Rep. II,Sales,121143
+121060,Sales Rep. III,Sales,121143
+121061,Sales Rep. III,Sales,121143
+121062,Sales Rep. IV,Sales,121145
+121063,Sales Rep. II,Sales,121145
+121064,Sales Rep. I,Sales,121145
+121065,Sales Rep. III,Sales,121145
+121066,Sales Rep. II,Sales,121145
+121067,Sales Rep. IV,Sales,121145
+121068,Sales Rep. II,Sales,121145
+121069,Sales Rep. II,Sales,121145
+121070,Sales Rep. III,Sales,121145
+121071,Sales Rep. III,Sales,121145
+121072,Sales Rep. I,Sales,121145
+121073,Sales Rep. I,Sales,121145
+121074,Sales Rep. I,Sales,121145
+121075,Sales Rep. II,Sales,121145
+121076,Sales Rep. II,Sales,121143
+121077,Sales Rep. III,Sales,121143
+121078,Sales Rep. I,Sales,121143
+121079,Sales Rep. I,Sales,121143
+121080,Sales Rep. I,Sales,121143
+121081,Sales Rep. III,Sales,121143
+121082,Sales Rep. III,Sales,121143
+121083,Sales Rep. I,Sales,121143
+121084,Sales Rep. I,Sales,121143
+121085,Sales Rep. IV,Sales,121143
+121086,Sales Rep. I,Sales,121143
+121087,Sales Rep. II,Sales,121143
+121088,Sales Rep. I,Sales,121143
+121089,Sales Rep. II,Sales,121143
+121090,Sales Rep. I,Sales,121143
+121091,Sales Rep. II,Sales,121143
+121092,Sales Rep. I,Sales,121143
+121093,Sales Rep. I,Sales,121143
+121094,Sales Rep. I,Sales,121143
+121095,Sales Rep. II,Sales,121143
+121096,Sales Rep. I,Sales,121143
+121097,Sales Rep. II,Sales,121143
+121098,Sales Rep. I,Sales,121143
+121099,Sales Rep. IV,Sales,121143
+121100,Sales Rep. II,Sales,121143
+121101,Sales Rep. I,Sales,121143
+121102,Sales Rep. I,Sales,121143
+121103,Sales Rep. I,Sales,121143
+121104,Sales Rep. II,Sales,121143
+121105,Sales Rep. III,Sales,121143
+121106,Sales Rep. I,Sales,121143
+121107,Sales Rep. IV,Sales,121143
+121108,Sales Rep. I,Sales,121143
+121109,Sales Rep. I,Sales,121143
+121110,Temp. Sales Rep.,Sales,121145
+121111,Temp. Sales Rep.,Sales,121145
+121112,Temp. Sales Rep.,Sales,121145
+121113,Temp. Sales Rep.,Sales,121145
+121114,Temp. Sales Rep.,Sales,121145
+121115,Temp. Sales Rep.,Sales,121145
+121116,Temp. Sales Rep.,Sales,121145
+121117,Temp. Sales Rep.,Sales,121145
+121118,Temp. Sales Rep.,Sales,121145
+121119,Temp. Sales Rep.,Sales,121145
+121120,Temp. Sales Rep.,Sales,121145
+121121,Temp. Sales Rep.,Sales,121145
+121122,Temp. Sales Rep.,Sales,121145
+121123,Temp. Sales Rep.,Sales,121145
+121124,Temp. Sales Rep.,Sales,121145
+121125,Trainee,Sales,121145
+121126,Trainee,Sales,121145
+121127,Trainee,Sales,121145
+121128,Trainee,Sales,121145
+121129,Trainee,Sales,121145
+121130,Trainee,Sales,121145
+121131,Trainee,Sales,121145
+121132,Trainee,Sales,121145
+121133,Trainee,Sales,121145
+121134,Trainee,Sales,121145
+121135,Sales Rep. I,Sales,121145
+121136,Sales Rep. I,Sales,121145
+121137,Sales Rep. I,Sales,121145
+121138,Sales Rep. I,Sales,121145
+121139,Sales Rep. II,Sales,121145
+121140,Sales Rep. I,Sales,121145
+121141,Vice President,Sales Management,120261
+121142,Director,Sales Management,121141
+121143,Senior Sales Manager,Sales Management,121142
+121144,Sales Manager,Sales Management,121142
+121145,Sales Manager,Sales Management,121142
+121146,Secretary III,Sales Management,121141
+121147,Secretary II,Sales Management,121142
+121148,Business Analyst II,Sales Management,121141
