@@ -16,7 +16,7 @@ This repository includes Jupyter Notebooks and a sample CSV file to demonstrate 
    git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/03-apache-spark-python-demo
    ```
 
-2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client (Docker image size is around 4GB):
+2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries, lakeFS Python client and Airflow (Docker image size is around 4.5GB):
 
    ```bash
       docker build -t lakefs-spark-python-demo .
