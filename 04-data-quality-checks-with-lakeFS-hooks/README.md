@@ -21,12 +21,15 @@
     image: <lakefs-hooks-image-name>
     container_name: lakefs-hooks
     ports:
-      - 5001:5001
+      - 5000:5000
     environment:
       - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
       - LAKEFS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
       - LAKEFS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
+{.note}
+Attention Mac users: In `macOS Monterey (version 12)` and above, they added a new service used for AirPlay that listens on port 5000 by default. Due to that, you may not be able to work with lakeFS hooks locally.
+
 * Start the docker containers: `docker compose up -d`
 * Once you have your Docker environment running, check out the following services:
   * **lakefs**:
