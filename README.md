@@ -8,4 +8,4 @@ This sample repository captures a collection of notebooks, dockerized applicatio
 Each of the projects, has it's own readme. You can start with number 1, and follow along to learn more.
 
 # QA
-Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to participate in the convesation and ask questions! 
+Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to participate in the converation and get answers! 
