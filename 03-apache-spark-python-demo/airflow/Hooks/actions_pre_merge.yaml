@@ -1,0 +1,17 @@
+name: TriggerAirflowDAGPreMerge
+description: This hook triggers Airflow DAG at post commit
+on:
+  pre-merge:
+    branches:
+      - main
+hooks:
+  - id: trigger_airflow_dag_lakefs_hooks_pre_merge_dag
+    type: airflow
+    description: Trigger DAG lakefs_hooks_pre_merge_dag
+    properties:
+      url: "http://host.docker.internal:8080/"
+      dag_id: "lakefs_hooks_pre_merge_dag"
+      username: "admin"
+      password: "Y6FSU99AuD6vYA77"
+      timeout: 10
+      wait_for_dag: true
