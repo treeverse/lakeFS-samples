@@ -45,7 +45,7 @@ services:
     depends_on:
       postgres_setup:
         condition: service_completed_successfully
-    image: "treeverse/lakefs:latest"
+    image: "treeverse/lakefs:0.88.0"
     ports:
       - "8084:8000"
     entrypoint: >
@@ -67,7 +67,7 @@ services:
     volumes:
       - ./app_data/lakefs_metadata:/home/lakefs/lakefs/
   lakefs_setup:
-    image: "treeverse/lakefs:latest"
+    image: "treeverse/lakefs:0.88.0"
     depends_on:
       lakefs:
         condition: service_healthy
