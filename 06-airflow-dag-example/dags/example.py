@@ -103,7 +103,7 @@ def transform_total_by_month(dt, **context):
     df = pd.read_csv(obj['Body'])
     df['month'] = pd.to_datetime(df['event_time']).dt.to_period('M')
     df = df.groupby('month').agg({'event_value': 'sum'})
-    _save_data_frame("transform_total_by_month", dt, df, branch=f"total_by_month_{dt}")
+    _save_data_frame("total_by_month", dt, df, branch=f"total_by_month_{dt}")
 
 
 with DAG(
