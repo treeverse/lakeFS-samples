@@ -8,6 +8,8 @@ from dulwich.repo import Repo
 
 RAW_ROW_COUNT = 100000
 
+np.random.seed(datetime.now().microsecond)
+
 try:
     # This can be any code that fetches the current extract version
     r = Repo(Variable.get("extract_code_git_root", "unknown"))
@@ -29,8 +31,6 @@ def _random_dates():
 
 # Extracts raw data and uploads it to lakeFS
 def extract():
-    # TODO - remove this usage of seed
-    np.random.seed(datetime.now().microsecond)
     df = pd.DataFrame({
         'user_id': np.random.randint(1, 1000, RAW_ROW_COUNT),
         'event_value': np.random.rand(RAW_ROW_COUNT),

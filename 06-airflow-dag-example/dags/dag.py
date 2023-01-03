@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import extract
 import transform
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from dulwich.repo import Repo
+from lakefs_client.model.reset_creation import ResetCreation
+from lakefs_provider.hooks.lakefs_hook import LakeFSHook
 from lakefs_provider.operators.commit_operator import LakeFSCommitOperator
 from lakefs_provider.operators.create_branch_operator import \
     LakeFSCreateBranchOperator
@@ -28,22 +30,36 @@ def get_version():
 
 
 def _transform_steps(dt_arg, transform_name, transform_func):
+    branch = f"{transform_name}_{dt_arg}"
+
+    def _reset_branch(context):
+        ti = context["ti"]
+        dt = ti.xcom_pull(task_ids='extract', dag_id='etl', key='return_value')
+        branch = f"{transform_name}_{dt}"
+        lakefs_hook = LakeFSHook(lakefs_conn_id="lakefs")
+        print("XXXDX" + branch)
+        lakefs_hook.get_conn().branches.reset_branch(repository="example-repo", branch=branch,
+                                                     reset_creation=ResetCreation(type="reset"))
+
     create_branch_op = LakeFSCreateBranchOperator(
         task_id=f"{transform_name}_create_branch",
         repo="example-repo",
-        branch=f"{transform_name}_{dt_arg}",
+        branch=branch,
         lakefs_conn_id="lakefs",
         source_branch="main",
     )
 
     transform_op = PythonOperator(task_id=f"{transform_name}_transform",
                                           python_callable=transform_func,
-                                          op_kwargs={"dt": dt_arg})
+                                          op_kwargs={"dt": dt_arg},
+                                          retries=5,
+                                          retry_delay=timedelta(seconds=5),
+                                          on_retry_callback=_reset_branch)
 
     commit_op = LakeFSCommitOperator(
         task_id=f"{transform_name}_commit",
         repo="example-repo",
-        branch=f"{transform_name}_{dt_arg}",
+        branch=branch,
         lakefs_conn_id="lakefs",
         msg="Transform result",
         metadata={
@@ -57,7 +73,7 @@ def _transform_steps(dt_arg, transform_name, transform_func):
         task_id=f"{transform_name}_merge",
         repo="example-repo",
         lakefs_conn_id="lakefs",
-        source_ref=f"{transform_name}_{dt_arg}",
+        source_ref=branch,
         destination_branch="main",
         msg="Merge transform result",
         metadata={
