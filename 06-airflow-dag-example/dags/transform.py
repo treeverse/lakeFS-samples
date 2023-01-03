@@ -1,13 +1,12 @@
-import os
-
 import pandas as pd
 import s3_utils
+from airflow.models import Variable
 from dulwich.repo import Repo
 
 try:
     # This can be any code that fetches the current transform version
-    r = Repo(os.getenv("TRANSFORM_CODE_GIT_ROOT"))
-    git_sha = r.head()
+    r = Repo(Variable.get("transform_code_git_root", "unknown"))
+    git_sha = r.head().decode("utf-8")
 except Exception as e:
     print(f"Failed to get git sha: {e}")
     git_sha = "unknown"

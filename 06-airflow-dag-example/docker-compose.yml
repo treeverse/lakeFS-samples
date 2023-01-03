@@ -25,11 +25,11 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: "dulwich airflow-provider-lakefs apache-airflow[pandas] ${_PIP_ADDITIONAL_REQUIREMENTS:-}"
-    DAG_CODE_GIT_ROOT: /opt/lakefs_example
-    EXTRACT_CODE_GIT_ROOT: /opt/lakefs_example
-    TRANSFORM_CODE_GIT_ROOT: /opt/lakefs_example
+    AIRFLOW_VAR_DAG_CODE_GIT_ROOT: /opt/lakefs_example
+    AIRFLOW_VAR_EXTRACT_CODE_GIT_ROOT: /opt/lakefs_example
+    AIRFLOW_VAR_TRANSFORM_CODE_GIT_ROOT: /opt/lakefs_example
   volumes:
-    - .:/opt/lakefs_example
+    - ..:/opt/lakefs_example
     - ./dags:/opt/airflow/dags
     - ./app_data/airflow/logs:/opt/airflow/logs
     - ./app_data/airflow/plugins:/opt/airflow/plugins

@@ -1,9 +1,8 @@
-
-import os
 from datetime import datetime
 
 import extract
 import transform
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from dulwich.repo import Repo
 from lakefs_provider.operators.commit_operator import LakeFSCommitOperator
@@ -17,8 +16,8 @@ RAW_ROW_COUNT = 100000
 
 try:
     # This can be any code that fetches the current DAG version
-    r = Repo(os.getenv("DAG_CODE_GIT_ROOT"))
-    git_sha = r.head()
+    r = Repo(Variable.get("dag_code_git_root"))
+    git_sha = r.head().decode("utf-8")
 except Exception as e:
     print(f"Failed to get git sha: {e}")
     git_sha = "unknown"
@@ -84,7 +83,11 @@ with DAG(
         branch="main",
         lakefs_conn_id="lakefs",
         msg="Extract result",
-        metadata={},
+        metadata={
+            "dag_version": get_version(),
+            "transform_version": transform.get_version(),
+            "extract_version": extract.get_version(),
+        },
     )
     t3 = _transform_steps(t1.output, "total_by_user",
                           transform.transform_total_by_user)
