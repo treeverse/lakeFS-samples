@@ -16,10 +16,10 @@ from airflow import DAG
 RAW_ROW_COUNT = 100000
 
 commit_metadata = {
-    "dag_version": Variable.get("etl_dag_version"),
-    "transform_version": Variable.get("transform_code_version"),
-    "extract_version": Variable.get("extract_code_version"),
-},
+    "dag_version": Variable.get("etl_dag_version", "unknown"),
+    "transform_version": Variable.get("transform_code_version", "unknown"),
+    "extract_version": Variable.get("extract_code_version", "unknown"),
+}
 
 
 def _transform_steps(dt_arg, transform_name, transform_func):

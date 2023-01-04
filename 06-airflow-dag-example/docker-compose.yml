@@ -173,6 +173,20 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+  variables-init:
+    <<: *airflow-common
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    entrypoint: /bin/bash
+  # yamllint disable rule:line-length
+    command:
+      - -c
+      - |
+        airflow variables set etl_dag_version a1b2c3
+        airflow variables set extract_code_version b2c3d4
+        airflow variables set transform_code_version c3d4e5
 
   airflow-init:
     <<: *airflow-common
