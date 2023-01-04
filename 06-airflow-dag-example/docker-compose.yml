@@ -24,8 +24,8 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: "dulwich airflow-provider-lakefs apache-airflow[pandas] ${_PIP_ADDITIONAL_REQUIREMENTS:-}"
-    AIRFLOW_VAR_DAG_CODE_GIT_ROOT: /opt/lakefs_example
+    _PIP_ADDITIONAL_REQUIREMENTS: "airflow-provider-lakefs apache-airflow[pandas] ${_PIP_ADDITIONAL_REQUIREMENTS:-}"
+    AIRFLOW_VAR_DAG_CODE_VERSION: /opt/lakefs_example
     AIRFLOW_VAR_EXTRACT_CODE_GIT_ROOT: /opt/lakefs_example
     AIRFLOW_VAR_TRANSFORM_CODE_GIT_ROOT: /opt/lakefs_example
   volumes:
@@ -240,6 +240,9 @@ services:
         mkdir -p /sources/app_data/logs /sources/app_data/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
+        airflow variable set etl_dag_version a1b2c3
+        airflow variable set extract_code_version b2c3d4
+        airflow variable set transform_code_version c3d4e5
     # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env

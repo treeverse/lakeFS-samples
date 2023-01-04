@@ -4,7 +4,6 @@ import extract
 import transform
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
-from dulwich.repo import Repo
 from lakefs_client.model.reset_creation import ResetCreation
 from lakefs_provider.hooks.lakefs_hook import LakeFSHook
 from lakefs_provider.operators.commit_operator import LakeFSCommitOperator
@@ -16,17 +15,11 @@ from airflow import DAG
 
 RAW_ROW_COUNT = 100000
 
-try:
-    # This can be any code that fetches the current DAG version
-    r = Repo(Variable.get("dag_code_git_root"))
-    git_sha = r.head().decode("utf-8")
-except Exception as e:
-    print(f"Failed to get git sha: {e}")
-    git_sha = "unknown"
-
-
-def get_version():
-    return git_sha
+commit_metadata = {
+    "dag_version": Variable.get("etl_dag_version"),
+    "transform_version": Variable.get("transform_code_version"),
+    "extract_version": Variable.get("extract_code_version"),
+},
 
 
 def _transform_steps(dt_arg, transform_name, transform_func):
@@ -62,11 +55,7 @@ def _transform_steps(dt_arg, transform_name, transform_func):
         branch=branch,
         lakefs_conn_id="lakefs",
         msg="Transform result",
-        metadata={
-            "dag_version": get_version(),
-            "transform_version": transform.get_version(),
-            "extract_version": extract.get_version(),
-        },
+        metadata=commit_metadata,
     )
 
     merge_op = LakeFSMergeOperator(
@@ -76,11 +65,7 @@ def _transform_steps(dt_arg, transform_name, transform_func):
         source_ref=branch,
         destination_branch="main",
         msg="Merge transform result",
-        metadata={
-            "dag_version": get_version(),
-            "transform_version": transform.get_version(),
-            "extract_version": extract.get_version(),
-        },
+        metadata=commit_metadata,
     )
     return (merge_op << commit_op << transform_op << create_branch_op)
 
@@ -99,11 +84,7 @@ with DAG(
         branch="main",
         lakefs_conn_id="lakefs",
         msg="Extract result",
-        metadata={
-            "dag_version": get_version(),
-            "transform_version": transform.get_version(),
-            "extract_version": extract.get_version(),
-        },
+        metadata=commit_metadata,
     )
     t3 = _transform_steps(t1.output, "total_by_user",
                           transform.transform_total_by_user)
