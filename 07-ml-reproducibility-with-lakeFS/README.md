@@ -10,8 +10,7 @@ In this tutorial, you will learn how to version your ML training data, model art
 ### Setup lakeFS server using "Everything Bagel" docker
 * Get a local lakeFS instance running in a Docker container. This environment includes lakeFS and other common data tools like Spark, dbt, Trino, Hive, Minio, and Jupyter. 
 * The following commands can be run in your terminal to get the Bagel running:
-  * `git clone https://github.com/treeverse/lakeFS.git`
-  * `cd lakeFS/deployments/compose`
+  * `git clone https://github.com/treeverse/lakeFS.git && cd lakeFS/deployments/compose`
 
 
 * Start the docker containers: `docker compose up -d`
@@ -26,8 +25,7 @@ In this tutorial, you will learn how to version your ML training data, model art
 
 ### Download demo Jupyter notebook
 * Run the following commands to access the demo notebooks.  
-  * `cd && git clone https://github.com/treeverse/lakeFS-samples.git`
-  * `cd 06-ml-reproducibility-with-lakeFS`
+  * `cd && git clone https://github.com/treeverse/lakeFS-samples.git && cd 07-ml-reproducibility-with-lakeFS`
 * Copy the below files from the git repo and upload them to the jupyter notebook workspace path `http://localhost:8888/tree/work`:
   * `ml_exp_demo.ipynb`
   * `./utils/ml_utils.ipynb`
