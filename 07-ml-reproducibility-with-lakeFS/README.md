@@ -14,10 +14,8 @@ In this tutorial, you will learn how to version your ML training data, model art
   ```bash
   git clone https://github.com/treeverse/lakeFS.git && cd lakeFS/deployments/compose
 
-
 * Start the docker containers: 
-  ```bash  
-     docker compose up -d
+  ```bash docker compose up -d
 Once you have your Docker environment running, check out the following services:
   * **lakefs**:
     ``` http://localhost:8000``` in your browser. The access key and secret to login are found in the `docker_compose.yaml` file in the `lakefs-setup` section.
