@@ -5,32 +5,32 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 This repository includes following Jupyter Notebooks which you can run on your local machine:
 
 1. Spark Demo:
-1.1. Integration of lakeFS with Apache Spark and Python
-1.2. Use Case: Isolated Testing Environment
+* Integration of lakeFS with Apache Spark and Python
+* Use Case: Isolated Testing Environment
 
 2. Delta Lake Demo:
-2.1. Integration of lakeFS with Delta Lake
-2.2. Use Cases: Isolating ETL job and atomic promotion to production. Atomic rollback of Multi-Table Transactions.
+* Integration of lakeFS with Delta Lake
+* Use Cases: Isolating ETL job and atomic promotion to production. Atomic rollback of Multi-Table Transactions.
 
 3. Airflow Demo Existing DAG:
-3.1. Integration of lakeFS with Airflow
-3.2. Use Case: Isolating Airflow job run and atomic promotion to production
+* Integration of lakeFS with Airflow
+* Use Case: Isolating Airflow job run and atomic promotion to production
 
 4. Airflow Demo New DAG:
-4.1. Integration of lakeFS with Airflow
-4.2. Use Case: Troubleshooting production issues
+* Integration of lakeFS with Airflow
+* Use Case: Troubleshooting production issues
 
 5. Hooks Airflow Demo:
-5.1. Integration of lakeFS with Airflow via Hooks
-5.2. Use Case: Isolated Ingestion & ETL Environment
+* Integration of lakeFS with Airflow via Hooks
+* Use Case: Isolated Ingestion & ETL Environment
 
 6. Hooks Schema Validation:
-6.1. Using Hooks or Git like actions
-6.2. Use Cases: Don't allow PII data and schema changes
+* Using Hooks or Git like actions
+* Use Cases: Don't allow PII data and schema changes
 
 7. Reprocess Data Demo:
-7.1. Integration of lakeFS with Apache Spark and Python
-7.2. Use Case: Reprocess and Backfill Data with new ETL logic
+* Integration of lakeFS with Apache Spark and Python
+* Use Case: Reprocess and Backfill Data with new ETL logic
 
 ## Prerequisites
 * Docker installed on your local machine
