@@ -17,7 +17,7 @@
   * **jupyter notebook**:
     `http://localhost:8888` in your browser. The password to login to notebook is found in `docker_compose.yaml` file in `notebook` section.
 
-### Clone lakeFS-samples repo to play around with lakeFS use cases
+### ### Download demo Jupyter notebook
 * Run the following commands in your terminal to clone lakeFS-samples repo:
 ```bash
   git clone https://github.com/treeverse/lakeFS-samples.git && cd lakeFS-samples/05-create-dev-test-env-with-lakeFS-branches
