@@ -23,7 +23,7 @@
   git clone https://github.com/treeverse/lakeFS-samples.git && cd lakeFS-samples/05-create-dev-test-env-with-lakeFS-branches
 ```
 
-* Upload the `lakeFS-samples/05-create-dev-test-env-with-lakeFS-branches/Create-DevTest-Env-with-lakeFS-branches.ipynb` to your jupyter notebook workspace.
+* Upload the `lakeFS-samples/05-create-dev-test-env-with-lakeFS-branches/Create-DevTest-Env-with-lakeFS-branches.ipynb` to your jupyter notebook workspace path `http://localhost:8888/tree/work` 
 
 * Open the `Create-DevTest-Env-with-lakeFS-branches.ipynb` demo notebook and follow along the steps. 
 
