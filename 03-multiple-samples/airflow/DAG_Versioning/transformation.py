@@ -25,7 +25,7 @@ dataPath = f"s3a://{repo}/{newBranch}/{fileName}"
 df = spark.read.csv(dataPath)
 
 # Partition the data and write to new branch by using S3A Gateway
-newDataPath = f"s3a://{repo}/{newBranch}/{newPath + '_c2'}"
-df.write.partitionBy("_c2").mode("overwrite").csv(newDataPath)
+newDataPath = f"s3a://{repo}/{newBranch}/{newPath + '_c1'}"
+df.write.partitionBy("_c1").mode("overwrite").csv(newDataPath)
 
 #time.sleep(30)
