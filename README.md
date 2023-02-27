@@ -5,7 +5,17 @@ This sample repository captures a collection of notebooks, dockerized applicatio
 
 
 # How to navigate?
-Each of the projects, has it's own readme. You can start with number 1, and follow along to learn more.
+Each directory is named after a specific lakeFS use case. And each project has it's own readme. Navigate to the use case of your interest and follow along the steps mentioned in the readme to check out a lakeFS use case.
+
+For example, 
+
+* `01-cross-collection-consistency-deltalake-lakefs` shows how to implement cross collection consistency on multiple delta tables using lakeFS atomic merges.
+
+* `04-data-quality-checks-with-lakeFS-hooks` shows how to use lakeFS webhooks to run automated data quality checks on different data branches.
+
+* `05-create-dev-test-env-with-lakeFS-branches` shows how to use lakeFS branching feature to create dev/test data environments for ETL testing and experimentation.
+
+* `07-ml-reproducibility-with-lakeFS` shows how to use lakeFS to reproduce ML experiments with certainty using lakeFS tags.
 
 # QA
-Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to participate in the converation and get answers! 
+Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to understand more about lakeFS use cases and get help with installing lakeFS as well! 
