@@ -1,0 +1,15 @@
+name: TriggerAirflowDAGPostCommit
+description: This hook triggers Airflow DAG at post commit
+on:
+  post-commit:
+    branches:
+      - version*
+hooks:
+  - id: trigger_airflow_lakefs_trigger_dag
+    type: airflow
+    description: Trigger Airflow DAG lakefs_trigger_dag
+    properties:
+      url: "http://host.docker.internal:8080/"
+      dag_id: "lakefs_trigger_dag"
+      username: "admin"
+      password: "Y6FSU99AuD6vYA77"
