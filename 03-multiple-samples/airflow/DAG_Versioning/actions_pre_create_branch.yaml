@@ -1,0 +1,16 @@
+name: TriggerAirflowDAGPreCreateBranch
+description: This hook triggers Airflow DAG at pre create branch
+on:
+  pre-create-branch:
+    branches:
+      - version*
+hooks:
+  - id: trigger_airflow_lakefs_create_dag
+    type: airflow
+    description: Trigger Airflow DAG lakefs_create_dag
+    properties:
+      url: "http://host.docker.internal:8080/"
+      dag_id: "lakefs_create_dag"
+      username: "admin"
+      password: "Y6FSU99AuD6vYA77"
+      wait_for_dag: true

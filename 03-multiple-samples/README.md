@@ -24,11 +24,15 @@ This repository includes following Jupyter Notebooks which you can run on your l
 * Integration of lakeFS with Airflow via Hooks
 * Use Case: Isolated Ingestion & ETL Environment
 
-6. Hooks Schema Validation:
+6. Airflow DAG Versioning Demo:
+* Integration of lakeFS with Airflow via Hooks
+* Use Case: Versioning DAGs and running pipeline from hooks using a configurable version of DAGs
+
+7. Hooks Schema Validation:
 * Using Hooks or Git like actions
 * Use Cases: Don't allow PII data and schema changes
 
-7. Reprocess Data Demo:
+8. Reprocess Data Demo:
 * Integration of lakeFS with Apache Spark and Python
 * Use Case: Reprocess and Backfill Data with new ETL logic
 
