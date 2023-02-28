@@ -11,6 +11,8 @@ For example,
 
 * `01-cross-collection-consistency-deltalake-lakefs` shows how to implement cross collection consistency on multiple delta tables using lakeFS atomic merges.
 
+* `03-multiple-samples` includes mutliple notebooks to show integration of lakeFS with Spark, Python, Delta Lake, Airflow and Hooks.
+
 * `04-data-quality-checks-with-lakeFS-hooks` shows how to use lakeFS webhooks to run automated data quality checks on different data branches.
 
 * `05-create-dev-test-env-with-lakeFS-branches` shows how to use lakeFS branching feature to create dev/test data environments for ETL testing and experimentation.
