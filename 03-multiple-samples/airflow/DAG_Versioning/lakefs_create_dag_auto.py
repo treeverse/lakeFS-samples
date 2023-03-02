@@ -2,6 +2,7 @@ from airflow import DAG
 from airflow.decorators import task
 from airflow.utils.dates import days_ago
 from airflow.models import Variable
+from airflow.providers.http.operators.http import SimpleHttpOperator
 
 from lakefs_provider.operators.get_object_operator import LakeFSGetObjectOperator
 
@@ -26,13 +27,20 @@ with DAG(
     catchup=False,
     tags=['testing'],
 ) as dag:
-    # Get the file.
-    task_get_dag_template = LakeFSGetObjectOperator(
+    # Get the DAG template from lakeFS Repository
+    #task_get_dag_template = LakeFSGetObjectOperator(
+    #    task_id='get_dag_template',
+    #    do_xcom_push=True,
+    #    ref=Variable.get("sourceBranch"),
+    #    path=Variable.get("dags_folder_on_lakefs")+'/'+Variable.get("dag_template_filename")
+    # )
+    # Get the DAG template from GitHub Repository
+    task_get_dag_template = SimpleHttpOperator(
         task_id='get_dag_template',
-        do_xcom_push=True,
-        ref=Variable.get("sourceBranch"),
-        path=Variable.get("dags_folder_on_lakefs")+'/'+Variable.get("dag_template_filename")
-        )
+        http_conn_id="conn_http_github_dag_template",
+        method="GET",
+        do_xcom_push=True
+    )
 
     @task(task_id="create_dag")
     def create_dag_file(dag_template, **kwargs):
