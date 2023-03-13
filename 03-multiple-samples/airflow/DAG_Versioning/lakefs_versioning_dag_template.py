@@ -39,7 +39,7 @@ def lakefs_versioning_dag_template(dag_id, default_args):
         task_transformation = SparkSubmitOperator(
             task_id='transformation',
             conn_id='conn_spark',
-            application="./airflow/DAG_Versioning/transformation.py",
+            application="/home/jovyan/airflow/DAG_Versioning/transformation.py",
             application_args=[default_args.get('branch')],
             jars=jars_partition_data
         )
