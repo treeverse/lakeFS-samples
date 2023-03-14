@@ -37,7 +37,9 @@ default_args = {
     "lakefs_conn_id": Variable.get("conn_lakefs")
 }
 
+filePath = Variable.get("filePath")
 fileName = Variable.get("fileName")
+CONTENT = open(filePath+'/'+fileName, 'r').read()
 
 IdAndMessage = namedtuple('IdAndMessage', ['id', 'message'])
 
@@ -67,7 +69,7 @@ def check_logs(task_instance, repo: str, ref: str, commits: Sequence[str], messa
 # The execution context and any results are automatically passed by task.post_execute method
 def print_commit_result(context, result, message):
     LoggingMixin().log.info(message + result \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
 
 class NamedStringIO(StringIO):
@@ -140,12 +142,10 @@ def lakefs_new_dag():
     task_load_file = LakeFSUploadOperator(
         task_id='load_file',
         branch=default_args.get('branch') + '_etl_load',
-        content=NamedStringIO(
-            content=open(
-                fileName, 'r').read(), name='content'))
+        content=NamedStringIO(content=CONTENT, name='content'))
 
     task_load_file.post_execute = lambda context, result: LoggingMixin().log.info(
-        'lakeFS URL for the data file is: ' + Variable.get("lakefsEndPoint") \
+        'lakeFS URL for the data file is: ' + Variable.get("lakefsUIEndPoint") \
         + '/api/v1/repositories/' + Variable.get("repo") + '/refs/' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] \
         + '_etl_load' + '/objects?path=' + Variable.get("fileName"))
@@ -250,7 +250,7 @@ def lakefs_new_dag():
         python_callable=check_equality,
         op_kwargs={
             'actual': '''{{ task_instance.xcom_pull(task_ids='get_file', key='return_value') }}''',
-            'expected': open(fileName, 'r').read(),
+            'expected': CONTENT,
         })        
 
     # Merge the changes back to the main branch.
@@ -392,7 +392,7 @@ def lakefs_new_dag():
     task_etl_task1 = SparkSubmitOperator(
         task_id='etl_task1',
         conn_id='conn_spark',
-        application="./airflow/New_DAG/etl_task1.py",
+        application="/home/jovyan/airflow/New_DAG/etl_task1.py",
         application_args=[default_args.get('branch') + '_etl_task1'],
         jars=jars_partition_data
     )
@@ -401,14 +401,14 @@ def lakefs_new_dag():
     task_etl_task1.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] + '_etl_task1' \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] + '_etl_task1' )
 
     task_etl_task2_1 = SparkSubmitOperator(
         task_id='etl_task2_1',
         conn_id='conn_spark',
-        application="./airflow/New_DAG/etl_task2_1.py",
+        application="/home/jovyan/airflow/New_DAG/etl_task2_1.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -417,14 +417,14 @@ def lakefs_new_dag():
     task_etl_task2_1.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] + '_etl_task2' \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] + '_etl_task2' )
 
     task_etl_task2_2 = SparkSubmitOperator(
         task_id='etl_task2_2',
         conn_id='conn_spark',
-        application="./airflow/New_DAG/etl_task2_2.py",
+        application="/home/jovyan/airflow/New_DAG/etl_task2_2.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -433,14 +433,14 @@ def lakefs_new_dag():
     task_etl_task2_2.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] + '_etl_task2' \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] + '_etl_task2' )
 
     task_etl_task2_3 = SparkSubmitOperator(
         task_id='etl_task2_3',
         conn_id='conn_spark',
-        application="./airflow/New_DAG/etl_task2_3.py",
+        application="/home/jovyan/airflow/New_DAG/etl_task2_3.py",
         application_args=[default_args.get('branch') + '_etl_task2'],
         jars=jars_partition_data
     )
@@ -449,14 +449,14 @@ def lakefs_new_dag():
     task_etl_task2_3.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] + '_etl_task2' \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] + '_etl_task2' )
 
     task_etl_task3 = SparkSubmitOperator(
         task_id='etl_task3',
         conn_id='conn_spark',
-        application="./airflow/New_DAG/etl_task3.py",
+        application="/home/jovyan/airflow/New_DAG/etl_task3.py",
         application_args=[default_args.get('branch') + '_etl_task3'],
         jars=jars_partition_data
     )
@@ -465,7 +465,7 @@ def lakefs_new_dag():
     task_etl_task3.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] + '_etl_task3' \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] + '_etl_task3' )
 

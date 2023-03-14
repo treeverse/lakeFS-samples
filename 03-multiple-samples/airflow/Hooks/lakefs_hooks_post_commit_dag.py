@@ -57,7 +57,7 @@ def lakefs_hooks_post_commit_dag():
     task_transformation = SparkSubmitOperator(
         task_id='transformation',
         conn_id='conn_spark',
-        application="./airflow/Hooks/transformation.py",
+        application="/home/jovyan/airflow/Hooks/transformation.py",
         application_args=[default_args.get('branch')],
         jars=jars_partition_data
     )

@@ -11,6 +11,6 @@ hooks:
     properties:
       url: "http://host.docker.internal:8080/"
       dag_id: "lakefs_delete_dag"
-      username: "admin"
-      password: "Y6FSU99AuD6vYA77"
+      username: "airflow"
+      password: "airflow"
       wait_for_dag: true
