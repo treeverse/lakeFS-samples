@@ -25,7 +25,7 @@ default_args = {
 # The execution context and any results are automatically passed by task.post_execute method
 def print_commit_result(context, result, message):
     LoggingMixin().log.info(message + result \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
 
     
@@ -57,7 +57,7 @@ def lakefs_wrapper_dag():
     task_trigger.pre_execute = lambda context: LoggingMixin().log.info(
         'Branch name is: ' + Variable.get("newBranch") + '_' \
         + context['ts_nodash'] \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsEndPoint") \
+        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/objects?ref=' \
         + Variable.get("newBranch") + '_' + context['ts_nodash'] )
 

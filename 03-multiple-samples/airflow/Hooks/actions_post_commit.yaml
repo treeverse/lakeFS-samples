@@ -11,5 +11,5 @@ hooks:
     properties:
       url: "http://host.docker.internal:8080/"
       dag_id: "lakefs_hooks_post_commit_dag"
-      username: "admin"
-      password: "Y6FSU99AuD6vYA77"
+      username: "airflow"
+      password: "airflow"
