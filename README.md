@@ -19,5 +19,7 @@ For example,
 
 * `07-ml-reproducibility-with-lakeFS` shows how to use lakeFS to reproduce ML experiments with certainty using lakeFS tags.
 
+* `08-data-lineage` demonstrating data lineage with lakeFS.
+
 # QA
 Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to understand more about lakeFS use cases and get help with installing lakeFS as well! 
