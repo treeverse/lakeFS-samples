@@ -1,4 +1,4 @@
-# Integration of lakeFS with Spark, Python, Delta Lake, Airflow and Hooks
+# Demo of lakeFS Data Lineage
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/) project.
 
