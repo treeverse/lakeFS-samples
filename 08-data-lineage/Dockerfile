@@ -2,15 +2,6 @@ FROM jupyter/pyspark-notebook:notebook-6.4.11
 
 ENV HADOOP_AWS_VERSION=3.3.1
 ENV AWS_SDK_VERSION=1.11.901
-ENV AIRFLOW_VERSION=2.5.1
-ENV CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-2.5.1/constraints-3.10.txt"
-ENV _AIRFLOW_DB_UPGRADE='true'
-ENV _AIRFLOW_WWW_USER_CREATE='true'
-ENV _AIRFLOW_WWW_USER_USERNAME='airflow'
-ENV _AIRFLOW_WWW_USER_PASSWORD='airflow'
-ENV AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-ENV AIRFLOW__CORE__FERNET_KEY='Ty-eEUIQQdUjarNo7kEbKza1AeKv4zMxE3q07MafCEs='
-ENV SQLALCHEMY_SILENCE_UBER_WARNING=1
 
 USER root
 
@@ -20,8 +11,5 @@ RUN wget https://repo1.maven.org/maven2/io/lakefs/hadoop-lakefs-assembly/0.1.12/
 RUN wget https://repo1.maven.org/maven2/io/lakefs/lakefs-spark-client-312-hadoop3_2.12/0.5.1/lakefs-spark-client-312-hadoop3_2.12-0.5.1.jar -O ${SPARK_HOME}/jars/lakefs-spark-client-312-hadoop3_2.12-0.5.1.jar
 
 RUN pip install lakefs-client==0.96.1
-RUN pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-RUN pip install airflow-provider-lakefs==0.44.0
-RUN pip install apache-airflow-providers-apache-spark==4.0.0
 
 USER $NB_UID
