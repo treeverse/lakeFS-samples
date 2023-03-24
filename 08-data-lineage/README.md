@@ -6,7 +6,7 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 In this example, data sets (employees & salaries) are ingested through two separated branches. Then, merged together on a transformation 
 branch. And finally, promoted to the production branch.
 
-At the very end of the process, the lakeFS "Blame" functionality (```bash log_commits ```) is used to trace the origin of a specific
+At the very end of the process, the lakeFS "Blame" functionality (``` log_commits ```) is used to trace the origin of a specific
 file or dataset.
 
 ## Prerequisites
