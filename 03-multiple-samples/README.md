@@ -36,6 +36,10 @@ This repository includes following Jupyter Notebooks which you can run on your l
 * Integration of lakeFS with Apache Spark and Python
 * Use Case: Reprocess and Backfill Data with new ETL logic
 
+9. RBAC Demo:
+* lakeFS Role-Based Access Control (RBAC) Demo
+* Use Case: Data Governance - secure your data lake
+
 ## Prerequisites
 * Docker installed on your local machine
 * lakeFS installed and running on your local machine or on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Playground](https://demo.lakefs.io/) which provides lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
