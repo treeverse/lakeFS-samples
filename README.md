@@ -17,9 +17,11 @@ For example,
 
 * `05-create-dev-test-env-with-lakeFS-branches` shows how to use lakeFS branching feature to create dev/test data environments for ETL testing and experimentation.
 
-* `07-ml-reproducibility-with-lakeFS` shows how to use lakeFS to reproduce ML experiments with certainty using lakeFS tags.
+* `07-ml-reproducibility-with-lakeFS` shows how to use lakeFS to reproduce ML experiments (using unstrcutured data) with certainty using lakeFS tags.
 
 * `08-data-lineage` demonstrating data lineage with lakeFS.
+
+* `10-ml-experimentation-with-lakeFS-structured-data` shows how to use lakeFS to reproduce ML experiments (using structured data) with certainty using lakeFS tags.
 
 # QA
 Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to understand more about lakeFS use cases and get help with installing lakeFS as well! 
