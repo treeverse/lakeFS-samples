@@ -34,3 +34,4 @@ Once you have your Docker environment running, check out the following services:
 
 ####  Open the `wine-quality-prediction-experimentation.ipynb` notebook and follow along the steps. 
 
+To learn more about how lakeFS can be used for ML experimentation and reproducibility, check out the [published blog](https://lakefs.io/blog/building-an-ml-experimentation-platform-for-easy-reproducibility-using-lakefs/).
