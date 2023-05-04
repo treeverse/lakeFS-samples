@@ -9,6 +9,8 @@ RUN wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_
 RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar -O ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar
 
 RUN pip install lakefs-client==0.96.1
-RUN pip install labelbox
+RUN pip3 install labelbox[data]
+RUN pip install tabulate
+RUN pip install boto3
 
 USER $NB_UID
