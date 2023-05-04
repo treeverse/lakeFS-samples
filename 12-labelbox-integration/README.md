@@ -1,4 +1,4 @@
-# Lablebox Integration
+# Labelbox Integration
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
