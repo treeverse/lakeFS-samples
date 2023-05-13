@@ -7,7 +7,8 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 ## Prerequisites
 * Docker installed on your local machine
 * Source and a target lakeFS environments (you can deploy one independently (https://docs.lakefs.io/deploy/) or use the hosted solution lakeFS Cloud (https://lakefs.cloud)
-* Object storage for both source and target lakeFS repositories
+* Source repository
+* Object storage for target repository but don't create target repository ahead of time (you will create the target repo in the notebook)
 
 ## Setup
 
@@ -29,4 +30,4 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 ## Demo Instructions
 
-Once you have successfully completed setup then open "Migrate or Clone Repo" notebook from JupyterLab UI and follow the instructions.
+Once you have successfully completed setup then open either "Migrate or Clone AWS Repo" or "Migrate or Clone Azure Repo" notebook from JupyterLab UI and follow the instructions.
