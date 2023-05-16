@@ -30,4 +30,4 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 ## Demo Instructions
 
-Once you have successfully completed setup then open either "Migrate or Clone AWS Repo" or "Migrate or Clone Azure Repo" notebook from JupyterLab UI and follow the instructions.
+Once you have successfully completed setup then open either "Migrate or Clone AWS Repo", "Migrate or Clone Azure Repo", "Migrate or Clone Local Repo to AWS" or "Migrate or Clone Local Repo to Azure" notebook (depending upon your requirement) from JupyterLab UI and follow the instructions.
