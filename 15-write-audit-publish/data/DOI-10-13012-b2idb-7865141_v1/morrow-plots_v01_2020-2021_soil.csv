@@ -1,0 +1,49 @@
+phase,year,plot,plot_num,plot_dir,rotation,corn,crop,variety,all_corn,yield_bush,yield_ton,treated,treatment,manure,lime,nit,p205,k20,stover,population,plant_date,plant_day,soil_sample,damage,notes
+5,2020,3NA,3,NW,1,TRUE,CC,NA,FALSE,113,NA,FALSE,none,NA,NA,NA,NA,NA,NA,34364,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3NB,3,NW,1,TRUE,CC,NA,FALSE,207,NA,TRUE,LNPK,NA,NA,200,43.54,40.97577296,NA,32670,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3NC,3,NE,1,TRUE,CC,NA,FALSE,84,NA,FALSE,none,NA,NA,NA,NA,NA,NA,32359,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3ND,3,NE,1,TRUE,CC,NA,FALSE,84,NA,FALSE,none,NA,NA,NA,NA,NA,NA,33686,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3SA,3,SW,1,TRUE,CC,NA,FALSE,118,NA,TRUE,LNPK,NA,NA,200,43.54,40.975773,NA,32732,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3SB,3,SW,1,TRUE,CC,NA,FALSE,168,NA,TRUE,LNPK,NA,NA,200,43.54,40.975773,NA,37171,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3SC,3,SE,1,TRUE,CC,NA,FALSE,81,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,36663,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,3SD,3,SE,1,TRUE,CC,NA,FALSE,62,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,32525,NA,NA,FALSE,Had to replanted due to field getting flooded on June 3rd,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2020,4NA,4,NW,2,FALSE,S,NA,FALSE,51,NA,FALSE,none,NA,NA,NA,NA,NA,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4NB,4,NW,2,FALSE,S,NA,FALSE,59,NA,TRUE,LNPK,NA,NA,200,56.76,53.4166786,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4NC,4,NE,2,FALSE,S,NA,FALSE,35,NA,FALSE,none,NA,NA,NA,NA,NA,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4ND,4,NE,2,FALSE,S,NA,FALSE,40,NA,FALSE,none,NA,NA,NA,NA,NA,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4SA,4,SW,2,FALSE,S,NA,FALSE,49,NA,TRUE,LNPK,NA,NA,200,52.96,49.8458308,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4SB,4,SW,2,FALSE,S,NA,FALSE,64,NA,TRUE,LNPK,NA,NA,200,54.27,51.0749579,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4SC,4,SE,2,FALSE,S,NA,FALSE,53,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,4SD,4,SE,2,FALSE,S,NA,FALSE,56,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,175000,NA,NA,FALSE,NA,NA
+5,2020,5NA,5,NW,3,FALSE,A,NA,FALSE,0,NA,FALSE,none,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5NB,5,NW,3,FALSE,A,NA,FALSE,0,NA,TRUE,LNPK,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5NC,5,NE,3,FALSE,A,NA,FALSE,0,NA,FALSE,none,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5ND,5,NE,3,FALSE,A,NA,FALSE,0,NA,FALSE,none,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5SA,5,SW,3,FALSE,A,NA,FALSE,0,NA,TRUE,LNPK,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5SB,5,SW,3,FALSE,A,NA,FALSE,0,NA,TRUE,LNPK,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5SC,5,SE,3,FALSE,A,NA,FALSE,0,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2020,5SD,5,SE,3,FALSE,A,NA,FALSE,0,NA,TRUE,MLP,NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE,NA,"No alfalfa harvested, mowed as green manure"
+5,2021,3NA,3,NW,1,TRUE,CC,NA,FALSE,0,NA,FALSE,none,NA,NA,NA,NA,NA,NA,NA,NA,NA,TRUE,"No data, critter and bird damaged plots",NA
+5,2021,3NB,3,NW,1,TRUE,CC,NA,FALSE,0,NA,TRUE,LNPK,NA,NA,200,60.088,60.088,NA,NA,NA,NA,TRUE,"No data, critter and bird damaged plots",Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year
+5,2021,3NC,3,NE,1,TRUE,CC,NA,FALSE,20,NA,FALSE,none,NA,NA,NA,NA,NA,NA,34074,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,3ND,3,NE,1,TRUE,CC,NA,FALSE,23,NA,FALSE,none,NA,NA,NA,NA,NA,NA,31363,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,3SA,3,SW,1,TRUE,CC,NA,FALSE,209,NA,TRUE,LNPK,NA,NA,200,51.408,51.408,NA,23522,NA,NA,TRUE,NA,"(Urea for N+14:14:14) based on grain removal of previous crop and used limiting P or K value; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,3SB,3,SW,1,TRUE,CC,NA,FALSE,327,NA,TRUE,LNPK,NA,NA,200,59.192,59.192,NA,31944,NA,NA,TRUE,NA,"(Urea for N+14:14:14) based on grain removal of previous crop and used limiting P or K value; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,3SC,3,SE,1,TRUE,CC,NA,FALSE,247,NA,TRUE,MLP,410,NA,NA,NA,NA,NA,32912,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,3SD,3,SE,1,TRUE,CC,NA,FALSE,245,NA,TRUE,MLP,410,NA,NA,NA,NA,NA,35235,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4NA,4,NW,2,TRUE,C,NA,FALSE,119,NA,FALSE,none,NA,NA,NA,NA,NA,NA,35719,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4NB,4,NW,2,TRUE,C,NA,FALSE,260,NA,TRUE,LNPK,NA,NA,200,69.328,69.328,NA,30202,NA,NA,TRUE,NA,"(Urea for N+14:14:14) based on grain removal of previous crop and used limiting P or K value; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4NC,4,NE,2,TRUE,C,NA,FALSE,84,NA,FALSE,none,NA,NA,NA,NA,NA,NA,32234,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4ND,4,NE,2,TRUE,C,NA,FALSE,86,NA,FALSE,none,NA,NA,NA,NA,NA,NA,33977,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4SA,4,SW,2,TRUE,C,NA,FALSE,311,NA,TRUE,LNPK,NA,NA,200,57.512,57.512,NA,34848,NA,NA,TRUE,NA,"(Urea for N+14:14:14) based on grain removal of previous crop and used limiting P or K value; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4SB,4,SW,2,TRUE,C,NA,FALSE,289,NA,TRUE,LNPK,NA,NA,200,75.208,75.208,NA,33686,NA,NA,TRUE,NA,"(Urea for N+14:14:14) based on grain removal of previous crop and used limiting P or K value; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4SC,4,SE,2,TRUE,C,NA,FALSE,285,NA,TRUE,MLP,500,NA,NA,NA,NA,NA,36300,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,4SD,4,SE,2,TRUE,C,NA,FALSE,260,NA,TRUE,MLP,500,NA,NA,NA,NA,NA,33977,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5NA,5,NW,3,TRUE,C,NA,FALSE,130,NA,FALSE,none,NA,NA,NA,NA,NA,NA,33106,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5NB,5,NW,3,TRUE,C,NA,FALSE,295,NA,TRUE,LNPK,NA,NA,200,NA,NA,NA,33686,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5NC,5,NE,3,TRUE,C,NA,FALSE,114,NA,FALSE,none,NA,NA,NA,NA,NA,NA,32815,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5ND,5,NE,3,TRUE,C,NA,FALSE,126,NA,FALSE,none,NA,NA,NA,NA,NA,NA,35719,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5SA,5,SW,3,TRUE,C,NA,FALSE,290,NA,TRUE,LNPK,NA,NA,200,NA,NA,NA,33106,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5SB,5,SW,3,TRUE,C,NA,FALSE,279,NA,TRUE,LNPK,NA,NA,200,NA,NA,NA,32525,NA,NA,TRUE,NA,"Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5SC,5,SE,3,TRUE,C,NA,FALSE,296,NA,TRUE,MLP,570,NA,NA,NA,NA,NA,35429,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
+5,2021,5SD,5,SE,3,TRUE,C,NA,FALSE,285,NA,TRUE,MLP,570,NA,NA,NA,NA,NA,32525,NA,NA,TRUE,NA,"Target rate of 200#N/A from manure; Target lbs/plot was 473.94 lbs/A due to half of N being available during first year.; Population, plants/ac numbers based on stand counts from hand harvesting"
