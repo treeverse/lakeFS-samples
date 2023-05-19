@@ -23,5 +23,8 @@ For example,
 
 * `10-ml-experimentation-with-lakeFS-structured-data` shows how to use lakeFS to reproduce ML experiments (using structured data) with certainty using lakeFS tags.
 
+* `15-write-audit-publish` contains a set of Jupyter notebooks demonstrating how the Write-Audit-Publish pattern can be implemented with different technologies, including lakeFS. 
+
+
 # QA
 Join the [lakeFS, data practitioner slack](https://go.lakefs.io/3iyZLOh) to understand more about lakeFS use cases and get help with installing lakeFS as well! 
