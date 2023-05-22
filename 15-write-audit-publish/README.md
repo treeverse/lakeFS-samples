@@ -6,9 +6,9 @@ These notebooks can be used to experiment with the pattern implementations in di
 
 Please see the accompanying blog series for more details: 
 
-1. **\<Blog  goes here\>**
-1. **\<Blog  goes here\>**
-1. **\<Blog  goes here\>**
+1. [Data Engineering Patterns: Write-Audit-Publish (WAP)](https://lakefs.io/blog/data-engineering-patterns-write-audit-publish)
+1. [Implementing Write-Audit-Publish: Which Tools Fit?](https://lakefs.io/blog/how-to-implement-write-audit-publish)
+1. [Putting the Write-Audit-Publish Pattern into Practice with lakeFS](https://lakefs.io/blog/howto-write-audit-publish-with-lakefs)
 
 ## Usage
 
