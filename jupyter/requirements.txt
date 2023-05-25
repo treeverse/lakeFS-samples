@@ -1,6 +1,5 @@
 lakefs_client
 jupysql==0.5.2
 boto3
-awscli
-awscliv2
-minio
+jupyter_contrib_nbextensions
+tabulate

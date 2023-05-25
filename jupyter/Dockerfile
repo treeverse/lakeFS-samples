@@ -28,3 +28,6 @@ RUN rm requirements.txt
 RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
 COPY ipython/startup/00-prettytables.py /home/jovyan/.ipython/profile_default/startup
 COPY ipython/startup/README /home/jovyan/.ipython/profile_default/startup
+
+# Disable the "Would you like to receive official Jupyter news?" popup
+RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
