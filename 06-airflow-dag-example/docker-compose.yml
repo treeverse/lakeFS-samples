@@ -7,13 +7,11 @@ x-airflow-common:
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.0}
   environment:
     &airflow-common-env
-    AIRFLOW_CONN_LAKEFS: '{
-        "conn_type": "HTTP",
-        "host": "http://lakefs:8000/api/v1",
-        "extra": {
-            "access_key_id": "AKIAIOSFODNN7EXAMPLE",
-            "secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-        }
+    AIRFLOW_CONN_FOO-LAKEFS: '{
+        "conn_type": "lakefs",
+        "host": "http://lakefs:8000/",
+        "login": "AKIAIOSFODNN7EXAMPLE",
+        "password": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
       }'
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
