@@ -7,7 +7,7 @@ x-airflow-common:
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.0}
   environment:
     &airflow-common-env
-    AIRFLOW_CONN_FOO-LAKEFS: '{
+    AIRFLOW_CONN_LAKEFS: '{
         "conn_type": "lakefs",
         "host": "http://lakefs:8000/",
         "login": "AKIAIOSFODNN7EXAMPLE",
