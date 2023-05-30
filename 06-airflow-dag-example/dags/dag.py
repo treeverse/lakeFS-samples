@@ -31,12 +31,12 @@ def _transform_steps(dt_arg, transform_name, transform_func):
         branch = f"{transform_name}_{dt}"
         lakefs_hook = LakeFSHook(lakefs_conn_id="lakefs")
         print("XXXDX" + branch)
-        lakefs_hook.get_conn().branches.reset_branch(repository="example-repo", branch=branch,
+        lakefs_hook.get_conn().branches.reset_branch(repository="airflow-example", branch=branch,
                                                      reset_creation=ResetCreation(type="reset"))
 
     create_branch_op = LakeFSCreateBranchOperator(
         task_id=f"{transform_name}_create_branch",
-        repo="example-repo",
+        repo="airflow-example",
         branch=branch,
         lakefs_conn_id="lakefs",
         source_branch="main",
@@ -51,7 +51,7 @@ def _transform_steps(dt_arg, transform_name, transform_func):
 
     commit_op = LakeFSCommitOperator(
         task_id=f"{transform_name}_commit",
-        repo="example-repo",
+        repo="airflow-example",
         branch=branch,
         lakefs_conn_id="lakefs",
         msg="Transform result",
@@ -60,7 +60,7 @@ def _transform_steps(dt_arg, transform_name, transform_func):
 
     merge_op = LakeFSMergeOperator(
         task_id=f"{transform_name}_merge",
-        repo="example-repo",
+        repo="airflow-example",
         lakefs_conn_id="lakefs",
         source_ref=branch,
         destination_branch="main",
@@ -80,7 +80,7 @@ with DAG(
     t1 = PythonOperator(task_id="extract", python_callable=extract.extract)
     t2 = LakeFSCommitOperator(
         task_id="commit",
-        repo="example-repo",
+        repo="airflow-example",
         branch="main",
         lakefs_conn_id="lakefs",
         msg="Extract result",

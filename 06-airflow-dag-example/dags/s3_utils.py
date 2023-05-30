@@ -12,7 +12,7 @@ lakefs_client = boto3.client('s3',
 
 def read_from_csv(table_name, dt, branch="main"):
     obj = lakefs_client.get_object(
-        Bucket="example-repo",
+        Bucket="airflow-example",
         Key=f"{branch}/{table_name}/{dt}/values.csv"
     )
     return pd.read_csv(obj['Body'])
@@ -21,7 +21,7 @@ def read_from_csv(table_name, dt, branch="main"):
 def save_as_csv(table_name, dt, df, branch="main"):
     csv = df.to_csv().encode('utf-8')
     lakefs_client.put_object(
-        Bucket="example-repo",
+        Bucket="airflow-example",
         Key=f"{branch}/{table_name}/{dt}/values.csv",
         Body=BytesIO(csv),
         ContentLength=len(csv),

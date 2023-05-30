@@ -30,19 +30,18 @@ services:
           wait-for -t 60 lakefs:8000 -- curl -u "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID":"$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
           # wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://example s3://example || true
           echo ""
-          wait-for -t 60 minio:9000
+          wait-for -t 60 minio:9000 && echo '------------------------------------------------
+
+                MinIO admin:   http://127.0.0.1:9001/
+                
+                               Username : minioadmin
+                               Password : minioadmin
+                '
           echo "------------------------------------------------"
-          echo ""
-          echo "MinIO admin:   http://127.0.0.1:9001/"
-          echo ""
-          echo "               Username : minioadmin"
-          echo "               Password : minioadmin"
-          echo ""
-          echo "------------------------------------------------"
-          wait-for -t 60 jupyter-notebook:8888
-          echo ""
-          echo "Jupyter:       http://127.0.0.1:8888/"
-          echo ""
+          wait-for -t 60 jupyter-notebook:8888 && echo '
+
+                Jupyter:       http://127.0.0.1:8888/
+                '
           echo "------------------------------------------------"
           echo ""
           echo "lakeFS Web UI: http://127.0.0.1:8000/      >(.＿.)<"

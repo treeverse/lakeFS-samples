@@ -1,10 +1,57 @@
-version: "3.9"
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
+#
+# WARNING: This configuration is for local development. Do not use it in a production deployment.
+#
+# This configuration supports basic configuration using environment variables or an .env file
+# The following variables are supported:
+#
+# AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
+#                                Default: apache/airflow:2.6.1
+# AIRFLOW_UID                  - User ID in Airflow containers
+#                                Default: 50000
+# AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
+#                                Default: .
+# Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
+#
+# _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
+#                                Default: airflow
+# _AIRFLOW_WWW_USER_PASSWORD   - Password for the administrator account (if requested).
+#                                Default: airflow
+# _PIP_ADDITIONAL_REQUIREMENTS - Additional PIP requirements to add when starting all containers.
+#                                Use this option ONLY for quick checks. Installing requirements at container
+#                                startup is done EVERY TIME the service is started.
+#                                A better way is to build a custom image or extend the official image
+#                                as described in https://airflow.apache.org/docs/docker-stack/build.html.
+#                                Default: ''
+#
+# Feel free to modify this file to suit your needs.
+---
+version: '3.8'
 x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.5.0}
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.1}
+  # build: .
   environment:
     &airflow-common-env
     AIRFLOW_CONN_LAKEFS: '{
@@ -21,16 +68,25 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    # yamllint disable rule:line-length
+    # Use simple http server on scheduler for health checks
+    # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
+    # yamllint enable rule:line-length
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
+    # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: "airflow-provider-lakefs apache-airflow[pandas] ${_PIP_ADDITIONAL_REQUIREMENTS:-}"
     AIRFLOW_VAR_DAG_CODE_VERSION: /opt/lakefs_example
     AIRFLOW_VAR_EXTRACT_CODE_GIT_ROOT: /opt/lakefs_example
     AIRFLOW_VAR_TRANSFORM_CODE_GIT_ROOT: /opt/lakefs_example
   volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ..:/opt/lakefs_example
-    - ./dags:/opt/airflow/dags
     - ./app_data/airflow/logs:/opt/airflow/logs
     - ./app_data/airflow/plugins:/opt/airflow/plugins
+    - ./app_data/airflow/config:/opt/airflow/config
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -39,44 +95,7 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-        
-         
 services:
-  lakefs:
-    depends_on:
-      postgres_setup:
-        condition: service_completed_successfully
-    image: "treeverse/lakefs:0.89.0"
-    ports:
-      - "8084:8000"
-    entrypoint: >
-      /bin/sh -c "lakefs setup
-      --user-name admin
-      --access-key-id AKIAIOSFODNN7EXAMPLE
-      --secret-access-key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY;
-      lakefs run"
-    environment:
-      LAKEFS_DATABASE_TYPE: postgres
-      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: postgres://airflow:airflow@postgres/lakefs?sslmode=disable
-      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: a123456
-      LAKEFS_BLOCKSTORE_TYPE: local
-    healthcheck:
-      test: ["CMD", "wget", "http://localhost:8000/api/v1/healthcheck"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - ./app_data/lakefs_metadata:/home/lakefs/lakefs/
-  lakefs_setup:
-    image: "treeverse/lakefs:0.89.0"
-    depends_on:
-      lakefs:
-        condition: service_healthy
-    entrypoint:
-      - /home/lakefs/scripts/init_repo.sh
-    volumes:
-      - ./app_data/lakefs_metadata:/home/lakefs/lakefs/
-      - ./scripts:/home/lakefs/scripts
   postgres:
     image: postgres:13
     environment:
@@ -87,36 +106,34 @@ services:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 5s
+      interval: 10s
       retries: 5
+      start_period: 5s
     restart: always
-  postgres_setup:
-    image: postgres:13
-    depends_on:
-      postgres:
-        condition: service_healthy
-    entrypoint: ["sh", "-c", "PGPASSWORD=airflow psql -h postgres -U airflow -c 'CREATE DATABASE lakefs;' || echo 'Database already exists'"]
+
   redis:
     image: redis:latest
     expose:
       - 6379
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 30s
       retries: 50
+      start_period: 30s
     restart: always
 
   airflow-webserver:
     <<: *airflow-common
     command: webserver
     ports:
-      - 8085:8080
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
@@ -127,10 +144,11 @@ services:
     <<: *airflow-common
     command: scheduler
     healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
-      interval: 10s
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
@@ -144,9 +162,10 @@ services:
       test:
         - "CMD-SHELL"
         - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     environment:
       <<: *airflow-common-env
       # Required to handle warm shutdown of the celery workers properly
@@ -163,28 +182,15 @@ services:
     command: triggerer
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-  variables-init:
-    <<: *airflow-common
-    depends_on:
-      <<: *airflow-common-depends-on
-      airflow-init:
-        condition: service_completed_successfully
-    entrypoint: /bin/bash
-  # yamllint disable rule:line-length
-    command:
-      - -c
-      - |
-        airflow variables set etl_dag_version a1b2c3
-        airflow variables set extract_code_version b2c3d4
-        airflow variables set transform_code_version c3d4e5
 
   airflow-init:
     <<: *airflow-common
@@ -249,12 +255,9 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/app_data/logs /sources/app_data/plugins
+        mkdir -p /sources/logs /sources/dags /sources/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
-        airflow variable set etl_dag_version a1b2c3
-        airflow variable set extract_code_version b2c3d4
-        airflow variable set transform_code_version c3d4e5
     # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env
@@ -265,7 +268,7 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
     volumes:
-      - .:/sources
+      - ${AIRFLOW_PROJ_DIR:-.}:/sources
 
   airflow-cli:
     <<: *airflow-common
@@ -289,17 +292,70 @@ services:
     profiles:
       - flower
     ports:
-      - 5555:5555
+      - "5555:5555"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+
+# 👇🏻👇🏻 Custom content below here 👇🏻👇🏻
+#
+  variables-init:
+    <<: *airflow-common
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+    entrypoint: /bin/bash
+  # yamllint disable rule:line-length
+    command:
+      - -c
+      - |
+        airflow variables set etl_dag_version a1b2c3
+        airflow variables set extract_code_version b2c3d4
+        airflow variables set transform_code_version c3d4e5
+        
+  lakefs:
+    extends:
+      file: ../docker-compose.yml
+      service: lakefs
+
+  lakefs-setup:
+    depends_on: 
+      - lakefs
+    image: treeverse/lakefs:latest
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://lakefs:8000
+    command:
+        - |
+          echo "---- Creating repository ----"
+          wait-for -t 60 lakefs:8000 -- \
+          curl -u "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID":"$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" \
+               -X POST -H "Content-Type: application/json" -d '{ "name": "airflow-example", 
+                                                                 "storage_namespace": "s3://example/'$(openssl rand -hex 4)'/", 
+                                                                 "default_branch": "main", 
+                                                                 "sample_data": false }' \
+                $$LAKECTL_SERVER_ENDPOINT_URL/api/v1/repositories 
+
+  minio-setup:
+    extends:
+      file: ../docker-compose.yml
+      service: minio-setup
+
+  minio:
+    extends:
+      file: ../docker-compose.yml
+      service: minio
 
 volumes:
   postgres-db-volume:
