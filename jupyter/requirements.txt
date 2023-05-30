@@ -1,4 +1,4 @@
-lakefs_client
+lakefs_client==0.101.0
 jupysql==0.5.2
 boto3
 jupyter_contrib_nbextensions
