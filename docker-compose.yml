@@ -16,8 +16,7 @@ services:
       - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
       - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
       - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
-      - LAKEFS_STATS_ENABLED
-      - LAKEFS_LOGGING_LEVEL
+      - LAKEFS_LOGGING_LEVEL=INFO
       - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
       - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
@@ -86,6 +85,7 @@ services:
       - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
     ports:
       - 8888:8888
+      - 4040:4040
     volumes:
       - ./notebooks:/home/jovyan/work
       - ./data:/data
