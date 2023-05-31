@@ -28,6 +28,13 @@ You can find the lakeFS web interface at http://localhost:8000.
 * Password: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`. 
 
 
+## Environment details
+
+* LakeFS http://localhost:8000/ (`AKIAIOSFODNN7EXAMPLE` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
+* Jupyter http://localhost:8888/
+* MinIO http://localhost:9001/ (`minioadmin`/`minioadmin`)
+* Spark UI http://localhost:4040/
+
 ## Got Questions or Want to Chat?
 
 👉🏻 Join the lakeFS Slack group - https://lakefs.io/slack
