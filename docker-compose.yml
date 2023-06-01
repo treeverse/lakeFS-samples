@@ -87,7 +87,7 @@ services:
       - 8888:8888
       - 4040:4040
     volumes:
-      - ./notebooks:/home/jovyan/work
+      - ./notebooks:/home/jovyan
       - ./data:/data
 
 networks:
