@@ -84,8 +84,8 @@ services:
     environment:
       - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
     ports:
-      - 8888:8888
-      - 4040:4040
+      - 8888:8888 # Jupyter
+      - 4040:4040 # Spark
     volumes:
       - ./notebooks:/home/jovyan
       - ./data:/data
