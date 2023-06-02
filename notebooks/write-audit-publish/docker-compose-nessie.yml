@@ -2,13 +2,13 @@ version: "3.5"
 services:
 
   notebook:
-    build: jupyter
+    build: ../../jupyter
     container_name: notebook
     ports:
       - 8888:8888
     volumes:
-      - ./data:/data
-      - ./notebooks:/home/jovyan/work
+      - ../../data:/data
+      - ../../notebooks:/home/jovyan/work
 
   nessie:
     image: projectnessie/nessie

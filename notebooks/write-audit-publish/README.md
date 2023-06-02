@@ -12,6 +12,10 @@ Please see the accompanying blog series for more details:
 
 ## Usage
 
-1. `docker-compose up`
-2. Load [Jupyter Notebooks](http://localhost:8888/lab/workspaces/auto-S/tree/work) and browse the Notebooks
+All of the notebooks except Nessie will run using the existing docker-compose.yml file that's in the root of the repository. 
 
+For the Project Nessie notebook use the provided `docker-compose-nessie.yml` file: 
+
+```bash
+docker compose -f docker-compose-nessie.yml up
+```
