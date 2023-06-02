@@ -21,7 +21,7 @@ Run the stack using Docker:
 docker compose up
 ```
 
-Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](http://127.0.0.1:8888/lab/tree/work/00_index.ipynb) to explore lakeFS. 
+Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
 
 You can find the lakeFS web interface at http://localhost:8000. 
 * User: `AKIAIOSFODNN7EXAMPLE`
