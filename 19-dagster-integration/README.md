@@ -28,5 +28,4 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 ## Demo Instructions
 
-Once you have successfully completed setup then open "Dagster Demo Existing DAG" notebook from JupyterLab UI and follow the instructions.
-
+Once you have successfully completed setup then open either "Dagster Demo Existing DAG" or "Dagster Demo New DAG" notebook from JupyterLab UI and follow the instructions.
