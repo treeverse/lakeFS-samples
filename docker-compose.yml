@@ -90,6 +90,15 @@ services:
       - ./notebooks:/home/jovyan
       - ./data:/data
 
+  lakefs-webhooks:
+    build: lakeFS-hooks
+    image: lakefs-hooks
+    container_name: lakefs-hooks
+    environment:
+      - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
+      - LAKEFS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - LAKEFS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
 networks:
   default:
     name: bagel
