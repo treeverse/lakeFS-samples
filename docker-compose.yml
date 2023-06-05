@@ -2,7 +2,7 @@ version: "3.5"
 services:
 
   lakefs:
-    image: treeverse/lakefs:0.101.0
+    image: treeverse/lakefs:0.102.2
     container_name: lakefs
     depends_on:
       - minio-setup
@@ -94,6 +94,8 @@ services:
     build: lakeFS-hooks
     image: lakefs-hooks
     container_name: lakefs-hooks
+    depends_on:
+      - lakefs
     environment:
       - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
       - LAKEFS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
