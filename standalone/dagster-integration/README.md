@@ -23,5 +23,7 @@
 
 ## Demo Instructions
 
-Once you have successfully completed setup then open "Dagster Demo Existing DAG" notebook from JupyterLab UI and follow the instructions.
+Once you have successfully completed setup then open one of the provided notebooks from JupyterLab UI: 
 
+* Dagster Demo Existing DAG
+* Dagster Demo New DAG
