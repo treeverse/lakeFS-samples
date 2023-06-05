@@ -1,9 +1,4 @@
 load_from:
-  # References the file copied into your Dockerfile
-#  - python_file: aws_test.py
-#  - python_file: lakefs_test_put.py
-#  - python_file: lakefs_test_list.py
-#  - python_file: lakefs_test_python_api.py
   - python_file: ./jobs/Existing_DAG/lakefs_tutorial_taskflow_api_etl.py
   - python_file: ./jobs/Existing_DAG/lakefs_wrapper_dag.py
   - python_file: ./jobs/New_DAG/lakefs_new_dag.py
