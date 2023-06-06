@@ -25,4 +25,7 @@ jobs:
         run: docker exec $(docker ps -q --filter expose=8888) pip3 install papermill
 
       - name: Run notebooks
-        run: ls spark/notebooks | xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
+        run: |
+          find notebooks -name "*.ipynb" | \
+          grep -vFf .github/workflows/notebooks_to_exclude.txt | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"

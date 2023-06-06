@@ -1,0 +1,14 @@
+demos-and-talks/chaos-engineering_dais22.ipynb
+demos-and-talks/lakeFS-DeltaLake-multi-table-transaction-consistency.ipynb
+demos-and-talks/lakeFSOnSynapse.ipynb
+demos-and-talks/ml-reproducibility.ipynb
+demos-and-talks/ml_reproducibility/file_utils.ipynb
+demos-and-talks/ml_reproducibility/ml_utils.ipynb
+reprocess-data/etl.ipynb
+reprocess-data/reprocessing.ipynb
+write-audit-publish/wap-delta.ipynb
+write-audit-publish/wap-hudi.ipynb
+write-audit-publish/wap-iceberg.ipynb
+write-audit-publish/wap-lakefs.ipynb
+write-audit-publish/wap-nessie.ipynb
+rbac-demo.ipynb
