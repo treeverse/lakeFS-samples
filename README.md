@@ -34,6 +34,7 @@ If you want to provision a lakeFS server as well as Jupyter then bring up the fu
 
 ```bash
 # make sure we've got the lakeFS hooks content too
+git submodule init
 git submodule update
 
 docker compose up
