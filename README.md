@@ -1,5 +1,7 @@
 # lakefs-samples
 
+_Incorporating the Docker Compose formally known as **Everything Bagel**._
+
 ![lakeFS logo](images/logo.png)
 
 **This sample repository captures a collection of notebooks, dockerized applications and code snippets that demonstrate how to use lakeFS.**
@@ -28,7 +30,7 @@ docker compose up jupyter-notebook
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
 
 
-### **Running lakeFS locally too?**
+### **Want to run lakeFS locally too?**
 
 If you want to provision a lakeFS server as well as Jupyter then bring up the full stack:
 
