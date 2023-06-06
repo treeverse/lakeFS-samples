@@ -15,7 +15,7 @@ git clone https://github.com/treeverse/lakeFS-samples.git
 cd lakeFS-samples
 ```
 
-You have two options
+You now have two options: 
 
 ### **Are you using lakeFS Cloud, or have your own lakeFS instance?** 
 
@@ -33,6 +33,9 @@ Once the stack's up and running, open the Jupyter Notebook (http://localhost:888
 If you want to provision a lakeFS server as well as Jupyter then bring up the full stack:
 
 ```bash
+# make sure we've got the lakeFS hooks content too
+git submodule update
+
 docker compose up
 ```
 
