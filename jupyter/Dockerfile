@@ -29,5 +29,8 @@ RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
 COPY ipython/startup/00-prettytables.py /home/jovyan/.ipython/profile_default/startup
 COPY ipython/startup/README /home/jovyan/.ipython/profile_default/startup
 
+# Set environment vars so that pyspark is available outside of Jupyter
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.5-src.zip:$PYTHONPATH
+
 # Disable the "Would you like to receive official Jupyter news?" popup
 RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
