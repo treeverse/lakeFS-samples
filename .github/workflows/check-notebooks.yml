@@ -2,7 +2,7 @@ name: "Check notebooks"
 on:
   push:
     branches:
-      - 'master'
+      # - 'master'
   pull_request:
 
 jobs:
