@@ -30,26 +30,20 @@ jobs:
             sleep 1
           done
 
-      - name: Check lakeFS connection locally
-        run: |
-          curl http://localhost:8000/_health 2>&1
-
       - name: Wait until lakeFS container is up and ready and reachable from Jupyter
         run: |
           timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
           while [ $SECONDS -lt $timeout ]; do
               output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health 2>&1)
-              echo $?
-              echo output
               if [[ $output == alive* ]]; then
-                  echo "Command returned: $output"
+                  echo "Health check returned: $output"
                   break
               fi
               sleep 5  # Wait for 1 second before trying again
           done
 
           if [ $SECONDS -ge $timeout ]; then
-              echo "Timeout reached, command did not return 'alive' within 5 minutes"
+              echo "Timeout reached, Health check did not return 'alive' within 5 minutes"
               exit 1
           fi
 
@@ -57,17 +51,12 @@ jobs:
         run: |
           docker ps -a
 
-      - name: Container log
-        run: |
-          docker logs $(docker ps -q --filter expose=8000)
-
       - name: Run notebooks
         run: |
-          docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
+          # docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
 
-          # cd notebooks && \
-          # find . -name "*.ipynb" | \
-          # grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
-          # grep -v .ipynb_checkpoints | \
-          # xargs -I {} echo {}
-#          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
+          cd notebooks && \
+          find . -name "*.ipynb" | \
+          grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
+          grep -v .ipynb_checkpoints | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
