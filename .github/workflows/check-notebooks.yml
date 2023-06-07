@@ -26,27 +26,9 @@ jobs:
 
       - name: Wait until lakeFS container is properly up
         run: |
-          timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
-          while [ $SECONDS -lt $timeout ]; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/_health)
-            echo $?
-            echo output
-
-            # Check if the response is a success code
-            if [[ $response -ge 200 && $response -lt 300 ]]; then
-              echo "\o/ lakeFS is reachable from host"
-              exit 0
-            else
-              echo "Failed with response code $response"
-              
-              sleep 5
-            fi
+          while ! curl -s http://localhost:8000/_health; do
+            sleep 1
           done
-
-          if [ $SECONDS -ge $timeout ]; then
-              echo "Timeout reached, command did not return 'alive' within 5 minutes"
-              exit 1
-          fi
 
       - name: Check lakeFS connection locally
         run: |
