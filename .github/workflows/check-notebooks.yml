@@ -24,7 +24,17 @@ jobs:
             sleep 1
           done
 
-      - name: Wait until lakeFS container is up and ready
+      - name: Wait until lakeFS container is up
+        run: |
+          while ! nc -z localhost 8000; do
+            sleep 1
+          done
+
+      - name: Check lakeFS connection locally
+        run: |
+          curl http://localhost:8000/_health 2>&1
+
+      - name: Wait until lakeFS container is up and ready and reachable from Jupyter
         run: |
           timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
           while [ $SECONDS -lt $timeout ]; do
@@ -50,10 +60,6 @@ jobs:
       - name: Container log
         run: |
           docker logs $(docker ps -q --filter expose=8000)
-
-      - name: Check lakeFS connection from Jupyter
-        run: |
-          docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health
 
       - name: Run notebooks
         run: |
