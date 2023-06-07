@@ -21,7 +21,7 @@ You now have two options:
 
 ### **Run a Notebook server with your existing lakeFS Server**
 
-If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](http://https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
+If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
 ```bash
 docker compose up jupyter-notebook
