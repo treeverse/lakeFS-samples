@@ -17,7 +17,7 @@ jobs:
       - name: Build container
         run: docker-compose pull && docker-compose build && docker-compose up -d
 
-      - name: Wait until container is up
+      - name: Wait until Jupyter container is up
         run: |
           while ! nc -z localhost 8888; do
             sleep 1
@@ -25,6 +25,12 @@ jobs:
 
       - name: Install papermill
         run: docker exec $(docker ps -q --filter expose=8888) pip3 install papermill
+
+      - name: Wait until lakeFS container is up
+        run: |
+          while ! nc -z localhost 8000; do
+            sleep 1
+          done
 
       - name: Run notebooks
         run: |
