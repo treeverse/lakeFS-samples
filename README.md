@@ -19,9 +19,9 @@ cd lakeFS-samples
 
 You now have two options: 
 
-### **Are you using lakeFS Cloud, or have your own lakeFS instance?** 
+### **Run a Notebook server with your existing lakeFS Server**
 
-All you need to run is the Jupyter notebook server: 
+If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](http://https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
 ```bash
 docker compose up jupyter-notebook
@@ -30,7 +30,7 @@ docker compose up jupyter-notebook
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
 
 
-### **Want to run lakeFS locally too?**
+### **Don't have a lakeFS Server?**
 
 If you want to provision a lakeFS server as well as Jupyter then bring up the full stack:
 
@@ -48,7 +48,7 @@ As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog 
 ## Environment Details
 
 * **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
-* **lakeFS** can be provisioned as part of this environment, or provided by [lakeFS cloud](http://https://lakefs.cloud/) or your own installation.
+* **lakeFS** can be provisioned as part of this environment, or provided by [lakeFS cloud](http://https://lakefs.cloud/) or your [own installation](https://docs.lakefs.io/deploy/).
 * If you run lakeFS as part of this environment, **MinIO** is provided as an S3-compatible object store. If you run lakeFS yourself you can use other S3-compatible object stores include S3, GCS, as well as MinIO
 * A sample **lakeFS webhooks server** is provided, configured based on using the provided lakeFS server. 
 
