@@ -24,11 +24,21 @@ jobs:
             sleep 1
           done
 
-      - name: Wait until lakeFS container is up
+      - name: Wait until lakeFS container is up and ready
         run: |
-          while ! nc -z localhost 8000; do
-            sleep 1
+          timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
+          while [ $SECONDS -lt $timeout ]; do
+              output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health)
+              if [[ $output == alive* ]]; then
+                  echo "Command returned: $output"
+                  break
+              fi
+              sleep 5  # Wait for 1 second before trying again
           done
+
+          if [ $SECONDS -ge $timeout ]; then
+              echo "Timeout reached, command did not return 'alive' within 5 minutes"
+          fi
 
       - name: Container status
         run: |
