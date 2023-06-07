@@ -31,9 +31,11 @@ jobs:
 
       - name: Run notebooks
         run: |
-          cd notebooks && \
-          find . -name "*.ipynb" | \
-          grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
-          grep -v .ipynb_checkpoints | \
-          xargs -I {} echo {}
+          docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
+
+          # cd notebooks && \
+          # find . -name "*.ipynb" | \
+          # grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
+          # grep -v .ipynb_checkpoints | \
+          # xargs -I {} echo {}
 #          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
