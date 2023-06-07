@@ -30,6 +30,10 @@ jobs:
             sleep 1
           done
 
+      - name: Check lakeFS connection from Jupyter
+        run: |
+          docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health
+
       - name: Run notebooks
         run: |
           docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
