@@ -6,9 +6,8 @@ on:
   pull_request:
 
 jobs:
-  docker:
+  check-notebooks:
     runs-on: ubuntu-latest
-#    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,9 +23,6 @@ jobs:
             sleep 1
           done
 
-      #- name: Install papermill
-      #  run: docker exec $(docker ps -q --filter expose=8888) pip3 install papermill
-
       - name: Wait until lakeFS container is up
         run: |
           while ! nc -z localhost 8000; do
@@ -35,6 +31,8 @@ jobs:
 
       - name: Run notebooks
         run: |
-          find notebooks -name "*.ipynb" | \
-          grep -vFf .github/workflows/notebooks_to_exclude.txt | \
-          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
+          cd notebooks && \
+          find . -name "*.ipynb" | \
+          grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
+          grep -v .ipynb_checkpoints | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/$(basename {})"
