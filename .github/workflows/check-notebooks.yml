@@ -28,7 +28,9 @@ jobs:
         run: |
           timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
           while [ $SECONDS -lt $timeout ]; do
-              output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health)
+              output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health 2>&1)
+              echo $?
+              echo output
               if [[ $output == alive* ]]; then
                   echo "Command returned: $output"
                   break
@@ -38,6 +40,7 @@ jobs:
 
           if [ $SECONDS -ge $timeout ]; then
               echo "Timeout reached, command did not return 'alive' within 5 minutes"
+              exit 1
           fi
 
       - name: Container status
