@@ -7,7 +7,8 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ubuntu-latest
+#    runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -23,8 +24,8 @@ jobs:
             sleep 1
           done
 
-      - name: Install papermill
-        run: docker exec $(docker ps -q --filter expose=8888) pip3 install papermill
+      #- name: Install papermill
+      #  run: docker exec $(docker ps -q --filter expose=8888) pip3 install papermill
 
       - name: Wait until lakeFS container is up
         run: |
