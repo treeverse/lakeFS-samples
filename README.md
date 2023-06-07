@@ -30,9 +30,9 @@ docker compose up jupyter-notebook
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
 
 
-### **Don't have a lakeFS Server?**
+### **Don't have a lakeFS Server or Object Store?**
 
-If you want to provision a lakeFS server as well as Jupyter then bring up the full stack:
+If you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
 
 ```bash
 # make sure we've got the lakeFS hooks content too
