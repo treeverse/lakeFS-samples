@@ -30,6 +30,14 @@ jobs:
             sleep 1
           done
 
+      - name: Container status
+        run: |
+          docker ps -a
+
+      - name: Container log
+        run: |
+          docker logs $(docker ps -q --filter expose=8000)
+
       - name: Check lakeFS connection from Jupyter
         run: |
           docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health
