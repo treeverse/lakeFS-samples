@@ -7,7 +7,6 @@ on:
 
 jobs:
   check-notebooks:
-    # runs-on: ubuntu-latest
     runs-on: ubuntu-latest-8-cores
     steps:
       - name: Checkout
@@ -30,33 +29,35 @@ jobs:
             sleep 1
           done
 
-      - name: Wait until lakeFS container is up and ready and reachable from Jupyter
-        run: |
-          timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
-          while [ $SECONDS -lt $timeout ]; do
-              output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health 2>&1)
-              if [[ $output == alive* ]]; then
-                  echo "Health check returned: $output"
-                  break
-              fi
-              sleep 5  # Wait for 1 second before trying again
-          done
-
-          if [ $SECONDS -ge $timeout ]; then
-              echo "Timeout reached, Health check did not return 'alive' within 5 minutes"
-              exit 1
-          fi
-
       - name: Container status
         run: |
           docker ps -a
 
-      - name: Run notebooks
-        run: |
-          # docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
+      # - name: Run notebooks
+      #   run: |
+      #     cd notebooks && \
+      #     find . -name "*.ipynb" | \
+      #     grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
+      #     grep -v .ipynb_checkpoints | \
+      #     xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
 
-          cd notebooks && \
-          find . -name "*.ipynb" | \
-          grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
-          grep -v .ipynb_checkpoints | \
-          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
+      - name: run_notebook_00_index 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/00_index.ipynb"
+      - name: run_notebook_spark-demo 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/spark-demo.ipynb"
+      - name: run_notebook_delta-lake 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/delta-lake.ipynb"
+      - name: run_notebook_reprocess-backfill-data 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/reprocess-backfill-data.ipynb"
+      - name: run_notebook_delta-diff 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/delta-diff.ipynb"
+      - name: run_notebook_import-multiple-buckets 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/import-multiple-buckets.ipynb"
+      - name: run_notebook_data-lineage 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/data-lineage.ipynb"
+      - name: run_notebook_version-control-of-multi-buckets-pipelines 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/version-control-of-multi-buckets-pipelines.ipynb"
+      - name: run_notebook_dev-test 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
+      - name: run_notebook_ml-experimentation-wine-quality-prediction 
+        run: docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/ml-experimentation-wine-quality-prediction.ipynb"
