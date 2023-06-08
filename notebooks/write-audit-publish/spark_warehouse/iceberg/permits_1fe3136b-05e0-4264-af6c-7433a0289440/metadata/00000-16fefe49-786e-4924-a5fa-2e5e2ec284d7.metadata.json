@@ -1,0 +1,206 @@
+{
+  "format-version" : 1,
+  "table-uuid" : "c242f85c-33c3-467b-9a28-811be6955f8f",
+  "location" : "file:///home/jovyan/work/write-audit-publish/spark_warehouse/iceberg/permits_1fe3136b-05e0-4264-af6c-7433a0289440",
+  "last-updated-ms" : 1685717433901,
+  "last-column-id" : 14,
+  "schema" : {
+    "type" : "struct",
+    "schema-id" : 0,
+    "fields" : [ {
+      "id" : 1,
+      "name" : "borough",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 2,
+      "name" : "category",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 3,
+      "name" : "communityboard_s",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 4,
+      "name" : "country",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 5,
+      "name" : "enddatetime",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 6,
+      "name" : "enteredon",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 7,
+      "name" : "eventagency",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 8,
+      "name" : "eventid",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 9,
+      "name" : "eventtype",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 10,
+      "name" : "parkingheld",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 11,
+      "name" : "policeprecinct_s",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 12,
+      "name" : "startdatetime",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 13,
+      "name" : "subcategoryname",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 14,
+      "name" : "zipcode_s",
+      "required" : false,
+      "type" : "string"
+    } ]
+  },
+  "current-schema-id" : 0,
+  "schemas" : [ {
+    "type" : "struct",
+    "schema-id" : 0,
+    "fields" : [ {
+      "id" : 1,
+      "name" : "borough",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 2,
+      "name" : "category",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 3,
+      "name" : "communityboard_s",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 4,
+      "name" : "country",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 5,
+      "name" : "enddatetime",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 6,
+      "name" : "enteredon",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 7,
+      "name" : "eventagency",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 8,
+      "name" : "eventid",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 9,
+      "name" : "eventtype",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 10,
+      "name" : "parkingheld",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 11,
+      "name" : "policeprecinct_s",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 12,
+      "name" : "startdatetime",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 13,
+      "name" : "subcategoryname",
+      "required" : false,
+      "type" : "string"
+    }, {
+      "id" : 14,
+      "name" : "zipcode_s",
+      "required" : false,
+      "type" : "string"
+    } ]
+  } ],
+  "partition-spec" : [ ],
+  "default-spec-id" : 0,
+  "partition-specs" : [ {
+    "spec-id" : 0,
+    "fields" : [ ]
+  } ],
+  "last-partition-id" : 999,
+  "default-sort-order-id" : 0,
+  "sort-orders" : [ {
+    "order-id" : 0,
+    "fields" : [ ]
+  } ],
+  "properties" : {
+    "owner" : "jovyan"
+  },
+  "current-snapshot-id" : 5323679328118569268,
+  "refs" : {
+    "main" : {
+      "snapshot-id" : 5323679328118569268,
+      "type" : "branch"
+    }
+  },
+  "snapshots" : [ {
+    "snapshot-id" : 5323679328118569268,
+    "timestamp-ms" : 1685717433901,
+    "summary" : {
+      "operation" : "append",
+      "spark.app.id" : "local-1685717419697",
+      "added-data-files" : "1",
+      "added-records" : "1000",
+      "added-files-size" : "51115",
+      "changed-partition-count" : "1",
+      "total-records" : "1000",
+      "total-files-size" : "51115",
+      "total-data-files" : "1",
+      "total-delete-files" : "0",
+      "total-position-deletes" : "0",
+      "total-equality-deletes" : "0"
+    },
+    "manifest-list" : "file:/home/jovyan/work/write-audit-publish/spark_warehouse/iceberg/permits_1fe3136b-05e0-4264-af6c-7433a0289440/metadata/snap-5323679328118569268-1-0ef1854d-d1ea-43b3-8ce5-5c78f2e07c82.avro",
+    "schema-id" : 0
+  } ],
+  "statistics" : [ ],
+  "snapshot-log" : [ {
+    "timestamp-ms" : 1685717433901,
+    "snapshot-id" : 5323679328118569268
+  } ],
+  "metadata-log" : [ ]
+}

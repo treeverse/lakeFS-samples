@@ -1,0 +1,5 @@
+spark-warehouse
+.ivy2/
+.jupyter/
+.local/
+

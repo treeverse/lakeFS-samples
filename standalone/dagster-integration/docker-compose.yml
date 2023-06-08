@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  lakefs:
+    extends:
+      file: ../../docker-compose.yml
+      service: lakefs
+
+  minio-setup:
+    extends:
+      file: ../../docker-compose.yml
+      service: minio-setup
+
+  minio:
+    extends:
+      file: ../../docker-compose.yml
+      service: minio
+
+  jupyter-notebook:
+    build: .
+    container_name: jupyter-notebook
+    environment:
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
+    ports:
+      - 8888:8888 # Jupyter
+      - 3000:3000 # Dagster
+    volumes:
+      - $PWD:/home/jovyan
