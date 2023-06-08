@@ -1,0 +1,62 @@
+name: "Check notebooks"
+on:
+  push:
+    branches:
+      # - 'master'
+  pull_request:
+
+jobs:
+  check-notebooks:
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Build container
+        run: docker-compose pull && docker-compose build && docker-compose up -d
+
+      - name: Wait until Jupyter container is up
+        run: |
+          while ! nc -z localhost 8888; do
+            sleep 1
+          done
+
+      - name: Wait until lakeFS container is properly up
+        run: |
+          while ! curl -s http://localhost:8000/_health; do
+            sleep 1
+          done
+
+      - name: Wait until lakeFS container is up and ready and reachable from Jupyter
+        run: |
+          timeout=$((SECONDS + 300))  # Set timeout to 5 minutes from now
+          while [ $SECONDS -lt $timeout ]; do
+              output=$(docker exec $(docker ps -q --filter expose=8888) wget -q -O - http://lakefs:8000/_health 2>&1)
+              if [[ $output == alive* ]]; then
+                  echo "Health check returned: $output"
+                  break
+              fi
+              sleep 5  # Wait for 1 second before trying again
+          done
+
+          if [ $SECONDS -ge $timeout ]; then
+              echo "Timeout reached, Health check did not return 'alive' within 5 minutes"
+              exit 1
+          fi
+
+      - name: Container status
+        run: |
+          docker ps -a
+
+      - name: Run notebooks
+        run: |
+          # docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/dev-test.ipynb"
+
+          cd notebooks && \
+          find . -name "*.ipynb" | \
+          grep -vFf ../.github/workflows/notebooks_to_exclude.txt | \
+          grep -v .ipynb_checkpoints | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
