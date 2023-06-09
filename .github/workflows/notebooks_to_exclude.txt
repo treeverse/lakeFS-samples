@@ -1,0 +1,34 @@
+# These are samples from conference talks etc that perhaps
+# relied on an existing cloud environment, or for other
+# reasons can't be run without further modification
+./demos-and-talks/chaos-engineering_dais22.ipynb
+./demos-and-talks/lakeFS-DeltaLake-multi-table-transaction-consistency.ipynb
+./demos-and-talks/lakeFSOnSynapse.ipynb
+
+# These notebooks include a deliberate failure as part of 
+# showing how hooks can enforce conditions in the repository
+./hooks-demo.ipynb
+./hooks-schema-and-pii-validation.ipynb
+./hooks-schema-validation.ipynb
+
+# This only works against lakeFS cloud
+./rbac-demo.ipynb
+
+# These notebooks include a deliberate failure as part of 
+# the data Audit step, and so will always throw an error (by design)
+./write-audit-publish/wap-delta.ipynb
+./write-audit-publish/wap-hudi.ipynb
+./write-audit-publish/wap-iceberg.ipynb
+./write-audit-publish/wap-lakefs.ipynb
+./write-audit-publish/wap-nessie.ipynb
+
+# These are notebooks with functions to support
+# other notebooks and aren't intended for running
+# in isolation
+./demos-and-talks/ml_reproducibility/file_utils.ipynb
+./demos-and-talks/ml_reproducibility/ml_utils.ipynb
+./reprocess-data/etl.ipynb
+./reprocess-data/reprocessing.ipynb
+
+# Ignore any temporary notebook caches etc
+.ipynb_checkpoints
