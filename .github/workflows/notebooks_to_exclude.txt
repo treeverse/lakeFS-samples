@@ -1,9 +1,7 @@
 # These are samples from conference talks etc that perhaps
 # relied on an existing cloud environment, or for other
 # reasons can't be run without further modification
-./demos-and-talks/chaos-engineering_dais22.ipynb
-./demos-and-talks/lakeFS-DeltaLake-multi-table-transaction-consistency.ipynb
-./demos-and-talks/lakeFSOnSynapse.ipynb
+./demos-and-talks/
 
 # These notebooks include a deliberate failure as part of 
 # showing how hooks can enforce conditions in the repository
