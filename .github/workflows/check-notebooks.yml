@@ -15,7 +15,7 @@ jobs:
           submodules: true
 
       - name: Build container
-        run: docker-compose pull && docker-compose build && docker-compose up -d
+        run: docker compose up --build --pull always -d
 
       - name: Wait until Jupyter container is up
         run: |
