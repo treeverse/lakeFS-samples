@@ -3,3 +3,4 @@ jupysql>=0.5.2
 boto3
 jupyter_contrib_nbextensions
 tabulate
+papermill

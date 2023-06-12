@@ -1,0 +1,37 @@
+name: "Check notebooks"
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+
+jobs:
+  check-notebooks:
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Build container
+        run: docker compose up --build --pull always -d
+
+      - name: Wait until Jupyter container is up
+        run: |
+          while ! nc -z localhost 8888; do
+            sleep 1
+          done
+
+      - name: Wait until lakeFS container is properly up
+        run: |
+          while ! curl -s http://localhost:8000/_health; do
+            sleep 1
+          done
+
+      - name: Run all selected notebooks
+        run: |
+          cd notebooks && \
+          find . -name "*.ipynb" | \
+          grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
