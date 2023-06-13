@@ -9,7 +9,7 @@
 1. Start by cloning this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/standalone/dagster-integration
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/dagster-integration
    ```
 
 2. Run the following to provision the stack which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client

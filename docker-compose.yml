@@ -87,7 +87,7 @@ services:
       - 8888:8888 # Jupyter
       - 4040:4040 # Spark
     volumes:
-      - ./notebooks:/home/jovyan
+      - ./00_notebooks:/home/jovyan
       - ./data:/data
 
   lakefs-webhooks:
