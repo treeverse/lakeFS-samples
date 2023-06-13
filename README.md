@@ -66,6 +66,19 @@ If you've brought up the full stack you'll also have:
 * MinIO http://localhost:9001/ (`minioadmin`/`minioadmin`)
 * Spark UI http://localhost:4040/
 
+## Other Examples
+
+Under the [standalone_examples](./standalone_examples/) folder are a set of examples that need to be run on their own. Some use the repository's Docker Compose file and extend it, and others are self-contained and use their own Dockerfile. 
+
+* [Airflow (1)](./standalone_examples/airflow-01/) - Four examples of using lakeFS with Airflow: 
+    * Versioning DAGs and running pipeline from hooks using a configurable version of DAGs 
+    * Isolating Airflow job run and atomic promotion to production
+    * Integration of lakeFS with Airflow via Hooks
+    * Troubleshooting production issues
+* [Airflow (2)](./standalone_examples/airflow-02/) - lakeFS + Airflow
+* [lakeFS + Dagster](./standalone_examples/dagster-integration/)
+* [Labelbox integration](./standalone_examples/labelbox-integration/)
+* [How to migrate or clone a repo](./standalone_examples/migrate-or-clone-repo/)
 ## Got Questions or Want to Chat?
 
 👉🏻 Join the lakeFS Slack group - https://lakefs.io/slack
