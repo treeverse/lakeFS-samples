@@ -8,7 +8,12 @@ This sample will give you an idea of how you can use the [lakeFS Airflow provide
 
 ### Run Instructions
 
-1. Clone the sample.
+1. Clone the sample: 
+
+    ```
+    git clone https://github.com/treeverse/lakeFS-samples
+    cd lakeFS-samples
+    git submodule init && git submodule update
 
 1. Spin up the environment:
    `docker-compose up`
@@ -44,3 +49,9 @@ This sample will give you an idea of how you can use the [lakeFS Airflow provide
 Here's the [DAG](./dags/dag.py) that's used: 
 
 ![](assets/airflow-ui-02.png)
+
+## Containers
+
+The Docker Compose in this folder extends the one in the root of this repository to add the necessary containers for Airflow:
+
+![](./assets/containers.excalidraw.png)
