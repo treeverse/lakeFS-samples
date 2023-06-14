@@ -49,7 +49,7 @@ This repository includes following Jupyter Notebooks which you can run on your l
 1. Start by cloning this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/03-multiple-samples
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/airflow-01
    ```
 
 2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries, lakeFS Python client and Airflow (Docker image size is around 4.5GB):
