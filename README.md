@@ -29,6 +29,11 @@ docker compose up jupyter-notebook
 
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
 
+Once you've finished, run the following to remove all the containers: 
+
+```bash
+docker compose down
+```
 
 ### **Don't have a lakeFS Server or Object Store?**
 
