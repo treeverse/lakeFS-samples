@@ -3,7 +3,11 @@ on:
   push:
     branches:
       - 'master'
+    paths-ignore:
+      - '01_standalone_examples/**'
   pull_request:
+    paths-ignore:
+      - '01_standalone_examples/**'
 
 jobs:
   check-notebooks:
