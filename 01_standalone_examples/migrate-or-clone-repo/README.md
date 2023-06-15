@@ -15,7 +15,7 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 1. Start by cloning this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/14-migrate-or-clone-repo
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/migrate-or-clone-repo
    ```
 
 2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client (Docker image size is around 4GB):
