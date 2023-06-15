@@ -1,44 +1,24 @@
-# Integration of lakeFS with Spark, Python, Delta Lake, Airflow and Hooks
+# Integration of lakeFS with Airflow and Hooks
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes following Jupyter Notebooks which you can run on your local machine:
 
-1. Spark Demo:
-* Integration of lakeFS with Apache Spark and Python
-* Use Case: Isolated Testing Environment
-
-2. Delta Lake Demo:
-* Integration of lakeFS with Delta Lake
-* Use Cases: Isolating ETL job and atomic promotion to production. Atomic rollback of Multi-Table Transactions.
-
-3. Airflow Demo Existing DAG:
+1. Airflow Demo Existing DAG:
 * Integration of lakeFS with Airflow
 * Use Case: Isolating Airflow job run and atomic promotion to production
 
-4. Airflow Demo New DAG:
+2. Airflow Demo New DAG:
 * Integration of lakeFS with Airflow
 * Use Case: Troubleshooting production issues
 
-5. Hooks Airflow Demo:
+3. Hooks Airflow Demo:
 * Integration of lakeFS with Airflow via Hooks
 * Use Case: Isolated Ingestion & ETL Environment
 
-6. Airflow DAG Versioning Demo:
+4. Airflow DAG Versioning Demo:
 * Integration of lakeFS with Airflow via Hooks
 * Use Case: Versioning DAGs and running pipeline from hooks using a configurable version of DAGs
-
-7. Hooks Schema Validation:
-* Using Hooks or Git like actions
-* Use Cases: Don't allow PII data and schema changes
-
-8. Reprocess Data Demo:
-* Integration of lakeFS with Apache Spark and Python
-* Use Case: Reprocess and Backfill Data with new ETL logic
-
-9. RBAC Demo:
-* lakeFS Role-Based Access Control (RBAC) Demo
-* Use Case: Data Governance - secure your data lake
 
 ## Prerequisites
 * Docker installed on your local machine
@@ -49,7 +29,7 @@ This repository includes following Jupyter Notebooks which you can run on your l
 1. Start by cloning this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/03-multiple-samples
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/airflow-01
    ```
 
 2. Run following commands to download and run Docker container which includes Python, Spark, Jupyter Notebook, JDK, Hadoop binaries, lakeFS Python client and Airflow (Docker image size is around 4.5GB):

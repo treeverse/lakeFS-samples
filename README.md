@@ -27,8 +27,13 @@ If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are ut
 docker compose up jupyter-notebook
 ```
 
-Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
+Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
 
+Once you've finished, run the following to remove all the containers: 
+
+```bash
+docker compose down
+```
 
 ### **Don't have a lakeFS Server or Object Store?**
 
@@ -42,7 +47,7 @@ git submodule update
 docker compose up
 ```
 
-As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog of sample notebooks](./notebooks/00_index.ipynb) to explore lakeFS. 
+As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
 
 
 ## Environment Details
@@ -66,6 +71,19 @@ If you've brought up the full stack you'll also have:
 * MinIO http://localhost:9001/ (`minioadmin`/`minioadmin`)
 * Spark UI http://localhost:4040/
 
+## Other Examples
+
+Under the [standalone_examples](./01_standalone_examples/) folder are a set of examples that need to be run on their own. Some use the repository's Docker Compose file and extend it, and others are self-contained and use their own Dockerfile. 
+
+* [Airflow (1)](./01_standalone_examples/airflow-01/) - Four examples of using lakeFS with Airflow: 
+    * Versioning DAGs and running pipeline from hooks using a configurable version of DAGs 
+    * Isolating Airflow job run and atomic promotion to production
+    * Integration of lakeFS with Airflow via Hooks
+    * Troubleshooting production issues
+* [Airflow (2)](./01_standalone_examples/airflow-02/) - lakeFS + Airflow
+* [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
+* [Labelbox integration](./01_standalone_examples/labelbox-integration/)
+* [How to migrate or clone a repo](./01_standalone_examples/migrate-or-clone-repo/)
 ## Got Questions or Want to Chat?
 
 👉🏻 Join the lakeFS Slack group - https://lakefs.io/slack

@@ -31,7 +31,7 @@ jobs:
 
       - name: Run all selected notebooks
         run: |
-          cd notebooks && \
+          cd 00_notebooks && \
           find . -name "*.ipynb" | \
           grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
           xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"

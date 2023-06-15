@@ -8,7 +8,7 @@ services:
       - 8888:8888
     volumes:
       - ../../data:/data
-      - ../../notebooks:/home/jovyan/work
+      - ../../00_notebooks:/home/jovyan/work
 
   nessie:
     image: projectnessie/nessie
