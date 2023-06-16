@@ -82,12 +82,12 @@ services:
     build: jupyter
     container_name: jupyter-notebook
     environment:
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
     ports:
       - 8888:8888 # Jupyter
       - 4040:4040 # Spark
     volumes:
-      - ./00_notebooks:/home/jovyan
+      - ./00_notebooks:/home/jovyan/notebooks
       - ./data:/data
 
   lakefs-webhooks:
