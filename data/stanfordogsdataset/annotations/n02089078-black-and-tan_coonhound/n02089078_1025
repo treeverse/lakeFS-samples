@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02089078</folder>
+	<filename>n02089078_1025</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>318</width>
+		<height>439</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>black-and-tan_coonhound</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>30</xmin>
+			<ymin>9</ymin>
+			<xmax>268</xmax>
+			<ymax>437</ymax>
+		</bndbox>
+	</object>
+</annotation>
