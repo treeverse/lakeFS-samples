@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02101388</folder>
+	<filename>n02101388_1445</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>250</width>
+		<height>187</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>Brittany_spaniel</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>77</xmin>
+			<ymin>25</ymin>
+			<xmax>189</xmax>
+			<ymax>186</ymax>
+		</bndbox>
+	</object>
+</annotation>
