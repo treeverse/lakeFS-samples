@@ -42,7 +42,7 @@ jobs:
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
               papermill "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
-                        2>/home/jovyan/notebooks/papermill-out/{}.stderr
+                        2>"/home/jovyan/notebooks/papermill-out/{}.stderr"
 
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
