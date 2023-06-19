@@ -33,19 +33,24 @@ jobs:
             sleep 1
           done
 
-      - name: Test all notebooks other than those excluded
+      - name: Run all notebooks other than those excluded
+        working-directory: 00_notebooks
         run: |
-          cd 00_notebooks
           mkdir -p papermill-out
           find . -name "*.ipynb" | \
             grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
               papermill "/home/jovyan/notebooks/{}" \
-                        "/home/jovyan/notebooks/papermill-out/{}"
-          # Look for failures
+                        "/home/jovyan/notebooks/papermill-out/{}" \
+                        2>/home/jovyan/notebooks/papermill-out/{}.stderr
+
+      - name: Check for any failed notebooks
+        working-directory: 00_notebooks
+        run: |
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" papermill-out/failed
+            mv "$file".stderr papermill-out/failed
             echo "Notebook failed: $file"
           done
 
