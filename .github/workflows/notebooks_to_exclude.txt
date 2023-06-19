@@ -23,7 +23,7 @@
 # These are notebooks with functions to support
 # other notebooks and aren't intended for running
 # in isolation
-./ml_reproducibility/ml_utils.ipynb
+./utils_ml_reproducibility/ml_utils.ipynb
 ./reprocess-data/etl.ipynb
 ./reprocess-data/reprocessing.ipynb
 
