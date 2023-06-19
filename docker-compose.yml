@@ -82,12 +82,12 @@ services:
     build: jupyter
     container_name: jupyter-notebook
     environment:
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
     ports:
       - 8888:8888 # Jupyter
       - 4040:4040 # Spark
     volumes:
-      - ./00_notebooks:/home/jovyan
+      - ./00_notebooks:/home/jovyan/notebooks
       - ./data:/data
 
   lakefs-webhooks:
@@ -100,6 +100,39 @@ services:
       - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
       - LAKEFS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
       - LAKEFS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+  test-notebooks:
+    profile: test-notebooks
+    depends_on:
+      - lakefs
+      - jupyter-notebook
+    build: jupyter
+    environment:
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
+    ports:
+      - 8888:8888 # Jupyter
+      - 4040:4040 # Spark
+    volumes:
+      - ./00_notebooks:/home/jovyan/notebooks
+      - ./data:/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Wait until Jupyter container is up"
+          while ! nc -z localhost 8888; do
+            sleep 1
+          done
+
+        echo "Wait until lakeFS container is properly up"
+          while ! curl -s http://localhost:8000/_health; do
+            sleep 1
+          done
+
+        echo "Runing all selected notebooks"
+          cd 00_notebooks && \
+          find . -name "*.ipynb" | \
+          grep -vFf <(grep -v -e '^#' -e '^$' ./notebooks_to_exclude_from_testing.txt) | \
+          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/notebooks/{}" "/home/jovyan/papermill_out" 
 
 networks:
   default:
