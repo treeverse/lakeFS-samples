@@ -30,3 +30,4 @@
 
 # Ignore any temporary notebook caches etc
 .ipynb_checkpoints
+papermill-out
