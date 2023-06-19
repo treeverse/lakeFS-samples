@@ -75,7 +75,6 @@ jobs:
 
       - name: Store Papermill output
         uses: actions/upload-artifact@v3
-        if: ${{ failure() }}
         with:
           name: Papermill output
           path: |
