@@ -41,7 +41,7 @@ jobs:
           find . -name "*.ipynb" | \
             grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
-              papermill -cwd /home/jovyan/notebooks/ \
+              papermill --cwd /home/jovyan/notebooks/ \
                         "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
                         2> papermill-out/papermill.err \
