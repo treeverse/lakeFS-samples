@@ -42,15 +42,15 @@ jobs:
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
               papermill "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
-                        2> papermill-out/{}.papermill.err \
-                        1> papermill-out/{}.papermill.out || true
+                        2> papermill-out/{}.err \
+                        1> papermill-out/{}.out || true
 
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
         run: |
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
-            mv "$file" "$file".stderr "$file".stdout papermill-out/failed
+            mv "$file" "$file".err "$file".out papermill-out/failed
             echo "Notebook failed: $file"
           done
 
