@@ -48,17 +48,20 @@ jobs:
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
         run: |
+          ls -lR papermill-out/
+
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" papermill-out/failed
-            echo "Notebook failed: $file"
+            echo "😱 Notebook failed: $file"
           done
 
           # Set the exit code based on whether we detected any failures
           if [ "$(ls -A papermill-out/failed)" ]; then
             mv papermill-out/papermill.err failed
             mv papermill-out/papermill.out failed
-            echo "Failing notebooks found"
+            echo ""
+            echo "🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨"
             exit 1
           else
             echo "No failures found"
