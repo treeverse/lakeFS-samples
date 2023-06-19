@@ -43,7 +43,7 @@ jobs:
               papermill "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
                         2> papermill-out/papermill.err \
-                        1> papermill-out/papermill.out
+                        1> papermill-out/papermill.out || true
 
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
