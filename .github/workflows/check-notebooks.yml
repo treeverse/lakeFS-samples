@@ -37,6 +37,7 @@ jobs:
         working-directory: 00_notebooks
         run: |
           mkdir -p papermill-out
+
           find . -name "*.ipynb" | \
             grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
@@ -49,8 +50,6 @@ jobs:
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
         run: |
-          ls -l papermill-out
-          
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" papermill-out/failed
@@ -59,8 +58,6 @@ jobs:
 
           # Set the exit code based on whether we detected any failures
           if [ "$(ls -A papermill-out/failed)" ]; then
-            mv papermill-out/papermill.err papermill-out/failed
-            mv papermill-out/papermill.out papermill-out/failed
             echo ""
             echo "🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨"
             exit 1
@@ -68,10 +65,19 @@ jobs:
             echo "✅ No failures found"
           fi
 
-      - name: Store any failing test artifacts
+      - name: Store any failing notebooks
         uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
           name: Failed notebooks
           path: |
             00_notebooks/papermill-out/failed
+
+      - name: Store Papermill output
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: Papermill output
+          path: |
+            00_notebooks/papermill-out/papermill.out
+            00_notebooks/papermill-out/papermill.err
