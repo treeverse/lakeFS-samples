@@ -48,6 +48,9 @@ jobs:
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
         run: |
+          pwd
+          ls -l papermill-out
+
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" "$file".err "$file".out papermill-out/failed
