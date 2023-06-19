@@ -23,8 +23,7 @@
 # These are notebooks with functions to support
 # other notebooks and aren't intended for running
 # in isolation
-./demos-and-talks/ml_reproducibility/file_utils.ipynb
-./demos-and-talks/ml_reproducibility/ml_utils.ipynb
+./utils_ml_reproducibility/ml_utils.ipynb
 ./reprocess-data/etl.ipynb
 ./reprocess-data/reprocessing.ipynb
 
