@@ -42,7 +42,8 @@ jobs:
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
               papermill "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
-                        2>"/home/jovyan/notebooks/papermill-out/{}.stderr"
+                        2> papermill-out/papermill.err \
+                        1> papermill-out/papermill.out
 
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
@@ -56,7 +57,9 @@ jobs:
 
           # Set the exit code based on whether we detected any failures
           if [ "$(ls -A papermill-out/failed)" ]; then
-            echo "Failing notebooks found"
+          mv papermill-out/papermill.err failed
+          mv papermill-out/papermill.out failed
+          echo "Failing notebooks found"
             exit 1
           else
             echo "No failures found"
