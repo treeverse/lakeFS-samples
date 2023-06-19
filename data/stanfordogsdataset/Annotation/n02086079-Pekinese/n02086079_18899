@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02086079</folder>
+	<filename>n02086079_18899</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>333</width>
+		<height>500</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>Pekinese</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>115</xmin>
+			<ymin>92</ymin>
+			<xmax>255</xmax>
+			<ymax>432</ymax>
+		</bndbox>
+	</object>
+</annotation>

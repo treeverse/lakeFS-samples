@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02095889</folder>
+	<filename>n02095889_1736</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>200</width>
+		<height>133</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>Sealyham_terrier</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>49</xmin>
+			<ymin>8</ymin>
+			<xmax>169</xmax>
+			<ymax>122</ymax>
+		</bndbox>
+	</object>
+</annotation>
