@@ -42,26 +42,23 @@ jobs:
             xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
               papermill "/home/jovyan/notebooks/{}" \
                         "/home/jovyan/notebooks/papermill-out/{}" \
-                        2> papermill-out/{}.err \
-                        1> papermill-out/{}.out || true
+                        2> papermill-out/papermill.err \
+                        1> papermill-out/papermill.out || true
 
       - name: Check for any failed notebooks
         working-directory: 00_notebooks
         run: |
-          pwd
-          ls -l papermill-out
-
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
-            mv "$file" "$file".err "$file".out papermill-out/failed
+            mv "$file" papermill-out/failed
             echo "Notebook failed: $file"
           done
 
           # Set the exit code based on whether we detected any failures
           if [ "$(ls -A papermill-out/failed)" ]; then
-          mv papermill-out/papermill.err failed
-          mv papermill-out/papermill.out failed
-          echo "Failing notebooks found"
+            mv papermill-out/papermill.err failed
+            mv papermill-out/papermill.out failed
+            echo "Failing notebooks found"
             exit 1
           else
             echo "No failures found"
