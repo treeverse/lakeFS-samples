@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02095314</folder>
+	<filename>n02095314_261</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>400</width>
+		<height>416</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>wire-haired_fox_terrier</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>56</xmin>
+			<ymin>147</ymin>
+			<xmax>325</xmax>
+			<ymax>383</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,25 @@
+<annotation>
+	<folder>02085782</folder>
+	<filename>n02085782_516</filename>
+	<source>
+		<database>ImageNet database</database>
+	</source>
+	<size>
+		<width>230</width>
+		<height>216</height>
+		<depth>3</depth>
+	</size>
+	<segment>0</segment>
+	<object>
+		<name>Japanese_spaniel</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>19</xmin>
+			<ymin>8</ymin>
+			<xmax>212</xmax>
+			<ymax>215</ymax>
+		</bndbox>
+	</object>
+</annotation>
