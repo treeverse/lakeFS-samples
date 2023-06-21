@@ -40,6 +40,7 @@ docker compose down
 If you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
 
 ```bash
+# make sure we have got the lakeFS hooks content too
 git submodule init
 git submodule update
 
