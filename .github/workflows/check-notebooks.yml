@@ -33,9 +33,50 @@ jobs:
             sleep 1
           done
 
-      - name: Run all selected notebooks
+      - name: Run all notebooks other than those excluded
+        working-directory: 00_notebooks
         run: |
-          cd 00_notebooks && \
+          mkdir -p papermill-out
+
           find . -name "*.ipynb" | \
-          grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
-          xargs -I {} docker exec $(docker ps -q --filter expose=8888) papermill "/home/jovyan/{}"
+            grep -vFf <(grep -v -e '^#' -e '^$' ../.github/workflows/notebooks_to_exclude.txt) | \
+            xargs -I {} docker exec $(docker ps -q --filter expose=8888) \
+              papermill --cwd /home/jovyan/notebooks/ \
+                        "/home/jovyan/notebooks/{}" \
+                        "/home/jovyan/notebooks/papermill-out/{}" \
+                        2> papermill-out/papermill.err \
+                        1> papermill-out/papermill.out || true
+                
+      - name: Check for any failed notebooks
+        working-directory: 00_notebooks
+        run: |
+          mkdir -p papermill-out/failed
+          for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
+            mv "$file" papermill-out/failed
+            echo "😱 Notebook failed: $file"
+          done
+
+          # Set the exit code based on whether we detected any failures
+          if [ "$(ls -A papermill-out/failed)" ]; then
+            echo ""
+            echo "🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨"
+            exit 1
+          else
+            echo "✅ No failures found"
+          fi
+
+      - name: Store any failing notebooks
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: Failed notebooks
+          path: |
+            00_notebooks/papermill-out/failed
+
+      - name: Store Papermill output
+        uses: actions/upload-artifact@v3
+        with:
+          name: Papermill output
+          path: |
+            00_notebooks/papermill-out/papermill.out
+            00_notebooks/papermill-out/papermill.err
