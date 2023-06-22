@@ -53,16 +53,17 @@ jobs:
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" papermill-out/failed
-            echo "😱 Notebook failed: $file"
+            echo "* 😱 $file" >> $GITHUB_STEP_SUMMARY
           done
 
           # Set the exit code based on whether we detected any failures
           if [ "$(ls -A papermill-out/failed)" ]; then
-            echo ""
-            echo "🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## 🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
-            echo "✅ No failures found"
+            echo "## ✅ No notebook failures found" >> $GITHUB_STEP_SUMMARY
+            echo "_Notebooks and paths listed in `.github/workflows/notebooks_to_exclude.txt` are excluded from automated testing._" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Store any failing notebooks
