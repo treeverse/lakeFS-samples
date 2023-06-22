@@ -53,7 +53,7 @@ jobs:
           mkdir -p papermill-out/failed
           for file in $(grep -r -l "papermill-error-cell-tag" papermill-out); do
             mv "$file" papermill-out/failed
-            echo "* 😱 ${file/papermill-out/}" >> $GITHUB_STEP_SUMMARY
+            echo "* 😱 ${file/papermill-out\//}" >> $GITHUB_STEP_SUMMARY
           done
 
           # Set the exit code based on whether we detected any failures
