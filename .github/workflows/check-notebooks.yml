@@ -61,7 +61,8 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "## 🚨👆🏻👆🏻 Failing notebooks found 👆🏻👆🏻🚨" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "_ℹ️ Download the `Failed notebooks` artifact to inspect the executed notebook and resulting errors._" >> $GITHUB_STEP_SUMMARY
+            echo "_ℹ️ Download the **Failed notebooks** artifact to inspect the executed notebook and resulting errors._" >> $GITHUB_STEP_SUMMARY
+            cat $GITHUB_STEP_SUMMARY
             exit 1
           else
             echo "## ✅ No notebook failures found" >> $GITHUB_STEP_SUMMARY
