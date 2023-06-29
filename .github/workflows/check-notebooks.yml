@@ -2,7 +2,7 @@ name: "Check notebooks"
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     paths-ignore:
       - '01_standalone_examples/**'
   pull_request:
