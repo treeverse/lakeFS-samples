@@ -5,7 +5,7 @@
 
 # These notebooks include a deliberate failure as part of 
 # showing how hooks can enforce conditions in the repository
-./hooks-demo.ipynb
+./hooks-webhooks-demo.ipynb
 ./hooks-schema-and-pii-validation.ipynb
 ./hooks-schema-validation.ipynb
 
