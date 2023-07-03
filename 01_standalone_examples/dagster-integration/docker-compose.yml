@@ -17,11 +17,11 @@ services:
 
   jupyter-notebook:
     build: .
-    container_name: jupyter-notebook
+    container_name: dagster-integration-jupyter-notebook
     environment:
       - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
     ports:
-      - 8888:8888 # Jupyter
-      - 3000:3000 # Dagster
+      - 28888:8888 # Jupyter
+      - 23000:3000 # Dagster
     volumes:
       - $PWD:/home/jovyan
