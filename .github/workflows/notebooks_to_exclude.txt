@@ -20,10 +20,6 @@
 ./write-audit-publish/wap-lakefs.ipynb
 ./write-audit-publish/wap-nessie.ipynb
 
-# This notebook excluded due to
-# https://github.com/treeverse/lakefs-iceberg/issues/25
-./iceberg-lakefs-nyc.ipynb
-
 # These are notebooks with functions to support
 # other notebooks and aren't intended for running
 # in isolation
