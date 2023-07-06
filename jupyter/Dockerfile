@@ -7,7 +7,7 @@
 #
 # For example https://hub.docker.com/layers/jupyter/pyspark-notebook/notebook-6.5.3/images/sha256-661613756e04df5ec9f00e49fe202b25a0f992c05f575d9608820528fa1db369?context=explore 
 # has `spark_version=3.3.2`
-FROM jupyter/pyspark-notebook:notebook-6.5.3
+FROM jupyter/all-spark-notebook:notebook-6.5.3
 
 ENV HADOOP_AWS_VERSION=3.3.1
 ENV AWS_SDK_VERSION=1.11.901
