@@ -16,12 +16,10 @@ USER root
 
 RUN wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar -O ${SPARK_HOME}/jars/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar
 RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar -O ${SPARK_HOME}/jars/hadoop-aws-${HADOOP_AWS_VERSION}.jar
-RUN wget https://repo1.maven.org/maven2/io/lakefs/hadoop-lakefs-assembly/0.1.12/hadoop-lakefs-assembly-0.1.12.jar -O ${SPARK_HOME}/jars/hadoop-lakefs-assembly-0.1.12.jar
-RUN wget https://repo1.maven.org/maven2/io/lakefs/lakefs-spark-client-312-hadoop3_2.12/0.5.1/lakefs-spark-client-312-hadoop3_2.12-0.5.1.jar -O ${SPARK_HOME}/jars/lakefs-spark-client-312-hadoop3_2.12-0.5.1.jar
 
-RUN pip install lakefs-client==0.96.1
+RUN pip install lakefs-client==0.104.0
 RUN pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
-RUN pip install airflow-provider-lakefs==0.44.0
+RUN pip install airflow-provider-lakefs==0.46.1
 RUN pip install apache-airflow-providers-apache-spark==4.0.0
 
 USER $NB_UID
