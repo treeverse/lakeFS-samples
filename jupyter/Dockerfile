@@ -27,6 +27,7 @@ RUN rm requirements.txt
 # Install R libraries for interacting with lakeFS from R
 RUN conda install --quiet --yes \
     'r-aws.s3' \
+    'r-arrow' \
     'r-httr' && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}"
