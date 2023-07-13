@@ -1,5 +1,5 @@
 version: "3.5"
-name: lakefs-with-jupyter
+name: lakefs-samples
 services:
   lakefs:
     image: treeverse/lakefs:0.104.0
