@@ -27,6 +27,10 @@
 ./reprocess-data/etl.ipynb
 ./reprocess-data/reprocessing.ipynb
 
+# Some notebooks are deliberate scraps of code 
+# and not designed to run end-to-end
+./R-client.ipynb
+
 # Ignore any temporary notebook caches etc
 .ipynb_checkpoints
 papermill-out
