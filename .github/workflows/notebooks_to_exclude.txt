@@ -20,16 +20,16 @@
 ./write-audit-publish/wap-lakefs.ipynb
 ./write-audit-publish/wap-nessie.ipynb
 
-# This notebook excluded due to
-# https://github.com/treeverse/lakefs-iceberg/issues/25
-./iceberg-lakefs-nyc.ipynb
-
 # These are notebooks with functions to support
 # other notebooks and aren't intended for running
 # in isolation
 ./utils_ml_reproducibility/ml_utils.ipynb
 ./reprocess-data/etl.ipynb
 ./reprocess-data/reprocessing.ipynb
+
+# Some notebooks are deliberate scraps of code 
+# and not designed to run end-to-end
+./R-client.ipynb
 
 # Ignore any temporary notebook caches etc
 .ipynb_checkpoints
