@@ -57,7 +57,7 @@ x-airflow-common:
     AIRFLOW_CONN_LAKEFS: '{
         "conn_type": "lakefs",
         "host": "http://lakefs:8000/",
-        "login": "AKIAIOSFODNN7EXAMPLE",
+        "login": "AKIAIOSFOLKFSSAMPLES",
         "password": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
       }'
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -333,7 +333,7 @@ services:
     image: treeverse/lakefs:latest
     entrypoint: ["/bin/sh", "-c"]
     environment:
-      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
       - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       - LAKECTL_SERVER_ENDPOINT_URL=http://lakefs:8000
     command:

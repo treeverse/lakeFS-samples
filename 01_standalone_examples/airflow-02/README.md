@@ -29,7 +29,7 @@ This sample will give you an idea of how you can use the [lakeFS Airflow provide
 
 1. Observe the results in lakeFS. Login to the lakeFS UI in [http://localhost:8080/](http://localhost:8080/)
 
-      * User: `AKIAIOSFODNN7EXAMPLE`
+      * User: `AKIAIOSFOLKFSSAMPLES`
       * Password: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
 
 1. In the `airflow-example` repository's [`main` branch](http://localhost:8000/repositories/airflow-example/objects) you'll see the raw data alongside the transformed results
