@@ -647,7 +647,7 @@ import lakefs_client
 from lakefs_client.client import LakeFSClient
 
 lakefs = LakeFSClient(lakefs_client.Configuration(
-    username='AKIAIOSFODNN7EXAMPLE', 
+    username='AKIAIOSFOLKFSSAMPLES', 
     password='...', 
     host='http://lakefs.example.com'))
     

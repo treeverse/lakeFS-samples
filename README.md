@@ -69,7 +69,7 @@ As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog 
 
 If you've brought up the full stack you'll also have: 
 
-* LakeFS http://localhost:8000/ (`AKIAIOSFODNN7EXAMPLE` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
+* LakeFS http://localhost:8000/ (`AKIAIOSFOLKFSSAMPLES` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
 * MinIO http://localhost:9001/ (`minioadmin`/`minioadmin`)
 * Spark UI http://localhost:4040/
 
