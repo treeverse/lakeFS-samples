@@ -94,7 +94,7 @@ def lakefs_new_dag():
     - id: conn_lakefs
     - type: http
     - host: http://localhost:8000
-    - extra: {"access_key_id":"AKIAIOSFODNN7EXAMPLE","secret_access_key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"}
+    - extra: {"access_key_id":"AKIAIOSFOLKFSSAMPLES","secret_access_key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"}
     """
 
     # Create the branch to run on
