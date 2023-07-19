@@ -1,6 +1,19 @@
 version: "3.5"
 name: lakefs-samples
 services:
+  jupyter-notebook:
+    build: jupyter
+    environment:
+      # log-level is set to WARN because of noisy stdout problem
+      # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
+    ports:
+      - 8888:8888 # Jupyter
+      - 4040:4040 # Spark
+    volumes:
+      - ./00_notebooks:/home/jovyan/notebooks
+      - ./data:/data
+
   lakefs:
     image: treeverse/lakefs:0.104.0
     depends_on:
@@ -73,19 +86,6 @@ services:
       - "9000:9000"
       - "9001:9001"
     entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
-
-  jupyter-notebook:
-  # Log level is set to WARN because of noisy stdout problem
-  # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
-    build: jupyter
-    environment:
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
-    ports:
-      - 8888:8888 # Jupyter
-      - 4040:4040 # Spark
-    volumes:
-      - ./00_notebooks:/home/jovyan/notebooks
-      - ./data:/data
 
   lakefs-webhooks:
     build: lakeFS-hooks
