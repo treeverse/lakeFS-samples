@@ -26,7 +26,7 @@ You now have two options:
 If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
 ```bash
-docker compose up jupyter-notebook
+docker compose up
 ```
 
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
@@ -46,7 +46,7 @@ If you want to provision a lakeFS server as well as MinIO for your object store,
 git submodule init
 git submodule update
 
-docker compose up
+docker compose --profile local-lakefs up
 ```
 
 As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 

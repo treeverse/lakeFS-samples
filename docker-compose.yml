@@ -65,6 +65,8 @@ services:
           echo "-------- Let's go and have axolotl fun! --------"
           echo ""
           wait
+    profiles:
+      - local-lakefs
 
   minio-setup:
     image: minio/mc:RELEASE.2023-05-18T16-59-00Z
@@ -78,7 +80,9 @@ services:
     command:
         - |
           mc mb lakefs/quickstart lakefs/example lakefs/sample-data
-          mc cp --recursive /data/* lakefs/sample-data
+          mc cp --recursive /data/* lakefs/sample-data 1>/dev/null # don't be so noisy 🤫
+    profiles:
+      - local-lakefs
 
   minio:
     image: minio/minio:RELEASE.2023-05-18T00-05-36Z
@@ -86,6 +90,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
+    profiles:
+      - local-lakefs
 
   lakefs-webhooks:
     build: lakeFS-hooks
@@ -96,6 +102,8 @@ services:
       - LAKEFS_SERVER_ADDRESS=http://lakefs:8000
       - LAKEFS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
       - LAKEFS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    profiles:
+      - local-lakefs
 
 networks:
   default:

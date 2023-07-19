@@ -1,6 +1,17 @@
 version: '3.8'
 name: lakefs-with-dagster
 services:
+  jupyter-notebook:
+    build: .
+    container_name: dagster-integration-jupyter-notebook
+    environment:
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
+    ports:
+      - 28888:8888 # Jupyter
+      - 23000:3000 # Dagster
+    volumes:
+      - $PWD:/home/jovyan
+
   lakefs:
     image: treeverse/lakefs:0.104.0
     depends_on:
@@ -54,6 +65,8 @@ services:
           echo "-------- Let's go and have axolotl fun! --------"
           echo ""
           wait
+    profiles:
+      - local-lakefs
 
   minio-setup:
     image: minio/mc:RELEASE.2023-05-18T16-59-00Z
@@ -67,21 +80,14 @@ services:
     command:
         - |
           mc mb lakefs/quickstart lakefs/example lakefs/sample-data
-          mc cp --recursive /data/* lakefs/sample-data
+          mc cp --recursive /data/* lakefs/sample-data 1>/dev/null # don't be so noisy 🤫
+    profiles:
+      - local-lakefs
 
   minio:
     image: minio/minio:RELEASE.2023-05-18T00-05-36Z
     ports:
       - "29001:9001"
     entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
-
-  jupyter-notebook:
-    build: .
-    container_name: dagster-integration-jupyter-notebook
-    environment:
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
-    ports:
-      - 28888:8888 # Jupyter
-      - 23000:3000 # Dagster
-    volumes:
-      - $PWD:/home/jovyan
+    profiles:
+      - local-lakefs
