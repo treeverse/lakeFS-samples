@@ -45,6 +45,7 @@
 # Feel free to modify this file to suit your needs.
 ---
 version: '3.8'
+name: lakefs-airflow-example-2
 x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
@@ -324,7 +325,7 @@ services:
         
   lakefs:
     extends:
-      file: ../docker-compose.yml
+      file: ../../docker-compose.yml
       service: lakefs
 
   lakefs-setup:
@@ -349,12 +350,12 @@ services:
 
   minio-setup:
     extends:
-      file: ../docker-compose.yml
+      file: ../../docker-compose.yml
       service: minio-setup
 
   minio:
     extends:
-      file: ../docker-compose.yml
+      file: ../../docker-compose.yml
       service: minio
 
 volumes:
