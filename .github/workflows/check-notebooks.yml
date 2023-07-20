@@ -23,8 +23,8 @@ jobs:
 
       - name: Wait until Jupyter container is up
         run: |
-          if ! timeout 1s bash -c '
-              while ! nc -z localhost 8888; do
+          if ! timeout 5s bash -c '
+              while ! nc -z localhost 8889; do
                   sleep 1
               done
           '; then
