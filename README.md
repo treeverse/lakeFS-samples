@@ -42,10 +42,6 @@ docker compose down
 If you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
 
 ```bash
-# make sure we have got the lakeFS hooks content too
-git submodule init
-git submodule update
-
 docker compose up
 ```
 
@@ -57,7 +53,6 @@ As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog 
 * **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
 * **lakeFS** can be provisioned as part of this environment, or provided by [lakeFS cloud](http://https://lakefs.cloud/) or your [own installation](https://docs.lakefs.io/deploy/).
 * If you run lakeFS as part of this environment, **MinIO** is provided as an S3-compatible object store. If you run lakeFS yourself you can use other S3-compatible object stores include S3, GCS, as well as MinIO
-* A sample **lakeFS webhooks server** is provided, configured based on using the provided lakeFS server. 
 
 ### Containers
 
