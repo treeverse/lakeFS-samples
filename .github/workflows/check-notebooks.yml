@@ -35,8 +35,8 @@ jobs:
 
       - name: Wait until lakeFS container is properly up
         run: |
-          if ! timeout 5s bash -c '
-          while ! curl -s http://localhost:8001/_health; do
+          if ! timeout 5m bash -c '
+          while ! curl -s http://localhost:8000/_health; do
               sleep 1
             done
           '; then
