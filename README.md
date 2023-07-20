@@ -42,10 +42,6 @@ docker compose down
 If you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
 
 ```bash
-# make sure we have got the lakeFS hooks content too
-git submodule init
-git submodule update
-
 docker compose --profile local-lakefs up
 ```
 
@@ -57,11 +53,10 @@ As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog 
 * **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
 * **lakeFS** can be provisioned as part of this environment, or provided by [lakeFS cloud](http://https://lakefs.cloud/) or your [own installation](https://docs.lakefs.io/deploy/).
 * If you run lakeFS as part of this environment, **MinIO** is provided as an S3-compatible object store. If you run lakeFS yourself you can use other S3-compatible object stores include S3, GCS, as well as MinIO
-* A sample **lakeFS webhooks server** is provided, configured based on using the provided lakeFS server. 
 
 ### Containers
 
-![](images/containers.png)
+![](images/containers.excalidraw.png)
 
 ### URLs and login details
 
@@ -88,6 +83,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [How to migrate or clone a repo](./01_standalone_examples/migrate-or-clone-repo/)
+
 ## Got Questions or Want to Chat?
 
 👉🏻 Join the lakeFS Slack group - https://lakefs.io/slack
