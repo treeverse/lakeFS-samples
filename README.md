@@ -26,7 +26,7 @@ You now have two options:
 If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
 ```bash
-docker compose up jupyter-notebook
+docker compose up
 ```
 
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8888) and check out the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
@@ -42,7 +42,7 @@ docker compose down
 If you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
 
 ```bash
-docker compose up
+docker compose --profile local-lakefs up
 ```
 
 As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog of sample notebooks](./00_notebooks/00_index.ipynb) to explore lakeFS. 
@@ -56,7 +56,7 @@ As above, open the Jupyter Notebook (http://localhost:8888) peruse the [catalog 
 
 ### Containers
 
-![](images/containers.png)
+![](images/containers.excalidraw.png)
 
 ### URLs and login details
 
@@ -83,6 +83,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [How to migrate or clone a repo](./01_standalone_examples/migrate-or-clone-repo/)
+
 ## Got Questions or Want to Chat?
 
 👉🏻 Join the lakeFS Slack group - https://lakefs.io/slack

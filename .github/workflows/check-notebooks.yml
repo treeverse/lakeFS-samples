@@ -19,19 +19,30 @@ jobs:
           submodules: true
 
       - name: Build container
-        run: docker compose --env-file .github/workflows/check-notebooks.env up --build --pull always -d
+        run: docker compose --profile local-lakefs --env-file .github/workflows/check-notebooks.env up --build --pull always -d
 
       - name: Wait until Jupyter container is up
         run: |
-          while ! nc -z localhost 8888; do
-            sleep 1
-          done
+          if ! timeout 5m bash -c '
+              while ! nc -z localhost 8888; do
+                  sleep 1
+              done
+          '; then
+              echo "❌ Timeout (5 minutes) occurred waiting for Jupyter to be available."
+              exit 1
+          fi
+
 
       - name: Wait until lakeFS container is properly up
         run: |
+          if ! timeout 5m bash -c '
           while ! curl -s http://localhost:8000/_health; do
-            sleep 1
-          done
+              sleep 1
+            done
+          '; then
+              echo "❌ Timeout (5 minutes) occurred waiting for lakeFS to be available."
+              exit 1
+          fi
 
       - name: Run all notebooks other than those excluded
         working-directory: 00_notebooks

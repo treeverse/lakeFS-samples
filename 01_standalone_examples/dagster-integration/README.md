@@ -16,7 +16,13 @@
 
 
    ```bash
-      docker compose up 
+   docker compose up 
+   ```
+
+   Alternatively, if you want to provision a lakeFS server as well as MinIO for your object store, plus Jupyter then bring up the full stack:
+
+   ```bash
+   docker compose --profile local-lakefs up
    ```
 
 3. Open JupyterLab UI [http://127.0.0.1:28888/](http://127.0.0.1:28888/) in your web browser.
