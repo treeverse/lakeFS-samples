@@ -22,10 +22,10 @@ This repository includes a Jupyter Notebook which you can run on your local mach
    ```bash
       docker build -t lakefs-labelbox-integration-demo .
 
-      docker run -d -p 8888:8888 -p 4040:4040 --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan -v $PWD/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py --name lakefs-labelbox-integration-demo lakefs-labelbox-integration-demo
+      docker run -d -p 38888:8888 -p 34040:4040 --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan -v $PWD/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py --name lakefs-labelbox-integration-demo lakefs-labelbox-integration-demo
    ```
 
-3. Open JupyterLab UI [http://127.0.0.1:8888/](http://127.0.0.1:8888/) in your web browser.
+3. Open JupyterLab UI [http://127.0.0.1:38888/](http://127.0.0.1:38888/) in your web browser.
 
 ## Demo Instructions
 

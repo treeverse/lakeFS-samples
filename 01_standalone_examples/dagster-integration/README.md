@@ -19,7 +19,7 @@
       docker compose up 
    ```
 
-3. Open JupyterLab UI [http://127.0.0.1:8888/](http://127.0.0.1:8888/) in your web browser.
+3. Open JupyterLab UI [http://127.0.0.1:28888/](http://127.0.0.1:28888/) in your web browser.
 
 ## Demo Instructions
 
