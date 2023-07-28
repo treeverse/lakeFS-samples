@@ -1,0 +1,108 @@
+version: "3.5"
+name: lakefs-samples-with-postgres
+services:
+  jupyter-notebook:
+    build: ../../jupyter
+    environment:
+      # log-level is set to WARN because of noisy stdout problem
+      # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
+    ports:
+      - 8888:8888 # Jupyter
+      - 4040:4040 # Spark
+    volumes:
+      - ../../00_notebooks:/home/jovyan/notebooks
+      - ../../data:/data
+
+  lakefs:
+    image: treeverse/lakefs:0.104.0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    environment:
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_LOGGING_LEVEL=INFO
+      - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
+      - LAKEFS_DATABASE_TYPE=postgres
+      - LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING=postgres://postgres:postgres@postgres/postgres?sslmode=disable
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+          lakefs run &
+          echo "---- Creating repository ----"
+          wait-for -t 60 lakefs:8000 -- curl -u "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID":"$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
+          # wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://example s3://example || true
+          echo ""
+          wait-for -t 60 minio:9000 && echo '------------------------------------------------
+
+                MinIO admin:   http://127.0.0.1:9001/
+                
+                               Username : minioadmin
+                               Password : minioadmin
+                '
+          echo "------------------------------------------------"
+          wait-for -t 60 jupyter-notebook:8888 && echo '
+
+                Jupyter:       http://127.0.0.1:8888/
+                '
+          echo "------------------------------------------------"
+          echo ""
+          echo "lakeFS Web UI: http://127.0.0.1:8000/      >(.＿.)<"
+          echo "                                             (  )_ "
+          echo ""
+          echo "                Access Key ID    : $$LAKECTL_CREDENTIALS_ACCESS_KEY_ID"
+          echo "                Secret Access Key: $$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY"
+          echo ""
+          echo "-------- Let's go and have axolotl fun! --------"
+          echo ""
+          wait
+
+  minio-setup:
+    image: minio/mc:RELEASE.2023-05-18T16-59-00Z
+    environment:
+        - MC_HOST_lakefs=http://minioadmin:minioadmin@minio:9000
+    depends_on:
+      - minio
+    volumes:
+      - ./data:/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          mc mb lakefs/quickstart lakefs/example lakefs/sample-data
+          exit 0
+
+  minio:
+    image: minio/minio:RELEASE.2023-05-18T00-05-36Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always 
+
+networks:
+  default:
+    name: bagel
