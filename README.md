@@ -81,6 +81,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [Azure Databricks](./01_standalone_examples/azure-databricks/)
 * [AWS Databricks](./01_standalone_examples/aws-databricks/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
+* [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [How to migrate or clone a repo](./01_standalone_examples/migrate-or-clone-repo/)
 * [Running lakeFS with PostgreSQL as K/V store](./01_standalone_examples/docker-compose-with-postgres/)

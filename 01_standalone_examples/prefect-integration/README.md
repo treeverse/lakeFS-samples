@@ -31,7 +31,17 @@ If you want to provision a lakeFS server as well as MinIO for your object store,
    docker compose --profile local-lakefs up
    ```
 
+### URLs and login details
+
+* Jupyter http://localhost:58888/
+* Prefect UI http://localhost:4200/
+
+If you've brought up the full stack you'll also have: 
+
+* LakeFS http://localhost:58000/ (`AKIAIOSFOLKFSSAMPLES` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
+* MinIO http://localhost:59001/ (`minioadmin`/`minioadmin`)
+
 
 ## Demo Instructions
 
-Open JupyterLab UI [http://127.0.0.1:58888/](http://127.0.0.1:58888/) in your web browser. Open either "Prefect Demo Existing DAG" or "Prefect Demo New DAG" notebook from JupyterLab UI and follow the instructions.
+Open Jupyter UI [http://localhost:58888](http://localhost:58888) in your web browser. Open either "Prefect Demo Existing DAG" or "Prefect Demo New DAG" notebook from Jupyter UI and follow the instructions.
