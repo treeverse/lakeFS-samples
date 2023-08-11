@@ -80,6 +80,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [Airflow (2)](./01_standalone_examples/airflow-02/) - lakeFS + Airflow
 * [Azure Databricks](./01_standalone_examples/azure-databricks/)
 * [AWS Databricks](./01_standalone_examples/aws-databricks/)
+* [AWS Glue and Athena](./01_standalone_examples/aws-glue-athena/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
