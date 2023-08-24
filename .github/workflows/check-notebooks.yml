@@ -8,6 +8,7 @@ on:
   pull_request:
     paths-ignore:
       - '01_standalone_examples/**'
+      
 permissions:
   id-token: write
   contents: read
@@ -22,6 +23,9 @@ jobs:
         with:
           submodules: true
 
+      - name: breakpoint
+        uses: self-actuated/connect-ssh@master
+    
       - name: Build container
         run: docker compose --profile local-lakefs --env-file .github/workflows/check-notebooks.env up --build --pull always -d
 
@@ -48,9 +52,6 @@ jobs:
               exit 1
           fi
 
-      - name: breakpoint
-        uses: self-actuated/connect-ssh@master
-    
       - name: Run all notebooks other than those excluded
         working-directory: 00_notebooks
         run: |
