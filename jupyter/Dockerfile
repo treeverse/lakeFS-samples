@@ -28,7 +28,7 @@ RUN rm requirements.txt
 RUN conda install --quiet --yes \
     'r-aws.s3' \
     'r-arrow' \
-    'r-httr' && \
+    'r-httr=1.4.6' && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}"
 
