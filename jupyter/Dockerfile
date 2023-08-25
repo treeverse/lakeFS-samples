@@ -24,14 +24,6 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 RUN rm requirements.txt
 
-# Install R libraries for interacting with lakeFS from R
-RUN conda install --quiet --yes \
-    'r-aws.s3' \
-    'r-arrow' \
-    'r-httr=1.4.6' && \
-    conda clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}"
-
 # Set up iPython pretty tables and Spark SQL magic
 RUN mkdir -p /home/jovyan/.ipython/profile_default/startup
 COPY ipython/startup/00-prettytables.py /home/jovyan/.ipython/profile_default/startup
