@@ -1,6 +1,6 @@
 # lakefs-samples
 
-[![Check notebooks](https://github.com/treeverse/lakeFS-samples/actions/workflows/check-notebooks.yml/badge.svg?branch=main)](https://github.com/treeverse/lakeFS-samples/actions/workflows/check-notebooks.yml)
+[![Check notebooks](https://github.com/treeverse/lakeFS-samples/actions/workflows/check-notebooks.yml/badge.svg?branch=main)](https://github.com/treeverse/lakeFS-samples/actions/workflows/check-notebooks.yml?query=branch:main)
 
 _Incorporating the Docker Compose formally known as **Everything Bagel**._
 
