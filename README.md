@@ -83,6 +83,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [AWS Glue and Athena](./01_standalone_examples/aws-glue-athena/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
+* [Image Segmentation Demo: ML Data Version Control and Reproducibility at Scale](./01_standalone_examples/image-segmentation/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [How to migrate or clone a repo](./01_standalone_examples/migrate-or-clone-repo/)
 * [Running lakeFS with PostgreSQL as K/V store](./01_standalone_examples/docker-compose-with-postgres/)
