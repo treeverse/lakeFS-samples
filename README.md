@@ -81,6 +81,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [Azure Databricks](./01_standalone_examples/azure-databricks/)
 * [AWS Databricks](./01_standalone_examples/aws-databricks/)
 * [AWS Glue and Athena](./01_standalone_examples/aws-glue-athena/)
+* [AWS Glue and Trino](./01_standalone_examples/aws-glue-trino/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
 * [Image Segmentation Demo: ML Data Version Control and Reproducibility at Scale](./01_standalone_examples/image-segmentation/)
