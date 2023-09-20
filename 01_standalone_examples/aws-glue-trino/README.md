@@ -39,7 +39,7 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 6. Attach an [AWS EMR cluster to a Workspace](https://docs.aws.amazon.com//emr/latest/ManagementGuide/emr-studio-create-use-clusters.html)
 
-7. Upload `trino-glue-demo-notebook` included in the Git repo in `lakeFS-samples/01_standalone_examples/aws-glue-trino` folder to AWS EMR Studio Workspace. Open this notebook and follow the instructions in the notebook.
+7. Upload `trino-glue-demo-notebook` included in the Git repo in `lakeFS-samples/01_standalone_examples/aws-glue-trino` folder to AWS EMR Studio Workspace. Open this notebook, select PySpark kernel to run the notebook and follow the instructions in the notebook.
 
 8. Run following command to terminate the EMR Cluster once you finish the demo. Change `cluster_id` by the ID returned by `aws emr create-cluster` command or check `cluster_id` in EMR UI.
 
