@@ -1,0 +1,22 @@
+[
+  {
+    "Classification": "trino-connector-hive",
+    "Properties": {
+      "hive.metastore": "glue",
+      "hive.s3.aws-access-key": "lakeFS Access Key",
+      "hive.s3.aws-secret-key": "lakeFS Secret Key",
+      "hive.s3.endpoint": "lakeFS Endpoint URL",
+      "hive.s3.path-style-access": "true",
+      "hive.s3-file-system-type": "TRINO"
+    }
+  },
+  {
+    "Classification": "hive-site",
+    "Properties": {
+      "fs.s3a.access.key": "lakeFS Access Key",
+      "fs.s3a.secret.key": "lakeFS Secret Key",
+      "fs.s3a.endpoint": "lakeFS Endpoint URL",
+      "fs.s3a.path.style.access": "true"
+    }
+  }
+]
