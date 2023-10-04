@@ -15,7 +15,7 @@ services:
       - ./data:/data
 
   lakefs:
-    image: treeverse/lakefs:0.107.0
+    image: treeverse/lakefs:0.111.1
     depends_on:
       - minio-setup
     ports:
@@ -30,6 +30,7 @@ services:
       - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
       - LAKEFS_LOGGING_LEVEL=INFO
       - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
+      - LAKEFS_INSTALLATION_USER_NAME=everything-bagel
       - LAKEFS_INSTALLATION_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
       - LAKEFS_INSTALLATION_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=${LAKEFS_INSTALLATION_ACCESS_KEY_ID:-1}
@@ -38,7 +39,6 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
-          lakefs setup --local-settings --user-name everything-bagel --access-key-id "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID" --secret-access-key "$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" || true
           lakefs run --local-settings &
           echo "---- Creating repository ----"
           wait-for -t 60 lakefs:8000 -- curl -u "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID":"$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
