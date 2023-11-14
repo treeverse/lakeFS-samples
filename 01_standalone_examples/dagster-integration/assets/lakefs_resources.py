@@ -32,6 +32,6 @@ def lakefs_ui_endpoint():
 
 @resource
 def dagster_ui_endpoint():
-    dagsterUIEndPoint = 'http://127.0.0.1:3000'
+    dagsterUIEndPoint = 'http://127.0.0.1:23000'
         
     return dagsterUIEndPoint
