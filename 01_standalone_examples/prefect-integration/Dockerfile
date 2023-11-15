@@ -10,6 +10,7 @@ RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/${HADOOP_AW
 
 RUN pip install lakefs-client==0.104.0
 
+RUN pip install pydantic==1.10.11
 RUN pip install -U prefect
 RUN pip install prefect-lakefs==0.3.0
 #RUN prefect config set PREFECT_API_URL="http://host.docker.internal:4200/api"
