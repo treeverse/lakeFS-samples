@@ -1,0 +1,101 @@
+---
+version: '3.9'
+name: lakefs-with-llm-openai-langchain
+services:
+  jupyter-notebook:
+    build: jupyter
+    container_name: llm-openai-langchain-jupyter-notebook
+    environment:
+      # log-level is set to WARN because of noisy stdout problem
+      # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password=''
+    ports:
+      - 8891:8888 # Jupyter
+    volumes:
+      - $PWD:/home/jovyan
+      - ./data:/data
+
+  lakefs:
+    image: treeverse/lakefs:1.1.0
+    depends_on:
+      - minio-setup
+    ports:
+      - "48000:8000"
+    environment:
+      - LAKEFS_DATABASE_TYPE=local
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_LOGGING_LEVEL=INFO
+      - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
+      - LAKEFS_INSTALLATION_USER_NAME=everything-bagel
+      - LAKEFS_INSTALLATION_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
+      - LAKEFS_INSTALLATION_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          lakefs run --local-settings &
+          echo "---- Creating repository ----"
+          wait-for -t 60 lakefs:8000 -- curl -u "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID":"$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
+          # wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://example s3://example || true
+          echo ""
+          wait-for -t 60 minio:9000 && echo '------------------------------------------------
+
+                MinIO admin:   http://127.0.0.1:49001/
+                
+                       Username : minioadmin
+                       Password : minioadmin
+                '
+          echo "------------------------------------------------"
+          wait-for -t 60 jupyter-notebook:8888 && echo '
+
+                Jupyter:       http://127.0.0.1:8891/
+                '
+          echo "------------------------------------------------"
+          echo ""
+          echo "      lakeFS Web UI: http://127.0.0.1:48000/"
+          echo ""
+          echo "                                           >(.＿.)<"
+          echo "                                             (  )_ "
+          echo ""
+          echo "       Access Key ID    : $$LAKEFS_INSTALLATION_ACCESS_KEY_ID"
+          echo "       Secret Access Key: $$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY"
+          echo ""
+          echo "-------- Let's go and have axolotl fun! --------"
+          echo ""
+          wait
+    profiles:
+      - local-lakefs
+
+  minio-setup:
+    image: minio/mc:RELEASE.2023-05-18T16-59-00Z
+    environment:
+        - MC_HOST_lakefs=http://minioadmin:minioadmin@minio:9000
+    depends_on:
+      - minio
+    volumes:
+      - ./data:/data
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          mc mb lakefs/quickstart lakefs/example lakefs/sample-data
+          mc cp --recursive /data/* lakefs/sample-data 1>/dev/null # don't be so noisy 🤫
+    profiles:
+      - local-lakefs
+
+  minio:
+    image: minio/minio:RELEASE.2023-05-18T00-05-36Z
+    ports:
+      - "49001:9001"
+    entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
+    profiles:
+      - local-lakefs
+
+networks:
+  default:
+    name: lakefs-llm-openai-langchain-network
+
