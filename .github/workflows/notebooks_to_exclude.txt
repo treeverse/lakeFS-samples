@@ -30,6 +30,7 @@
 # Some notebooks are deliberate scraps of code 
 # and not designed to run end-to-end
 ./R-client.ipynb
+./R-weather.ipynb
 
 # Ignore any temporary notebook caches etc
 .ipynb_checkpoints
