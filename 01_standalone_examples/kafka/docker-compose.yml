@@ -69,7 +69,7 @@ services:
       - ./data:/data
 
   lakefs:
-    image: treeverse/lakefs:0.111.1
+    image: treeverse/lakefs:1.1.0
     depends_on:
       - minio-setup
     ports:
