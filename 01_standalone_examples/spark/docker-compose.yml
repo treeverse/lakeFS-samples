@@ -12,7 +12,7 @@ services:
       - 4040:4040 # Spark
     volumes:
       - $PWD:/home/jovyan
-      - ./data:/data
+      - ../../data:/data
 
   lakefs:
     image: treeverse/lakefs:1.1.0
@@ -75,7 +75,7 @@ services:
     depends_on:
       - minio
     volumes:
-      - ./data:/data
+      - ../../data:/data
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
