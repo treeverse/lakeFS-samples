@@ -36,7 +36,7 @@ services:
         fs.s3a.secret.key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY     
 
   lakefs:
-    image: treeverse/lakefs:1.1.0
+    image: treeverse/lakefs:1
     depends_on:
       - minio-setup
     ports:
