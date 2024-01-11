@@ -1,26 +1,25 @@
 from dagster import resource
 
-import lakefs_client
-from lakefs_client.client import LakeFSClient
+import lakefs
+from lakefs.client import Client
 import os
 
 @resource
 def lakefs_client_resource():
-    lakefsEndPoint = os.getenv("LAKEFS_ENDPOINT")
-    lakefsAccessKey = os.getenv("LAKEFS_CREDENTIALS_ACCESS_KEY_ID")
-    lakefsSecretKey = os.getenv("LAKEFS_CREDENTIALS_SECRET_ACCESS_KEY")
-    # lakeFS credentials and endpoint
-    configuration = lakefs_client.Configuration()
-    configuration.username = lakefsAccessKey
-    configuration.password = lakefsSecretKey
-    configuration.host = lakefsEndPoint
+    lakefsEndPoint = os.getenv("LAKECTL_SERVER_ENDPOINT_URL")
+    lakefsAccessKey = os.getenv("LAKECTL_CREDENTIALS_ACCESS_KEY_ID")
+    lakefsSecretKey = os.getenv("LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY")
 
-    client = LakeFSClient(configuration)
+    client = Client(
+        host=lakefsEndPoint,
+        username=lakefsAccessKey,
+        password=lakefsSecretKey,
+    )
     return client    
 
 @resource
 def lakefs_ui_endpoint():
-    lakefsEndPoint = os.getenv("LAKEFS_ENDPOINT")
+    lakefsEndPoint = os.getenv("LAKECTL_SERVER_ENDPOINT_URL")
     if lakefsEndPoint.startswith('http://host.docker.internal'):
         lakefsUIEndPoint = 'http://127.0.0.1:8000'
     elif lakefsEndPoint.startswith('http://lakefs'):

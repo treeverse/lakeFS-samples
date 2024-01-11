@@ -13,7 +13,7 @@ services:
       - $PWD:/home/jovyan
 
   lakefs:
-    image: treeverse/lakefs:0.106.0
+    image: treeverse/lakefs:1.7.0
     depends_on:
       - minio-setup
     ports:
