@@ -3,7 +3,7 @@
 import json
 from dagster import job, op, in_process_executor, mem_io_manager, resource
 import io
-from assets.lakefs_resources import lakefs_client_resource
+import lakefs
 # [END import_module]
 
 @resource(config_schema={"repo": str, "sourceBranch": str, "newBranch": str})
@@ -42,7 +42,7 @@ def transform(order_data_dict: dict):
 # [END transform]
 
 # [START load]
-@op(required_resource_keys={"variables","client"})
+@op(required_resource_keys={"variables"})
 def load(context, total_order_value: float):
     """
     #### Load task
@@ -53,15 +53,14 @@ def load(context, total_order_value: float):
     print(f"Total order value is: {total_order_value:.2f}")
 
     # [START of lakeFS Code]
-    contentToUpload = io.BytesIO(f"Total order value is: {total_order_value:.2f}".encode('utf-8'))
-    context.resources.client.objects.upload_object(
-        repository=context.resources.variables["repo"],
-        branch=context.resources.variables["newBranch"],
-        path="total_order_value.txt", content=contentToUpload)
+    branch = lakefs.repository(context.resources.variables["repo"]).branch(context.resources.variables["newBranch"])
+    w = branch.object("total_order_value.txt").writer(metadata={'using': 'python_wrapper', 'source':'Marketing system'})
+    w.write(f"Total order value is: {total_order_value:.2f}")
+    w.close()
     # [END of lakeFS Code]
 # [END load]
 
-@job(resource_defs={"io_manager": mem_io_manager, "variables": my_variables, "client": lakefs_client_resource}, executor_def=in_process_executor)
+@job(resource_defs={"io_manager": mem_io_manager, "variables": my_variables}, executor_def=in_process_executor)
 def lakefs_tutorial_taskflow_api_etl():
     # [START main_flow]
     order_data = extract()
