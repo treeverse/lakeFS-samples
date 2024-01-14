@@ -70,6 +70,7 @@ services:
 
   lakefs:
     image: treeverse/lakefs:1
+    pull_policy: always
     depends_on:
       - minio-setup
     ports:

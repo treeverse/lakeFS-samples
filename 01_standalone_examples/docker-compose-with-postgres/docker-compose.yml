@@ -16,6 +16,7 @@ services:
 
   lakefs:
     image: treeverse/lakefs:1
+    pull_policy: always
     ports:
       - "8000:8000"
     depends_on:
