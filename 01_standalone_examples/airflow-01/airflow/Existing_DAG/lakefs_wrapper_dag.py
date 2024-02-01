@@ -4,6 +4,7 @@ from airflow.utils.dates import days_ago
 from lakefs_provider.operators.create_branch_operator import LakeFSCreateBranchOperator
 from lakefs_provider.operators.commit_operator import LakeFSCommitOperator
 from lakefs_provider.operators.merge_operator import LakeFSMergeOperator
+import lakefs
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.models.dagrun import DagRun
@@ -28,6 +29,14 @@ def print_commit_result(context, result, message):
         + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
 
+def delete_demo_objects(task_instance):
+    branch = lakefs.repository(Variable.get("repo")).branch(Variable.get("sourceBranch"))
+    branch.object("total_order_value.txt").delete()
+    
+    for diff in branch.uncommitted():
+        ref = branch.commit(
+                message='Deleted existing demo objects using Airflow!',
+                metadata={"committed_from": "airflow-operator"})
     
 @dag(default_args=default_args,
      render_template_as_native_obj=True,
@@ -36,6 +45,10 @@ def print_commit_result(context, result, message):
      schedule_interval=None,
      tags=['testing'])
 def lakefs_wrapper_dag():
+    task_delete_demo_objects = PythonOperator(
+        task_id='delete_demo_objects',
+        python_callable=delete_demo_objects)
+    
     # Create the branch to run on
     task_create_etl_branch = LakeFSCreateBranchOperator(
         task_id='create_etl_branch',
@@ -82,6 +95,6 @@ def lakefs_wrapper_dag():
 
     task_merge_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
 
-    task_create_etl_branch >> task_trigger >> task_commit_etl_branch >> task_merge_etl_branch
+    task_delete_demo_objects >> task_create_etl_branch >> task_trigger >> task_commit_etl_branch >> task_merge_etl_branch
     
 sample_workflow_dag = lakefs_wrapper_dag()

@@ -21,7 +21,7 @@ def print_diff_refs(diff_refs):
         results,
         headers=['Path','Path Type','Size(Bytes)','Type']))
 
-def upload_object(client, repo_name, branch_name, local_path, filename, lakefs_path):
+def upload_object(branch, local_path, filename, lakefs_path):
     if local_path == '':
         filename_with_path = os.path.expanduser('~')+'/'+filename
     else:
@@ -32,8 +32,5 @@ def upload_object(client, repo_name, branch_name, local_path, filename, lakefs_p
     else:
         lakefs_filename_with_path = lakefs_path + '/' + filename
         
-    contentToUpload = open(filename_with_path, 'rb') # Only a single file per upload which must be named \\\"content\\\"
-    print(client.objects.upload_object(
-        repository=repo_name,
-        branch=branch_name,
-        path=lakefs_filename_with_path, content=contentToUpload))
+    contentToUpload = open(filename_with_path, 'r').read() # Only a single file per upload which must be named \\\"content\\\"
+    print(branch.object(lakefs_filename_with_path).upload(data=contentToUpload, mode='wb', pre_sign=False))
