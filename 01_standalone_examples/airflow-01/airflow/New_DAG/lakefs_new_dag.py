@@ -39,7 +39,7 @@ default_args = {
 
 filePath = Variable.get("filePath")
 fileName = Variable.get("fileName")
-CONTENT = open(filePath+'/'+fileName, 'r').read()
+CONTENT = open(filePath+'/'+fileName, 'rb').read()
 
 IdAndMessage = namedtuple('IdAndMessage', ['id', 'message'])
 
@@ -71,12 +71,6 @@ def print_commit_result(context, result, message):
     LoggingMixin().log.info(message + result \
         + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
-
-class NamedStringIO(StringIO):
-    def __init__(self, content: str, name: str) -> None:
-        super().__init__(content)
-        self.name = name
-
 
 @dag(default_args=default_args,
      render_template_as_native_obj=True,
@@ -142,7 +136,7 @@ def lakefs_new_dag():
     task_load_file = LakeFSUploadOperator(
         task_id='load_file',
         branch=default_args.get('branch') + '_etl_load',
-        content=NamedStringIO(content=CONTENT, name='content'))
+        content=CONTENT)
 
     task_load_file.post_execute = lambda context, result: LoggingMixin().log.info(
         'lakeFS URL for the data file is: ' + Variable.get("lakefsUIEndPoint") \
@@ -250,7 +244,7 @@ def lakefs_new_dag():
         python_callable=check_equality,
         op_kwargs={
             'actual': '''{{ task_instance.xcom_pull(task_ids='get_file', key='return_value') }}''',
-            'expected': CONTENT,
+            'expected': str(CONTENT, 'utf-8'),
         })        
 
     # Merge the changes back to the main branch.

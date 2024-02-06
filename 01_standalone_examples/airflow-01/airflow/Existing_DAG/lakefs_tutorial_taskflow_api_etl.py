@@ -31,14 +31,7 @@ from airflow.decorators import dag, task
 from airflow.models import Variable
 import io
 from airflow.operators.python import get_current_context
-import lakefs_client
-from lakefs_client.client import LakeFSClient
-# lakeFS credentials and endpoint
-configuration = lakefs_client.Configuration()
-configuration.username = Variable.get("lakefsAccessKey")
-configuration.password = Variable.get("lakefsSecretKey")
-configuration.host = Variable.get("lakefsEndPoint")
-client = LakeFSClient(configuration)
+import lakefs
 # [END of lakeFS Code]
 
 # [START instantiate_dag]
@@ -104,14 +97,11 @@ def lakefs_tutorial_taskflow_api_etl():
         print(f"Total order value is: {total_order_value:.2f}")
 
         # [START of lakeFS Code]
-        repo = Variable.get("repo")
         context = get_current_context()
-        newBranch = context["dag_run"].conf["newBranch"]
-        contentToUpload = io.BytesIO(f"Total order value is: {total_order_value:.2f}".encode('utf-8'))
-        client.objects.upload_object(
-            repository=repo,
-            branch=newBranch,
-            path="total_order_value.txt", content=contentToUpload)
+        branch = lakefs.repository(Variable.get("repo")).branch(context["dag_run"].conf["newBranch"])
+        w = branch.object("total_order_value.txt").writer(pre_sign=False, metadata={'using': 'python_wrapper', 'source':'eCommerce system'})
+        w.write(f"Total order value is: {total_order_value:.2f}")
+        w.close()
         # [END of lakeFS Code]
 
     # [END load]
