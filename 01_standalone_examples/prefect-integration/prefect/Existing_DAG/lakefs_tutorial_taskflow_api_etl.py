@@ -2,17 +2,10 @@
 # [START import_module]
 import json
 from prefect import flow, task, runtime, variables
-from prefect_lakefs.credentials import LakeFSCredentials
-from prefect_lakefs.tasks import upload_object
-from io import StringIO
+import lakefs
 from lakefs_demo import generate_flow_run_name
 # [END import_module]
 
-class NamedStringIO(StringIO):
-    def __init__(self, content: str, name: str) -> None:
-        super().__init__(content)
-        self.name = name
-        
 # [START extract]
 @task(name='Extract')
 def extract():
@@ -45,7 +38,7 @@ def transform(order_data_dict: dict):
 # [END transform]
 
 # [START load]
-@flow(name='Load', flow_run_name=generate_flow_run_name)
+@task(name='Load')
 def load(total_order_value: float, new_branch: str):
     """
     #### Load task
@@ -56,15 +49,10 @@ def load(total_order_value: float, new_branch: str):
     print(f"Total order value is: {total_order_value:.2f}")
 
     # [START of lakeFS Code]
-    contentToUpload = NamedStringIO(content=f"Total order value is: {total_order_value:.2f}", name='content')
-    object_stat = upload_object(
-        lakefs_credentials=LakeFSCredentials.load(variables.get('lakefs_credential_name')),
-        repository=variables.get('repo'),
-        #branch=runtime.flow_run.parameters['new_branch'],
-        branch=new_branch,
-        path="total_order_value.txt",
-        content=contentToUpload
-    )
+    branch = lakefs.repository(variables.get('repo')).branch(new_branch)
+    w = branch.object("total_order_value.txt").writer(metadata={'using': 'python_wrapper', 'source':'Sales system'})
+    w.write(f"Total order value is: {total_order_value:.2f}")
+    w.close()
     # [END of lakeFS Code]
 # [END load]
 
