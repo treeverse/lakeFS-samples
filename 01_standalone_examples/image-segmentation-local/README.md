@@ -24,7 +24,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 1. Start by cloning this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/image-segmentation
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/image-segmentation-local
    ```
 
 2. Run the following to provision the full stack which includes lakeFS, MinIO, Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client
