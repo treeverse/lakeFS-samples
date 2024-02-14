@@ -21,5 +21,6 @@ RUN pip install lakefs==0.2.1
 RUN pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
 RUN pip install airflow-provider-lakefs==0.48.0
 RUN pip install apache-airflow-providers-apache-spark==4.0.0
+RUN pip install apache-airflow-providers-databricks==5.0.1
 
 USER $NB_UID

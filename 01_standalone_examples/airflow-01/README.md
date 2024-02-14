@@ -20,6 +20,10 @@ This repository includes following Jupyter Notebooks which you can run on your l
 * Integration of lakeFS with Airflow via Hooks
 * Use Case: Versioning DAGs and running pipeline from hooks using a configurable version of DAGs
 
+5. Databricks:
+* Integration of lakeFS with Airflow and Databricks
+* Use Case: Run Databricks notebook via Airflow DAG
+
 ## Prerequisites
 * Docker installed on your local machine
 * lakeFS installed and running on your local machine or on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Playground](https://demo.lakefs.io/) which provides lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
