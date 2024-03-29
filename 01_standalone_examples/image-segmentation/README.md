@@ -45,4 +45,8 @@ If any of the port numbers (8889, 4041 and 5001) are already in use then change 
 ## Demo Instructions
 
 1. Once you have successfully completed setup then open "Image Segmentation" notebook from JupyterLab UI and follow the instructions.
-2. If you want to run same notebook on the Databricks cluster then import "Image Segmentation" and "ImageSegmentationSetup" notebooks to your Databricks environment.
+2. If you want to run same notebook on the Databricks cluster:
+    * Use Databricks Runtime version "14.3 LTS ML". GPUs are not required for this demo.
+    * Install pytorch-lightning==1.5.4, segmentation-models-pytorch==0.3.3 and lakefs==0.4.1 Python libraries on your Databricks Compute cluster. Also, install io.lakefs:hadoop-lakefs-assembly:0.2.3 library from [Maven repository](https://mvnrepository.com/artifact/io.lakefs/hadoop-lakefs-assembly).
+    * Follow [Databricks and lakeFS Integration: Step-by-Step Configuration Tutorial](https://lakefs.io/blog/databricks-lakefs-integration-tutorial/) to configure your Databricks Compute cluster.
+    * Import "Image Segmentation" and "ImageSegmentationSetup" notebooks to your Databricks environment.

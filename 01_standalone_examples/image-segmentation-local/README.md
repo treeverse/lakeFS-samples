@@ -33,7 +33,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
    docker compose --profile local-lakefs up
    ```
 
-   If any of the port numbers (8893, 4043, 5001, 8003, 9002 and 9003) are already in use then change the port numbers in docker-compose.yml file to any available ports.
+   If any of the port numbers (8893, 4043, 5002, 8003, 9002 and 9003) are already in use then change the port numbers in docker-compose.yml file to any available ports.
 
 3. Open JupyterLab UI [http://127.0.0.1:8893/](http://127.0.0.1:8893/) in your web browser.
 

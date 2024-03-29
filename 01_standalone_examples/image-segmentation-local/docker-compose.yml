@@ -10,7 +10,7 @@ services:
     ports:
       - 8893:8888 # Jupyter
       - 4043:4040 # Spark
-      - 5001:5000 # MLflow
+      - 5002:5000 # MLflow
     volumes:
       - $PWD:/home/jovyan
       - ../../data:/data
