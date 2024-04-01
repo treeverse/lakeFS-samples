@@ -5,7 +5,7 @@ USER root
 # These commands install the cv2 dependencies that are normally present on the local machine
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
-RUN pip install lakefs-sdk==1.1.0.2
+RUN pip install lakefs==0.4.1
 
 # Used openai 0.28.1 (old version) for langchain v0.0.331 compatibility
 RUN pip install langchain==0.0.331 unstructured[pdf]==0.10.29 openai==0.28.1 tiktoken==0.4.0
