@@ -10,7 +10,7 @@ RUN wget https://aka.ms/downloadazcopy-v10-linux -O /usr/local/bin/downloadazcop
     rmdir azcopy_linux_amd64_10.*/ && \
     rm downloadazcopy-v10-linux
     
-RUN pip install lakefs-client==0.100.0
+RUN pip install lakefs==0.6.0
 RUN pip install awscli
 RUN pip install awscliv2
 
