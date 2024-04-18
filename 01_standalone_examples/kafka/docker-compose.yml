@@ -69,7 +69,7 @@ services:
       - ./data:/data
 
   lakefs:
-    image: treeverse/lakefs:1
+    image: treeverse/lakefs:1.3.0
     pull_policy: always
     depends_on:
       - minio-setup
