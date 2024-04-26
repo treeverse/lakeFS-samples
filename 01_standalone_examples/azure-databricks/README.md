@@ -20,7 +20,7 @@ This repository includes following Databricks Notebooks which you can run in you
 * This notebook also runs unstructuredDataMLDemoSetup notebook internally.
 
 ## Prerequisites
-* lakeFS installed and running on your local machine or on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Playground](https://demo.lakefs.io/) which provides lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
+* lakeFS installed and running on your local machine or on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Cloud](https://demo.lakefs.io/) which provides lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
 * Databricks server with the ability to run compute clusters on top of it. 
 * Configure your Databricks cluster to use lakeFS Hadoop file system in Presigned Mode. Read this blog [Databricks and lakeFS Integration: Step-by-Step Configuration Tutorial](https://lakefs.io/blog/databricks-lakefs-integration-tutorial/) or [lakeFS documentation](https://docs.lakefs.io/integrations/spark.html#hadoop-filesystem-in-presigned-mode-beta) for the configuration.
 * Permissions to manage the cluster configuration, including adding libraries. 
@@ -28,7 +28,7 @@ This repository includes following Databricks Notebooks which you can run in you
 
 ## Setup
 
-1. Download these notebooks from GitHub and [import it in your Databricks workspace](https://learn.microsoft.com/en-us/azure/databricks/notebooks/notebook-export-import#--import-a-notebook):
+1. Download these notebooks from GitHub and [import it in your Databricks workspace](https://learn.microsoft.com/en-us/azure/databricks/notebooks/notebook-export-import#--import-a-notebook).
 
 
 ## Demo Instructions
