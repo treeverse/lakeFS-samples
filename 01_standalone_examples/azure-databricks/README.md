@@ -19,6 +19,10 @@ This repository includes following Databricks Notebooks which you can run in you
 * Use Case: Isolated Reproducible Unstructured Datasets for ML
 * This notebook also runs unstructuredDataMLDemoSetup notebook internally.
 
+5. Unity Catalog Integration Demo:
+* Use Case: Isolated Unity Catalog schema for dev/test environment
+* This notebook also runs unityCatalogIntegrationDemoSetup notebook internally.
+
 ## Prerequisites
 * lakeFS installed and running on your local machine or on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Playground](https://demo.lakefs.io/) which provides lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
 * Databricks server with the ability to run compute clusters on top of it. 
