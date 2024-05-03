@@ -17,11 +17,11 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 2. Change `lakeFS Endpoint URL`, `Access Key` and `Secret Key` in `trino_configurations.json` file included in the Git repo in `lakeFS-samples/01_standalone_examples/aws-glue-trino` folder.
 
-3. Run following AWS CLI command to create an EMR cluster. Change AWS `region_name`, `log-uri`, `ec2_subnet_name` before running the command.
+3. Run following AWS CLI command to create an EMR cluster. Change AWS `region_name`, `log-uri`, `ec2_subnet_name` before running the command. lakeFS Python SDK requires Python v3.9 or above. Python v3.9 is supported starting with EMR v7.0.0.
 
    ```bash
    aws emr create-cluster \
-       --release-label emr-6.11.1 \
+       --release-label emr-7.0.0 \
        --applications Name=Trino Name=JupyterEnterpriseGateway Name=Spark \
        --configurations file://trino_configurations.json \
        --region region_name \
