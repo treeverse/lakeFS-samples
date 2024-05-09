@@ -18,61 +18,78 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 
 1. Create Databricks secret scope e.g. **demos** or use an existing secret scope. Add following secrets in that secret scope by following [Secret management docs](https://docs.databricks.com/en/security/secrets/index.html): 
 
-        lakefs_access_key_id e.g. 'AKIAIOSFOLKFSSAMPLES'
+       lakefs_access_key_id e.g. 'AKIAIOSFOLKFSSAMPLES'
 
-        lakefs_secret_access_key e.g. 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+       lakefs_secret_access_key e.g. 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+
+    You can use following Databricks commands to create secrets:
+   ```bash
+   databricks secrets put-secret --json '{
+     "scope": "demos",
+     "key": "lakefs_access_key_id",
+     "string_value": "AKIAIOSFOLKFSSAMPLES"
+   }'
+
+   databricks secrets put-secret --json '{
+     "scope": "demos",
+     "key": "lakefs_secret_access_key",
+     "string_value": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+   }'
+   ```
 
 1. Create a Git repository. It can be named **lakeFS-samples-ci-cd**.
 
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/aws-databricks/ci-cd-demo
+   git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/databricks-ci-cd
    ```
 
 1. Create folders **.github/workflows** and **databricks-notebooks** in your Git repo.
 
-1. Upload **pr_commit_run_databricks_etl_job.yml** file in **lakeFS-samples/01_standalone_examples/aws-databricks/ci-cd-demo/.github/workflows** folder to **.github/workflows** folder in your Git repo.
+1. Upload **pr_commit_run_databricks_etl_job.yml** file in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/.github/workflows** folder to **.github/workflows** folder in your Git repo.
 
-1. Upload all files in **lakeFS-samples/01_standalone_examples/aws-databricks/ci-cd-demo/databricks-notebooks** folder to **databricks-notebooks** folder in your Git repo.
+1. Upload all files in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/databricks-notebooks** folder to **databricks-notebooks** folder in your Git repo.
 
-1. Add following secrets in your Git repo by following [Creating secrets for a repository docs](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository). This is the Databricks token created in 1st step above.
+1. Add following secrets in your Git repo by following [Creating secrets for a repository docs](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository). This is the Databricks token created in 1st step above. If you copy & paste the secret name then verify that there are no spaces before and after the secret name.
 
-        DATABRICKS_TOKEN
+       DATABRICKS_TOKEN
 
 
 1. Add following variables in your Git repo by following [Creating configuration variables for a repository docs](https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository):
 * Variable to store your [Databricks host name or URL](https://docs.databricks.com/en/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) e.g. https://cust-success.cloud.databricks.com
 
-        DATABRICKS_HOST 
+      DATABRICKS_HOST
 
 * Variable to store your [Databricks Cluster ID](https://docs.databricks.com/en/workspace/workspace-details.html#cluster-url-and-id) e.g. 1115-164516-often242
 
-        DATABRICKS_CLUSTER_ID
+      DATABRICKS_CLUSTER_ID
 
 * Variable to store your [Databricks Workspace Folder path](https://docs.databricks.com/en/workspace/workspace-details.html#folder-id) e.g. /Shared/lakefs_demos/ci_cd_demo or /Users/me@example.com/MyFolder/lakefs_demos/ci_cd_demo
 
-        DATABRICKS_WORKSPACE_NOTEBOOK_PATH 
+      DATABRICKS_WORKSPACE_NOTEBOOK_PATH
 
 * Variable to store your Databricks Secret Scope created in 2nd step e.g. demos
 
-        DATABRICKS_SECRET_SCOPE
+      DATABRICKS_SECRET_SCOPE
 
 * Variable to store your lakeFS End Point e.g. https://company.region.lakefscloud.io
 
-        LAFEFS_END_POINT
+      LAKEFS_END_POINT
 
 * Variable to store your lakeFS repository name (which will be created by this demo) e.g. databricks-ci-cd-repo
 
-        LAKFES_REPO_NAME
+      LAKFES_REPO_NAME
 
 * Variable to store the storage namespace for the lakeFS repo. It is a location in the underlying storage where data for lakeFS repository will be stored. e.g. s3://example
 
-        LAKEFS_REPO_STORAGE_NAMESPACE
+      LAKEFS_REPO_STORAGE_NAMESPACE
 
 * Variable to store the storage namespace where Delta tables created by this demo will be stored e.g. s3://data-source/delta-tables. Do NOT use the same storage namespace as above.
 
-        DATA_SOURCE_STORAGE_NAMESPACE
+  If it is not there then create Databricks [External Location](https://docs.databricks.com/en/sql/language-manual/sql-ref-external-locations.html) to write to s3://data-source URL and you should have **READ FILES** and **WRITES FILES** [premissions on and External Location](https://docs.databricks.com/en/connect/unity-catalog/manage-external-locations.html#grant-permissions-on-an-external-location)
+
+      DATA_SOURCE_STORAGE_NAMESPACE
 
 ## Demo Instructions
 
@@ -94,6 +111,17 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 1. GitHub [Payloads for Pull Request](https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=closed#pull_request).
 
 ## Additional Useful GitHub Action Code
+
+1. Code to run the Action workflow only if any file changes in a specific folder e.g. databricks-notebooks. So, changing README file will not run the workflow:
+
+   ```bash
+   name: Run Databricks ETL jobs in an isolated environment by using lakeFS
+
+   on:
+      pull_request:
+         paths:
+            - 'databricks-notebooks/**'
+   ```
 
 1. If you use Scala for Databricks notebooks then this is the step to build Scala job:
 
@@ -172,17 +200,6 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
               { "maven": {"coordinates": "io.lakefs:hadoop-lakefs-assembly:0.2.1"} },
               { "pypi": {"package": "lakefs==0.4.1"} }
             ]
-   ```
-
-1. Code to run the workflow only if any file changes in a specific folder (etl_jobs in this case)       :
-
-   ```bash
-   name: Run Scala job for isolated testing by using lakeFS
-
-   on:
-      pull_request:
-         paths:
-            - 'etl_jobs/**'
    ```
 
 1. Code to checkout a folder from the repo instead of full repo:
