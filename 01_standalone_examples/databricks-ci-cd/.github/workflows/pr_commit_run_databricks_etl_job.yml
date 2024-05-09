@@ -1,0 +1,101 @@
+name: Run Databricks ETL jobs in an isolated environment by using lakeFS
+
+on:
+  pull_request:
+
+env:
+  DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+jobs:
+  run-etl-jobs-in-isolated-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Set additional environment variables
+        run:  |
+          echo "WORKSPACE_NOTEBOOK_PATH=${{ vars.DATABRICKS_WORKSPACE_NOTEBOOK_PATH }}/pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          echo "LOCAL_NOTEBOOK_PATH=/home/runner/work/${{ github.event.pull_request.head.repo.name }}/${{ github.event.pull_request.head.repo.name }}/databricks-notebooks" >> $GITHUB_ENV
+          echo "LAKFES_BRANCH_NAME=pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+      - name: Create Databricks Workspace directory and import Databricks notebooks
+        run:  |
+          curl -F path="${{ env.WORKSPACE_NOTEBOOK_PATH }}"  \
+            ${{ vars.DATABRICKS_HOST }}/api/2.0/workspace/mkdirs --header "Authorization: Bearer ${{ env.DATABRICKS_TOKEN }}"
+
+          cd ${{ env.LOCAL_NOTEBOOK_PATH }}
+
+          for file in *.py
+          do
+            curl -F path="${{ env.WORKSPACE_NOTEBOOK_PATH }}/$file"  \
+            -F language=PYTHON -F overwrite=true -F content=@"$file" \
+              ${{ vars.DATABRICKS_HOST }}/api/2.0/workspace/import --header "Authorization: Bearer ${{ env.DATABRICKS_TOKEN }}"
+          done
+      - name: Trigger Databricks job to create sample Delta tables
+        uses: databricks/run-notebook@v0.0.3
+        id: trigger_databricks_notebook_create_sample_delta_tables
+        with:
+          run-name: "GitHub Action - PR ${{ github.event.number }} - Create Sample Delta Tables"
+          workspace-notebook-path: "${{ env.WORKSPACE_NOTEBOOK_PATH }}/Create Sample Delta Tables.py"
+          notebook-params-json:  >
+            {
+              "data_source_storage_namespace": "${{ vars.DATA_SOURCE_STORAGE_NAMESPACE }}"
+            }
+          existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
+      - name: Trigger Databricks job to create lakeFS repo and import data
+        uses: databricks/run-notebook@v0.0.3
+        id: trigger_databricks_notebook_create_lakefs_repo
+        with:
+          run-name: "GitHub Action - PR ${{ github.event.number }} - Create lakeFS Repo and Import Data"
+          workspace-notebook-path: "${{ env.WORKSPACE_NOTEBOOK_PATH }}/Create lakeFS Repo and Import Data.py"
+          notebook-params-json:  >
+            {
+              "databricks_secret_scope": "${{ vars.DATABRICKS_SECRET_SCOPE }}",
+              "lakefs_end_point": "${{ vars.LAKEFS_END_POINT }}",
+              "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
+              "lakefs_repo_storage_namespace": "${{ vars.LAKEFS_REPO_STORAGE_NAMESPACE }}",
+              "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}",
+              "data_source_storage_namespace": "${{ vars.DATA_SOURCE_STORAGE_NAMESPACE }}"
+            }
+          existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
+      - name: Trigger Databricks ETL Job
+        uses: databricks/run-notebook@v0.0.3
+        id: trigger_databricks_notebook_etl_job
+        with:
+          run-name: "GitHub Action - PR ${{ github.event.number }} - ETL Job"
+          workspace-notebook-path: "${{ env.WORKSPACE_NOTEBOOK_PATH }}/ETL Job.py"
+          notebook-params-json:  >
+            {
+              "environment": "dev",
+              "data_source_storage_namespace": "${{ vars.DATA_SOURCE_STORAGE_NAMESPACE }}",
+              "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
+              "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}"
+            }
+          existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
+      - name: Trigger Databricks job to run validations
+        uses: databricks/run-notebook@v0.0.3
+        id: trigger_databricks_notebook_run_validations
+        with:
+          run-name: "GitHub Action - PR ${{ github.event.number }} - Run Validations"
+          workspace-notebook-path: "${{ env.WORKSPACE_NOTEBOOK_PATH }}/Run Validations.py"
+          notebook-params-json:  >
+            {
+              "databricks_secret_scope": "${{ vars.DATABRICKS_SECRET_SCOPE }}",
+              "lakefs_end_point": "${{ vars.LAKEFS_END_POINT }}",
+              "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
+              "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}"
+            }
+          existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
+          outputs: >
+            notebook-output >> "$GITHUB_OUTPUT"
+      - name: Check for failed validations
+        run: |
+          echo "Validation Output: ${{ steps.trigger_databricks_notebook_run_validations.outputs.notebook-output }}"  
+          if [[ "${{ steps.trigger_databricks_notebook_run_validations.outputs.notebook-output }}" == "Success" ]]
+          then
+            echo "## ✅ No validation failures found"
+          else
+            echo "## 🚨👆🏻👆🏻 Validation checks failed 👆🏻👆🏻🚨"
+            exit 1
+          fi
