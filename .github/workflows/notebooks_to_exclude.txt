@@ -31,8 +31,8 @@
 # and not designed to run end-to-end
 ./R-client.ipynb
 ./R-weather.ipynb
+./R.ipynb
 
 # Ignore any temporary notebook caches etc
 .ipynb_checkpoints
-.papermill-out
 papermill-out
