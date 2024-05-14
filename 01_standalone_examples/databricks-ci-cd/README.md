@@ -7,7 +7,7 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 ## Prerequisites
 * lakeFS installed and running on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Cloud](https://demo.lakefs.io/) which provides free lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
 * Databricks server with the ability to run compute clusters on top of it. 
-* Configure your Databricks cluster to use lakeFS Hadoop file system. Read this blog [Databricks and lakeFS Integration: Step-by-Step Configuration Tutorial](https://lakefs.io/blog/databricks-lakefs-integration-tutorial/) or [lakeFS documentation](https://docs.lakefs.io/integrations/spark.html#lakefs-hadoop-filesystem) for the configuration.
+* Configure your Databricks cluster to use the lakeFS Hadoop file system. Read this blog [Databricks and lakeFS Integration: Step-by-Step Configuration Tutorial](https://lakefs.io/blog/databricks-lakefs-integration-tutorial/) or [lakeFS documentation](https://docs.lakefs.io/integrations/spark.html#lakefs-hadoop-filesystem) for the configuration.
 * Permissions to manage the cluster configuration, including adding libraries. 
 * GitHub account. 
 
@@ -73,7 +73,7 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 
       DATABRICKS_SECRET_SCOPE
 
-* Variable to store your lakeFS End Point e.g. https://company.region.lakefscloud.io
+* Variable to store your lakeFS Endpoint e.g. https://company.region.lakefscloud.io
 
       LAKEFS_END_POINT
 
@@ -81,13 +81,13 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 
       LAKFES_REPO_NAME
 
-* Variable to store the storage namespace for the lakeFS repo. It is a location in the underlying storage where data for lakeFS repository will be stored. e.g. s3://example
+* Variable to store the storage namespace for the lakeFS repo. It is a location in the underlying storage where data for the lakeFS repository will be stored. e.g. s3://example
 
       LAKEFS_REPO_STORAGE_NAMESPACE
 
 * Variable to store the storage namespace where Delta tables created by this demo will be stored e.g. s3://data-source/delta-tables. Do NOT use the same storage namespace as above.
 
-  If it is not there then create Databricks [External Location](https://docs.databricks.com/en/sql/language-manual/sql-ref-external-locations.html) to write to s3://data-source URL and you should have **READ FILES** and **WRITES FILES** [premissions on and External Location](https://docs.databricks.com/en/connect/unity-catalog/manage-external-locations.html#grant-permissions-on-an-external-location)
+  If it is not there then create Databricks [External Location](https://docs.databricks.com/en/sql/language-manual/sql-ref-external-locations.html) to write to s3://data-source URL and you should have **READ FILES** and **WRITES FILES** [permissions on and External Location](https://docs.databricks.com/en/connect/unity-catalog/manage-external-locations.html#grant-permissions-on-an-external-location)
 
       DATA_SOURCE_STORAGE_NAMESPACE
 
@@ -103,7 +103,7 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 ## Demo Instructions for Scala ETL Jobs
 #### Additional Setup
 
-1. This demo will compile Scala programs and will build JAR file. Demo will upload JAR file to AWS S3. Demo will also create Databricks cluster on the fly and will install JAR file and lakeFS libraries. So, additional setup steps are required.
+1. This demo will compile Scala programs and will build a JAR file. Demo will upload the JAR file to AWS S3. Demo will also create a Databricks cluster on the fly and will install the JAR file and lakeFS libraries. So, additional setup steps are required.
 
 1. Remove **pr_commit_run_databricks_etl_job.yml** file from **.github/workflows** folder in your Git repo.
 
@@ -114,26 +114,32 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 1. Upload all files in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/scala_etl_jobs** folder to **scala_etl_jobs** folder in your Git repo.
 
 1. Add following secrets in your Git repo:
-* AWS Access & Secret Key so Databricks cluster can access S3 bucket:
+* AWS Access Key so GitHub Action can upload JAR file to S3 and Databricks cluster can access S3 bucket:
 
       AWS_ACCESS_KEY
 
+* AWS Secret Key so GitHub Action can upload JAR file to S3 and Databricks cluster can access S3 bucket:
+
       AWS_SECRET_KEY
 
-* LakeFS Access & Secret Key so Databricks cluster can access lakeFS server:
+* LakeFS Access Key so Databricks cluster can access lakeFS server:
 
       LAKEFS_ACCESS_KEY
 
+* LakeFS Secret Key so Databricks cluster can access lakeFS server:
+
       LAKEFS_SECRET_KEY
 
-7. Add following variables in your Git repo:
-* AWS Region, S3 bucket name and root folder name in S3 bucket to upload JAR file to S3:
+7. Add following variables in your Git repo to upload JAR file to S3:
+* AWS Region e.g. us-east-1:
 
       AWS_REGION
 
+* AWS S3 bucket name e.g. sample-jars:
 
       AWS_BUCKET_FOR_JARS
 
+* Root folder name in S3 bucket used above e.g. uploaded-jars:
 
       AWS_BUCKET_ROOT_FOLDER_FOR_JARS
 
@@ -219,6 +225,48 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
             [
               { "jar": "${{ steps.upload_file_to_dbfs.outputs.dbfs-file-path }}" }
             ]
+   ```
+
+1. Code to create a new Databricks cluster while triggering a Notebook and to install the libraries to the new cluster:
+
+   ```bash
+      - name: Trigger Databricks Scala ETL Job
+        uses: databricks/run-notebook@v0.0.3
+        id: trigger_databricks_notebook_scala_etl_job
+        with:
+          run-name: "GitHub Action - PR ${{ github.event.number }} - Scala ETL Job"
+          local-notebook-path: "./scala_etl_jobs/Run Scala ETL Job.py"
+          notebook-params-json:  >
+            {
+              "environment": "dev",
+              "data_source_storage_namespace": "${{ vars.DATA_SOURCE_STORAGE_NAMESPACE }}",
+              "lakefs_end_point": "${{ vars.LAKEFS_END_POINT }}",
+              "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
+              "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}"
+            }
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "14.3.x-scala2.12",
+              "node_type_id": "m5d.large",
+              "spark_conf": {
+                "spark.hadoop.fs.lakefs.access.mode": "presigned",
+                "spark.hadoop.fs.lakefs.impl": "io.lakefs.LakeFSFileSystem",
+                "spark.hadoop.fs.lakefs.endpoint": "${{ vars.LAKEFS_END_POINT }}/api/v1",
+                "spark.hadoop.fs.lakefs.access.key": "${{secrets.LAKEFS_ACCESS_KEY}}",
+                "spark.hadoop.fs.lakefs.secret.key": "${{secrets.LAKEFS_SECRET_KEY}}",
+                "spark.hadoop.fs.s3a.access.key": "${{secrets.AWS_ACCESS_KEY}}",
+                "spark.hadoop.fs.s3a.secret.key": "${{secrets.AWS_SECRET_KEY}}"
+              }
+            }
+          libraries-json: >
+            [
+              { "jar": "s3://${{ vars.AWS_BUCKET_FOR_JARS }}/${{ vars.AWS_BUCKET_ROOT_FOLDER_FOR_JARS }}/jars/pr-${{ github.event.number }}/etl_jobs-assembly-0.1.0-SNAPSHOT.jar" },
+              { "maven": {"coordinates": "io.lakefs:hadoop-lakefs-assembly:0.2.4"} },
+              { "pypi": {"package": "lakefs==0.6.0"} }
+            ]
+          outputs: >
+            run-url >> "$GITHUB_OUTPUT"
    ```
 
 1. Code to checkout a folder from the repo instead of full repo:
