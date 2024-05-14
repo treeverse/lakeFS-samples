@@ -1,6 +1,3 @@
-# Databricks notebook source
-#dbutils.widgets.text("data_source_storage_namespace", "s3://treeverse-ort-simulation-bucket/amit/data-source/delta-tables")
-
 dataSourceStorageNamespace = getArgument('data_source_storage_namespace')
 
 # COMMAND ----------

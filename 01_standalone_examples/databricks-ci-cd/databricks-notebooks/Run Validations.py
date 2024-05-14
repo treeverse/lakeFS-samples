@@ -1,13 +1,9 @@
-# Databricks notebook source
-#dbutils.widgets.text("databricks_secret_scope", "demos")
-#dbutils.widgets.text("lakefs_end_point", "https://treeverse.us-east-1.lakefscloud.io")
-#dbutils.widgets.text("lakefs_repo", "amit-databricks-ci-cd-repo")
-#dbutils.widgets.text("lakefs_branch", "test")
-
 databricksSecretScope = getArgument('databricks_secret_scope')
 lakefsEndPoint = getArgument('lakefs_end_point')
 repo_name = getArgument('lakefs_repo')
 newBranch = getArgument('lakefs_branch')
+create_lakefs_repo_run_url = getArgument('create_lakefs_repo_run_url')
+etl_job_run_url = getArgument('etl_job_run_url')
 
 lakefsAccessKey = dbutils.secrets.get(databricksSecretScope, 'lakefs_access_key_id')
 lakefsSecretKey = dbutils.secrets.get(databricksSecretScope, 'lakefs_secret_access_key')
@@ -33,7 +29,11 @@ print("lakeFS credentials verified")
 
 repo = lakefs.Repository(repo_name, client=clt)
 branchNew = repo.branch(newBranch)
-branchNew.commit(message='Commit ETL job changes')
+ref = branchNew.commit(message='Commit ETL job changes',
+                 metadata={'::lakefs::Create lakeFS Repo and Import Data Notebook::url[url:ui]': create_lakefs_repo_run_url,
+                           '::lakefs::ETL Job Notebook::url[url:ui]': etl_job_run_url})
+commitURL = f"{lakefsEndPoint}/repositories/{repo_name}/commits/{ref.get_commit().id}"
+print(commitURL)
 
 # COMMAND ----------
 
