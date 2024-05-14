@@ -91,14 +91,60 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 
       DATA_SOURCE_STORAGE_NAMESPACE
 
-## Demo Instructions
+## Demo Instructions for Python ETL Jobs
 
-1. Create a new branch in your Git repository. Select newly created branch.
-1. Remove the comment from the last 5 lines of code in **ETL Job.py** inside **databricks-notebooks** folder and Commit your changes.
-1. Go to **Pull requests** tab in your Git repo, create Pull Request.
-1. Go to **Actions** tab in your Git repo. Git Action will start running automaically and validation checks will fail.
-1. Go back to **Code** tab in your Git repo and select the branch created in 1st step. Comment back the last 5 lines of code in **ETL Job.py** and Commit your changes.
-1. Go back to **Actions** tab in your Git repo. Git Action will start running again and validation checks will pass this time.
+1. Create a new branch in your Git repository. Select the newly created branch.
+1. Remove the comment from the last 5 lines of code in **ETL Job.py** inside the **databricks-notebooks** folder and Commit your changes.
+1. Go to the **Pull requests** tab in your Git repo, create Pull Request.
+1. Go to the **Actions** tab in your Git repo. Git Action will start running automatically and validation checks will fail.
+1. Go back to the **Code** tab in your Git repo and select the branch created in 1st step. Comment back the last 5 lines of code in **ETL Job.py** and Commit your changes.
+1. Go back to the **Actions** tab in your Git repo. Git Action will start running again and validation checks will pass this time.
+
+## Demo Instructions for Scala ETL Jobs
+#### Additional Setup
+
+1. This demo will compile Scala programs and will build JAR file. Demo will upload JAR file to AWS S3. Demo will also create Databricks cluster on the fly and will install JAR file and lakeFS libraries. So, additional setup steps are required.
+
+1. Remove **pr_commit_run_databricks_etl_job.yml** file from **.github/workflows** folder in your Git repo.
+
+1. Upload **pr_commit_run_scala_etl_jobs.yml** file in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/scala_etl_jobs** folder to **.github/workflows** folder in your Git repo.
+
+1. Create folder **scala_etl_jobs** in your Git repo.
+
+1. Upload all files in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/scala_etl_jobs** folder to **scala_etl_jobs** folder in your Git repo.
+
+1. Add following secrets in your Git repo:
+* AWS Access & Secret Key so Databricks cluster can access S3 bucket:
+
+      AWS_ACCESS_KEY
+
+      AWS_SECRET_KEY
+
+* LakeFS Access & Secret Key so Databricks cluster can access lakeFS server:
+
+      LAKEFS_ACCESS_KEY
+
+      LAKEFS_SECRET_KEY
+
+7. Add following variables in your Git repo:
+* AWS Region, S3 bucket name and root folder name in S3 bucket to upload JAR file to S3:
+
+      AWS_REGION
+
+
+      AWS_BUCKET_FOR_JARS
+
+
+      AWS_BUCKET_ROOT_FOLDER_FOR_JARS
+
+#### Demo Instructions
+1. Create a new branch in your Git repository. Select the newly created branch.
+1. Remove the comment from the last 4 lines of code in **etl_jobs.scala** inside the **scala_etl_jobs/src/main/scala/example** folder and Commit your changes.
+1. Go to the **Pull requests** tab in your Git repo, create Pull Request.
+1. Go to the **Actions** tab in your Git repo. Git Action will start running automatically and validation checks will fail.
+1. Go back to the **Code** tab in your Git repo and select the branch created in 1st step. Comment back the last 4 lines of code in **etl_jobs.scala** and Commit your changes.
+1. Go back to the **Actions** tab in your Git repo. Git Action will start running again and validation checks will pass this time.
+
 
 ## Useful Information
 
@@ -109,10 +155,12 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 1. GitHub [Events that trigger workflows](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows).
 1. GitHub [Webhook events and payloads](https://docs.github.com/en/webhooks/webhook-events-and-payloads).
 1. GitHub [Payloads for Pull Request](https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=closed#pull_request).
+1. Documentation on [GitHub Action that uploads a file to Amazon S3](https://github.com/hkusu/s3-upload-action)
+1. Documentation on [GitHub Action that uploads a file to Databricks DFBS](https://github.com/databricks/upload-dbfs-temp/)
 
 ## Additional Useful GitHub Action Code
 
-1. Code to run the Action workflow only if any file changes in a specific folder e.g. databricks-notebooks. So, changing README file will not run the workflow:
+1. Code to run the Action workflow only if any file changes in a specific folder e.g. databricks-notebooks. So, changing README file, which is outside the databricks-notebooks folder, will not run the workflow:
 
    ```bash
    name: Run Databricks ETL jobs in an isolated environment by using lakeFS
@@ -123,82 +171,53 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
             - 'databricks-notebooks/**'
    ```
 
-1. If you use Scala for Databricks notebooks then this is the step to build Scala job:
+1. Upload a file to S3 e.g. upload Scala JAR file:
 
    ```bash
-      - name: Build Scala job
-        run:  |
-          cd etl_jobs
-          sbt assembly
-          ls -lh /home/runner/work/image-segmentation-repo/image-segmentation-repo/etl_jobs/target/scala-2.12/transform-assembly-0.1.0-SNAPSHOT.jar
-   ```
-
-1. Upload a file to S3 e.g. upload JAR file built in the previous step:
-
-   ```bash
-      - name: Upload JAR to S3
+      - name: Upload JAR file to S3
         uses: hkusu/s3-upload-action@v2
-        id: S3
+        id: upload_file_to_s3
         with:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
           aws-secret-access-key: ${{secrets.AWS_SECRET_KEY}}
-          aws-region: 'us-east-1'
-          aws-bucket: "treeverse-ort-simulation-bucket"
-          bucket-root: "amit"
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-bucket: ${{ vars.AWS_BUCKET_FOR_JARS }}
+          bucket-root: ${{ vars.AWS_BUCKET_ROOT_FOLDER_FOR_JARS }}
           destination-dir: "jars/pr-${{ github.event.number }}"
-          file-path: "/home/runner/work/image-segmentation-repo/image-segmentation-repo/etl_jobs/target/scala-2.12/transform-assembly-0.1.0-SNAPSHOT.jar"
-   ```
-
-1. Upload a file to DBFS (Databricks FS) e.g. upload JAR file built in the previous step:
-
-   ```bash
-      - name: Upload JAR to DBFS
-        uses: databricks/upload-dbfs-temp@v0
-        with:
-          local-path: /home/runner/work/image-segmentation-repo/image-segmentation-repo/etl_jobs/target/scala-2.12/transform-assembly-0.1.0-SNAPSHOT.jar
-        id: upload_jar
-      - name: Get JAR location
+          file-path: "${{ env.LOCAL_NOTEBOOK_PATH }}/scala_etl_jobs/target/scala-2.12/etl_jobs-assembly-0.1.0-SNAPSHOT.jar"
+          output-file-url: 'true'
+      - name: Print JAR file location on S3
         run: |
-            echo "JAR location: ${{ steps.upload_jar.outputs.dbfs-file-path }}"
+            echo "JAR location on S3: ${{ steps.upload_file_to_s3.outputs.file-url }}"
    ```
-
-1. Create a new Databricks cluster instead of using an existing cluster, install libraries and trigger Scala job:
+   
+1. When creating a new Databricks cluster then install JAR file from S3:
 
    ```bash
-      - name: Trigger Databricks Run Scala ETL Job
-        uses: databricks/run-notebook@v0.0.3
-        id: trigger_databricks_notebook_run_scala_etl_job
-        with:
-          run-name: "PR ${{ github.event.number }} GitHub Action - Run Scala ETL job"
-          local-notebook-path: "Run Scala ETL Job.py"
-          notebook-params-json:  >
-            {
-              "env": "dev",
-              "repo": "amit-pr-checks-repo",
-              "branch": "pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}",
-              "etl_start_date": "2012-01-01",
-              "etl_end_date": "2012-03-01"
-            }
-          new-cluster-json: >
-            {
-              "num_workers": 1,
-              "spark_version": "14.3.x-scala2.12",
-              "node_type_id": "m5d.large",
-              "spark_conf": {
-                "spark.hadoop.fs.lakefs.access.mode": "presigned",
-                "spark.hadoop.fs.lakefs.impl": "io.lakefs.LakeFSFileSystem",
-                "spark.hadoop.fs.lakefs.endpoint": "https://treeverse.us-east-1.lakefscloud.io/api/v1",
-                "spark.hadoop.fs.lakefs.access.key": "${{secrets.LAKEFS_ACCESS_KEY}}",
-                "spark.hadoop.fs.lakefs.secret.key": "${{secrets.LAKEFS_SECRET_KEY}}",
-                "spark.hadoop.fs.s3a.access.key": "${{secrets.AWS_ACCESS_KEY}}",
-                "spark.hadoop.fs.s3a.secret.key": "${{secrets.AWS_SECRET_KEY}}"
-              }
-            }
           libraries-json: >
             [
-              { "jar": "s3://treeverse-ort-simulation-bucket/amit/jars/pr-${{ github.event.number }}/transform-assembly-0.1.0-SNAPSHOT.jar" },
-              { "maven": {"coordinates": "io.lakefs:hadoop-lakefs-assembly:0.2.1"} },
-              { "pypi": {"package": "lakefs==0.4.1"} }
+              { "jar": "s3://${{ vars.AWS_BUCKET_FOR_JARS }}/${{ vars.AWS_BUCKET_ROOT_FOLDER_FOR_JARS }}/jars/pr-${{ github.event.number }}/etl_jobs-assembly-0.1.0-SNAPSHOT.jar" }
+            ]
+   ```
+
+1. Upload a file to Databricks DBFS e.g. upload Scala JAR file:
+   ```bash
+      - name: Upload JAR file to DBFS
+        uses: databricks/upload-dbfs-temp@v0
+        with:
+          local-path: ${{ env.LOCAL_NOTEBOOK_PATH }}/scala_etl_jobs/target/scala-2.12/etl_jobs-assembly-0.1.0-SNAPSHOT.jar
+        id: upload_file_to_dbfs
+      - name: Print JAR file location on DBFS
+        run: |
+            echo "JAR location on DBFS: ${{ steps.upload_file_to_dbfs.outputs.dbfs-file-path }}"
+   ```
+
+1. When creating a new Databricks cluster then install JAR file from Databricks DBFS:
+
+   ```bash
+          libraries-json: >
+            [
+              { "jar": "${{ steps.upload_file_to_dbfs.outputs.dbfs-file-path }}" }
             ]
    ```
 
@@ -211,11 +230,11 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
       - name: Checks out the repo
         uses: actions/checkout@v4
         with:
-          sparse-checkout: 'etl_jobs/src'
+          sparse-checkout: 'scala_etl_jobs/src'
           sparse-checkout-cone-mode: false
    ```
 
-1. Get branch list and store it in a GitHub multi-line environment variable:
+1. Get list of branches in Git repo and store it in a GitHub multi-line environment variable:
 
    ```bash
       - name: Get branch list
@@ -228,12 +247,19 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
           } >> $GITHUB_ENV
    ```
 
-1. If you use Scala for Databricks notebooks then this is the step to build Scala job:
+1. Get Git branch name:
 
    ```bash
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
    ```
 
-1. If you use Scala for Databricks notebooks then this is the step to build Scala job:
+1. Get date & timestamp:
 
    ```bash
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
    ```

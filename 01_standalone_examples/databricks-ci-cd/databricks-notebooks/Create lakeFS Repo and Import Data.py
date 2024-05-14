@@ -1,11 +1,3 @@
-# Databricks notebook source
-#dbutils.widgets.text("databricks_secret_scope", "demos")
-#dbutils.widgets.text("lakefs_end_point", "https://treeverse.us-east-1.lakefscloud.io")
-#dbutils.widgets.text("lakefs_repo", "amit-databricks-ci-cd-repo")
-#dbutils.widgets.text("lakefs_repo_storage_namespace", "s3://treeverse-ort-simulation-bucket/amit")
-#dbutils.widgets.text("lakefs_branch", "test")
-#dbutils.widgets.text("data_source_storage_namespace", "s3://treeverse-ort-simulation-bucket/amit/data-source/delta-tables")
-
 databricksSecretScope = getArgument('databricks_secret_scope')
 lakefsEndPoint = getArgument('lakefs_end_point')
 repo_name = getArgument('lakefs_repo')
@@ -47,20 +39,24 @@ importer = branchMain.import_data(commit_message="import objects", metadata={"ke
     .prefix(importSource, destination=importDestination)
 
 importer.start()
-status = importer.status()
-print(status)
 
-while not status.completed and status.error is None:
+while not importer.status().completed and importer.status().error is None:
     time.sleep(2)
     status = importer.status()
     print(status)
 
-if status.error:
+if importer.status().completed:
+    print(f"\nImported a total of {importer.status().ingested_objects} objects into branch {sourceBranch}")
+
+if importer.status().error:
     raise Exception(status.error)
-    
-print(f"\nImported a total of {status.ingested_objects} objects into branch {sourceBranch}")
 
 # COMMAND ----------
 
-branchNew = repo.branch(newBranch).create(source_reference=sourceBranch)
-print(f"{newBranch} ref:", branchNew.get_commit().id)
+branchNew = repo.branch(newBranch).create(source_reference=sourceBranch, exist_ok=True)
+branchURL = f"{lakefsEndPoint}/repositories/{repo_name}/objects?ref={newBranch}"
+print(f"lakeFS Branch URL: {branchURL}")
+
+# COMMAND ----------
+
+dbutils.notebook.exit(branchURL)

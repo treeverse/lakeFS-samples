@@ -1,4 +1,4 @@
-name: Run Databricks ETL jobs in an isolated environment by using lakeFS
+name: Run Scala ETL jobs in an isolated environment by using lakeFS
 
 on:
   pull_request
@@ -19,6 +19,26 @@ jobs:
           echo "WORKSPACE_NOTEBOOK_PATH=${{ vars.DATABRICKS_WORKSPACE_NOTEBOOK_PATH }}/pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
           echo "LOCAL_NOTEBOOK_PATH=/home/runner/work/${{ github.event.pull_request.head.repo.name }}/${{ github.event.pull_request.head.repo.name }}" >> $GITHUB_ENV
           echo "LAKFES_BRANCH_NAME=pr-${{ github.event.number }}-${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+      - name: Build Scala job
+        run:  |
+          cd scala_etl_jobs
+          sbt assembly
+          ls -lh ${{ env.LOCAL_NOTEBOOK_PATH }}/scala_etl_jobs/target/scala-2.12/etl_jobs-assembly-0.1.0-SNAPSHOT.jar
+      - name: Upload JAR file to S3
+        uses: hkusu/s3-upload-action@v2
+        id: upload_file_to_s3
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_KEY}}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-bucket: ${{ vars.AWS_BUCKET_FOR_JARS }}
+          bucket-root: ${{ vars.AWS_BUCKET_ROOT_FOLDER_FOR_JARS }}
+          destination-dir: "jars/pr-${{ github.event.number }}"
+          file-path: "${{ env.LOCAL_NOTEBOOK_PATH }}/scala_etl_jobs/target/scala-2.12/etl_jobs-assembly-0.1.0-SNAPSHOT.jar"
+          output-file-url: 'true'
+      - name: Print JAR file location on S3
+        run: |
+            echo "JAR location on S3: ${{ steps.upload_file_to_s3.outputs.file-url }}"
       - name: Create Databricks Workspace directory and import Databricks notebooks
         run:  |
           curl -F path="${{ env.WORKSPACE_NOTEBOOK_PATH }}"  \
@@ -65,12 +85,12 @@ jobs:
       - name: Print lakeFS Branch URL
         run: |
             echo "lakeFS Branch URL: ${{ steps.trigger_databricks_notebook_create_lakefs_repo.outputs.notebook-output }}"
-      - name: Trigger Databricks ETL Job
+      - name: Trigger Databricks Scala ETL Job
         uses: databricks/run-notebook@v0.0.3
-        id: trigger_databricks_notebook_etl_job
+        id: trigger_databricks_notebook_scala_etl_job
         with:
-          run-name: "GitHub Action - PR ${{ github.event.number }} - ETL Job"
-          workspace-notebook-path: "${{ env.WORKSPACE_NOTEBOOK_PATH }}/ETL Job.py"
+          run-name: "GitHub Action - PR ${{ github.event.number }} - Scala ETL Job"
+          local-notebook-path: "./scala_etl_jobs/Run Scala ETL Job.py"
           notebook-params-json:  >
             {
               "environment": "dev",
@@ -79,7 +99,27 @@ jobs:
               "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
               "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}"
             }
-          existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "14.3.x-scala2.12",
+              "node_type_id": "m5d.large",
+              "spark_conf": {
+                "spark.hadoop.fs.lakefs.access.mode": "presigned",
+                "spark.hadoop.fs.lakefs.impl": "io.lakefs.LakeFSFileSystem",
+                "spark.hadoop.fs.lakefs.endpoint": "${{ vars.LAKEFS_END_POINT }}/api/v1",
+                "spark.hadoop.fs.lakefs.access.key": "${{secrets.LAKEFS_ACCESS_KEY}}",
+                "spark.hadoop.fs.lakefs.secret.key": "${{secrets.LAKEFS_SECRET_KEY}}",
+                "spark.hadoop.fs.s3a.access.key": "${{secrets.AWS_ACCESS_KEY}}",
+                "spark.hadoop.fs.s3a.secret.key": "${{secrets.AWS_SECRET_KEY}}"
+              }
+            }
+          libraries-json: >
+            [
+              { "jar": "s3://${{ vars.AWS_BUCKET_FOR_JARS }}/${{ vars.AWS_BUCKET_ROOT_FOLDER_FOR_JARS }}/jars/pr-${{ github.event.number }}/etl_jobs-assembly-0.1.0-SNAPSHOT.jar" },
+              { "maven": {"coordinates": "io.lakefs:hadoop-lakefs-assembly:0.2.4"} },
+              { "pypi": {"package": "lakefs==0.6.0"} }
+            ]
           outputs: >
             run-url >> "$GITHUB_OUTPUT"
       - name: Trigger Databricks job to run validations
@@ -95,7 +135,7 @@ jobs:
               "lakefs_repo": "${{ vars.LAKFES_REPO_NAME }}",
               "lakefs_branch": "${{ env.LAKFES_BRANCH_NAME }}",
               "create_lakefs_repo_run_url": "${{ steps.trigger_databricks_notebook_create_lakefs_repo.outputs.run-url }}",
-              "etl_job_run_url": "${{ steps.trigger_databricks_notebook_etl_job.outputs.run-url }}"
+              "etl_job_run_url": "${{ steps.trigger_databricks_notebook_scala_etl_job.outputs.run-url }}"
             }
           existing-cluster-id: "${{ vars.DATABRICKS_CLUSTER_ID }}"
           outputs: >
