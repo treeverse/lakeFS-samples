@@ -39,6 +39,7 @@ importer = branchMain.import_data(commit_message="import objects", metadata={"ke
     .prefix(importSource, destination=importDestination)
 
 importer.start()
+time.sleep(2)
 
 while not importer.status().completed and importer.status().error is None:
     time.sleep(2)
