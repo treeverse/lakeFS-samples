@@ -11,6 +11,8 @@ from airflow.models.dagrun import DagRun
 import time
 from functools import partial
 from airflow.utils.log.logging_mixin import LoggingMixin
+from airflow.utils.db import provide_session
+from airflow.models import XCom
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -28,6 +30,21 @@ def print_commit_result(context, result, message):
     LoggingMixin().log.info(message + result \
         + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
+
+# The execution context and any results are automatically passed by task.post_execute method
+@provide_session
+def override_lakefs_link(context, result, session=None):
+    if Variable.get("lakefsEndPoint").startswith('http://host.docker.internal'):
+        session.query(XCom) \
+        .filter(XCom.dag_id == context["dag"].dag_id, \
+                XCom.task_id == context["task"].task_id, \
+                XCom.execution_date == context['execution_date'], \
+                XCom.key == 'lakefs_commit') \
+        .delete(synchronize_session='fetch')
+
+        value = {'base_url': Variable.get("lakefsUIEndPoint"), 'repo': Variable.get("repo"), 'commit_digest': result}
+        LoggingMixin().log.info(f"Overridden Persist lakeFS commit data {value}")    
+        context["ti"].xcom_push(key='lakefs_commit', value=value)
 
 def delete_demo_objects(task_instance):
     branch = lakefs.repository(Variable.get("repo")).branch(Variable.get("sourceBranch"))
@@ -82,6 +99,7 @@ def lakefs_wrapper_dag():
     )
 
     task_commit_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_commit_etl_branch.post_execute = partial(override_lakefs_link)
 
     # Merge the changes back to the main branch.
     task_merge_etl_branch = LakeFSMergeOperator(
@@ -94,7 +112,8 @@ def lakefs_wrapper_dag():
     )
 
     task_merge_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_branch.post_execute = partial(override_lakefs_link)
 
     task_delete_demo_objects >> task_create_etl_branch >> task_trigger >> task_commit_etl_branch >> task_merge_etl_branch
-    
+
 sample_workflow_dag = lakefs_wrapper_dag()

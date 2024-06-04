@@ -25,6 +25,8 @@ from airflow.models import Variable
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.utils.log.logging_mixin import LoggingMixin
 from functools import partial
+from airflow.utils.db import provide_session
+from airflow.models import XCom
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -71,6 +73,21 @@ def print_commit_result(context, result, message):
     LoggingMixin().log.info(message + result \
         + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
         + '/repositories/' + Variable.get("repo") + '/commits/' + result)
+
+# The execution context and any results are automatically passed by task.post_execute method
+@provide_session
+def override_lakefs_link(context, result, session=None):
+    if Variable.get("lakefsEndPoint").startswith('http://host.docker.internal'):
+        session.query(XCom) \
+        .filter(XCom.dag_id == context["dag"].dag_id, \
+                XCom.task_id == context["task"].task_id, \
+                XCom.execution_date == context['execution_date'], \
+                XCom.key == 'lakefs_commit') \
+        .delete(synchronize_session='fetch')
+
+        value = {'base_url': Variable.get("lakefsUIEndPoint"), 'repo': Variable.get("repo"), 'commit_digest': result}
+        LoggingMixin().log.info(f"Overridden Persist lakeFS commit data {value}")    
+        context["ti"].xcom_push(key='lakefs_commit', value=value)
 
 @dag(default_args=default_args,
      render_template_as_native_obj=True,
@@ -170,6 +187,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_load.post_execute = partial(print_commit_result, message='lakeFS commit id for load_file task is: ')
+    task_commit_load.post_execute = partial(override_lakefs_link)
     
     task_commit_task1 = LakeFSCommitOperator(
         task_id='commit_task1',
@@ -180,6 +198,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_task1.post_execute = partial(print_commit_result, message='lakeFS commit id for etl_task1 is: ')
+    task_commit_task1.post_execute = partial(override_lakefs_link)
     
     task_commit_task2_1 = LakeFSCommitOperator(
         task_id='commit_task2_1',
@@ -190,6 +209,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_task2_1.post_execute = partial(print_commit_result, message='lakeFS commit id for etl_task2_1 is: ')
+    task_commit_task2_1.post_execute = partial(override_lakefs_link)
     
     task_commit_task2_2 = LakeFSCommitOperator(
         task_id='commit_task2_2',
@@ -200,6 +220,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_task2_2.post_execute = partial(print_commit_result, message='lakeFS commit id for etl_task2_2 is: ')
+    task_commit_task2_2.post_execute = partial(override_lakefs_link)
     
     task_commit_task2_3 = LakeFSCommitOperator(
         task_id='commit_task2_3',
@@ -210,6 +231,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_task2_3.post_execute = partial(print_commit_result, message='lakeFS commit id for etl_task2_3 is: ')
+    task_commit_task2_3.post_execute = partial(override_lakefs_link)
     
     task_commit_task3 = LakeFSCommitOperator(
         task_id='commit_task3',
@@ -220,6 +242,7 @@ def lakefs_new_dag():
 
     # The execution context and any results are automatically passed by task.post_execute method
     task_commit_task3.post_execute = partial(print_commit_result, message='lakeFS commit id for etl_task3 is: ')
+    task_commit_task3.post_execute = partial(override_lakefs_link)
     
     # Wait until the commit is completed.
     # Not really necessary in this DAG, since the LakeFSCommitOperator won't return before that.
@@ -258,6 +281,7 @@ def lakefs_new_dag():
     )
 
     task_merge_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_branch.post_execute = partial(override_lakefs_link)
 
     task_merge_etl_task1_branch = LakeFSMergeOperator(
         task_id='merge_etl_task1_branch',
@@ -269,6 +293,7 @@ def lakefs_new_dag():
     )
 
     task_merge_etl_task1_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_task1_branch.post_execute = partial(override_lakefs_link)
 
     task_merge_etl_task2_branch = LakeFSMergeOperator(
         task_id='merge_etl_task2_branch',
@@ -280,6 +305,7 @@ def lakefs_new_dag():
     )
 
     task_merge_etl_task2_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_task2_branch.post_execute = partial(override_lakefs_link)
 
     task_merge_etl_task3_branch = LakeFSMergeOperator(
         task_id='merge_etl_task3_branch',
@@ -291,6 +317,7 @@ def lakefs_new_dag():
     )
 
     task_merge_etl_task3_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_task3_branch.post_execute = partial(override_lakefs_link)
 
     task_merge_etl_load_branch = LakeFSMergeOperator(
         task_id='merge_etl_load_branch',
@@ -302,6 +329,7 @@ def lakefs_new_dag():
     )
 
     task_merge_etl_load_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_load_branch.post_execute = partial(override_lakefs_link)
 
     expectedCommits = ['''{{ ti.xcom_pull('merge_etl_branch') }}''']
     expectedMessages = ['merging ' + default_args.get('branch') + ' to the ' + default_args.get('default-branch') + ' branch']
