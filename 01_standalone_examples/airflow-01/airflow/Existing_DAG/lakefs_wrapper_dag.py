@@ -12,6 +12,10 @@ import time
 from functools import partial
 from airflow.utils.log.logging_mixin import LoggingMixin
 
+import sys
+sys.path.insert(0, '/home/jovyan')
+from lakefs_demo import print_commit_result, post_execute_commit
+
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 default_args = {
@@ -22,12 +26,6 @@ default_args = {
     "default-branch": Variable.get("sourceBranch"),
     "lakefs_conn_id": Variable.get("conn_lakefs")
 }
-
-# The execution context and any results are automatically passed by task.post_execute method
-def print_commit_result(context, result, message):
-    LoggingMixin().log.info(message + result \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
-        + '/repositories/' + Variable.get("repo") + '/commits/' + result)
 
 def delete_demo_objects(task_instance):
     branch = lakefs.repository(Variable.get("repo")).branch(Variable.get("sourceBranch"))
@@ -81,7 +79,7 @@ def lakefs_wrapper_dag():
         metadata={"committed_from": "airflow-operator"}
     )
 
-    task_commit_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_commit_etl_branch.post_execute = partial(post_execute_commit, message='lakeFS commit id is: ')
 
     # Merge the changes back to the main branch.
     task_merge_etl_branch = LakeFSMergeOperator(
@@ -93,8 +91,8 @@ def lakefs_wrapper_dag():
         metadata={"committer": "airflow-operator"}
     )
 
-    task_merge_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_branch.post_execute = partial(post_execute_commit, message='lakeFS commit id is: ')
 
     task_delete_demo_objects >> task_create_etl_branch >> task_trigger >> task_commit_etl_branch >> task_merge_etl_branch
-    
+
 sample_workflow_dag = lakefs_wrapper_dag()
