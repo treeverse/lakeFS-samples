@@ -100,7 +100,7 @@ def create_etl_task3_branch(context):
 def load_file(context):
     branch = lakefs.repository(context.resources.variables["repo"]).branch(context.resources.variables["newBranch"] + '_etl_load')
     obj = branch.object(path=context.resources.variables["fileName"])
-    with open(os.getenv("DAGSTER_HOME")+'/'+context.resources.variables["fileName"], mode='rb') as reader, obj.writer(mode='wb') as writer:
+    with open(os.getenv("DAGSTER_HOME")+'/'+context.resources.variables["fileName"], mode='rb') as reader, obj.writer(mode='wb', pre_sign=False) as writer:
         writer.write(reader.read())
         
     my_logger.info(
@@ -278,56 +278,56 @@ def merge_etl_load_branch(context):
 def etl_task1(context):
     repo = lakefs.repository(context.resources.variables["repo"])
     branch = repo.branch(context.resources.variables["newBranch"]+'_etl_task1')    
-    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r').read()
+    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 1:
         raise Failure(
             description="Column _c0 not found in schema")
     else:
-        return branch.object(path=context.resources.variables["newPath"] + '_c0/' + context.resources.variables["fileName"]).upload(mode='wb', data=content)
+        return branch.object(path=context.resources.variables["newPath"] + '_c0/' + context.resources.variables["fileName"]).upload(mode='wb', data=content, pre_sign=False)
         
 @op(required_resource_keys={"variables"}, ins={"start": In(Nothing)})
 def etl_task2_1(context):
     repo = lakefs.repository(context.resources.variables["repo"])
     branch = repo.branch(context.resources.variables["newBranch"]+'_etl_task2')
-    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r').read()
+    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 2:
         raise Failure(
             description="Column _c1 not found in schema struct<_c0:string>")
     else:
-        return branch.object(path=context.resources.variables["newPath"] + '_c1/' + context.resources.variables["fileName"]).upload(mode='wb', data=content)
+        return branch.object(path=context.resources.variables["newPath"] + '_c1/' + context.resources.variables["fileName"]).upload(mode='wb', data=content, pre_sign=False)
         
 @op(required_resource_keys={"variables"}, ins={"start": In(Nothing)})
 def etl_task2_2(context):
     repo = lakefs.repository(context.resources.variables["repo"])
     branch = repo.branch(context.resources.variables["newBranch"]+'_etl_task2')
-    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r').read()
+    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 3:
         raise Failure(
             description="Column _c2 not found in schema struct<_c0:string,_c1:string>")
     else:
-        return branch.object(path=context.resources.variables["newPath"] + '_c2/' + context.resources.variables["fileName"]).upload(mode='wb', data=content)
+        return branch.object(path=context.resources.variables["newPath"] + '_c2/' + context.resources.variables["fileName"]).upload(mode='wb', data=content, pre_sign=False)
         
 @op(required_resource_keys={"variables"}, ins={"start": In(Nothing)})
 def etl_task2_3(context):
     repo = lakefs.repository(context.resources.variables["repo"])
     branch = repo.branch(context.resources.variables["newBranch"]+'_etl_task2')
-    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r').read()
+    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 4:
         raise Failure(
             description="Column _c3 not found in schema struct<_c0:string,_c1:string,_c2:string>")
     else:
-        return branch.object(path=context.resources.variables["newPath"] + '_c3/' + context.resources.variables["fileName"]).upload(mode='wb', data=content)
+        return branch.object(path=context.resources.variables["newPath"] + '_c3/' + context.resources.variables["fileName"]).upload(mode='wb', data=content, pre_sign=False)
         
 @op(required_resource_keys={"variables"}, ins={"start": In(Nothing)})
 def etl_task3(context):
     repo = lakefs.repository(context.resources.variables["repo"])
     branch = repo.branch(context.resources.variables["newBranch"]+'_etl_task3')
-    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r').read()
+    content = branch.object(path=context.resources.variables["fileName"]).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 5:
         raise Failure(
             description="Column _c4 not found in schema struct<_c0:string,_c1:string,_c2:string,_c3:string>")
     else:
-        return branch.object(path=context.resources.variables["newPath"] + '_c4/' + context.resources.variables["fileName"]).upload(mode='wb', data=content)
+        return branch.object(path=context.resources.variables["newPath"] + '_c4/' + context.resources.variables["fileName"]).upload(mode='wb', data=content, pre_sign=False)
         
 @job(resource_defs={
     "io_manager": mem_io_manager,

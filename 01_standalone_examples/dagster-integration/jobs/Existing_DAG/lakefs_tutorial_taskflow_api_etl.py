@@ -54,7 +54,7 @@ def load(context, total_order_value: float):
 
     # [START of lakeFS Code]
     branch = lakefs.repository(context.resources.variables["repo"]).branch(context.resources.variables["newBranch"])
-    w = branch.object("total_order_value.txt").writer(metadata={'using': 'python_wrapper', 'source':'Marketing system'})
+    w = branch.object("total_order_value.txt").writer(pre_sign=False, metadata={'using': 'python_wrapper', 'source':'Marketing system'})
     w.write(f"Total order value is: {total_order_value:.2f}")
     w.close()
     # [END of lakeFS Code]
