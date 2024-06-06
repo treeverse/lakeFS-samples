@@ -10,6 +10,9 @@ _Incorporating the Docker Compose formally known as **Everything Bagel**._
 
 _lakeFS is a popular open-source solution for managing data. It provides a consistent and scalable data management layer on top of cloud storage, such as Amazon S3, Azure Blob Storage, or Google Cloud Storage. It allows users to create and manage data in a version-controlled and immutable manner, and offers features such as data governance, data lineage, and data access controls. lakeFS is compatible with a wide range of data processing frameworks and tools._
 
+### **Go to [lakefs_enterprise](./02_lakefs_enterprise/) folder if you want to use [lakeFS Enterprise](https://docs.lakefs.io/understand/enterprise/) instead of lakeFS open source**
+
+
 ## Let's Get Started 👩🏻‍💻
 
 Clone this repository

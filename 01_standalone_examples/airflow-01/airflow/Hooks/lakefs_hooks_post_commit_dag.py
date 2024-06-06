@@ -14,6 +14,10 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from io import StringIO
 
+import sys
+sys.path.insert(0, '/home/jovyan')
+from lakefs_demo import print_commit_result, post_execute_commit
+
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 default_args = {
@@ -24,12 +28,6 @@ default_args = {
     "default-branch": Variable.get("sourceBranch"),
     "lakefs_conn_id": Variable.get("conn_lakefs")
 }
-
-# The execution context and any results are automatically passed by task.post_execute method
-def print_commit_result(context, result, message):
-    LoggingMixin().log.info(message + result \
-        + ' and lakeFS URL is: ' + Variable.get("lakefsUIEndPoint") \
-        + '/repositories/' + Variable.get("repo") + '/commits/' + result)
 
 @dag(default_args=default_args,
      render_template_as_native_obj=True,
@@ -82,7 +80,7 @@ def lakefs_hooks_post_commit_dag():
         metadata={"committed_from": "airflow-operator"}
     )
 
-    task_commit_etl_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_commit_etl_branch.post_execute = partial(post_execute_commit, message='lakeFS commit id is: ')
 
     # Merge the changes back to the main branch.
     task_merge_etl_to_ingest_branch = LakeFSMergeOperator(
@@ -94,7 +92,7 @@ def lakefs_hooks_post_commit_dag():
         metadata={"committer": "airflow-operator"}
     )
 
-    task_merge_etl_to_ingest_branch.post_execute = partial(print_commit_result, message='lakeFS commit id is: ')
+    task_merge_etl_to_ingest_branch.post_execute = partial(post_execute_commit, message='lakeFS commit id is: ')
 
     task_create_etl_branch >> task_transformation >> task_create_success_file >> task_commit_etl_branch >> task_merge_etl_to_ingest_branch
     
