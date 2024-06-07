@@ -5,7 +5,7 @@ import os
 def lakefs_ui_endpoint():
     lakefsEndPoint = os.getenv("LAKECTL_SERVER_ENDPOINT_URL")
     if lakefsEndPoint.startswith('http://host.docker.internal'):
-        lakefsUIEndPoint = 'http://127.0.0.1:8000'
+        lakefsUIEndPoint = lakefsEndPoint.replace('host.docker.internal','127.0.0.1')
     elif lakefsEndPoint.startswith('http://lakefs'):
         lakefsUIEndPoint = 'http://127.0.0.1:28000'
     else:
