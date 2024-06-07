@@ -6,7 +6,6 @@ services:
   database:
     image: postgres:15.2-alpine
     container_name: database-prefect
-    restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -18,7 +17,6 @@ services:
   server:
     image: prefecthq/prefect:2.10.17-python3.11
     container_name: server-prefect
-    restart: always
     volumes:
       - prefect:/root/.prefect
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
@@ -40,7 +38,6 @@ services:
   agent:
     image: prefecthq/prefect:2.10.17-python3.11
     container_name: agent-prefect
-    restart: always
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "agent", "start", "-q", "YOUR_WORK_QUEUE_NAME"]
     environment:
       - PREFECT_API_URL=http://server:4200/api
