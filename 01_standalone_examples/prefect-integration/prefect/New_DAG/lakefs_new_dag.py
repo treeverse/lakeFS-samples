@@ -86,7 +86,7 @@ def load_file(new_branch: str):
     branch_name = new_branch + '_etl_load'
     branch = lakefs.repository(variables.get("repo")).branch(branch_name)
     obj = branch.object(path=variables.get("file_name"))
-    with open(variables.get("file_path")+'/'+variables.get("file_name"), mode='rb') as reader, obj.writer(mode='wb') as writer:
+    with open(variables.get("file_path")+'/'+variables.get("file_name"), mode='rb') as reader, obj.writer(mode='wb', pre_sign=False) as writer:
         writer.write(reader.read())
 
     my_logger = get_run_logger()
@@ -252,51 +252,51 @@ def merge_etl_load_branch(new_branch: str):
 def etl_task1(new_branch: str):
     repo = lakefs.repository(variables.get("repo"))
     branch = repo.branch(new_branch+'_etl_task1')    
-    content = branch.object(path=variables.get("file_name")).reader(mode='r').read()
+    content = branch.object(path=variables.get("file_name")).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 1:
         raise Exception("Column _c0 not found in schema")
     else:
-        return branch.object(path=variables.get("new_path") + '_c0/' + variables.get("file_name")).upload(mode='wb', data=content)
+        return branch.object(path=variables.get("new_path") + '_c0/' + variables.get("file_name")).upload(mode='wb', data=content, pre_sign=False)
 
 @task(name='ETL Task2_1')
 def etl_task2_1(new_branch: str):
     repo = lakefs.repository(variables.get("repo"))
     branch = repo.branch(new_branch+'_etl_task2')    
-    content = branch.object(path=variables.get("file_name")).reader(mode='r').read()
+    content = branch.object(path=variables.get("file_name")).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 2:
         raise Exception("Column _c1 not found in schema struct<_c0:string>")
     else:
-        return branch.object(path=variables.get("new_path") + '_c1/' + variables.get("file_name")).upload(mode='wb', data=content)
+        return branch.object(path=variables.get("new_path") + '_c1/' + variables.get("file_name")).upload(mode='wb', data=content, pre_sign=False)
         
 @task(name='ETL Task2_2')
 def etl_task2_2(new_branch: str):
     repo = lakefs.repository(variables.get("repo"))
     branch = repo.branch(new_branch+'_etl_task2')    
-    content = branch.object(path=variables.get("file_name")).reader(mode='r').read()
+    content = branch.object(path=variables.get("file_name")).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 3:
         raise Exception("Column _c2 not found in schema struct<_c0:string,_c1:string>")
     else:
-        return branch.object(path=variables.get("new_path") + '_c2/' + variables.get("file_name")).upload(mode='wb', data=content)
+        return branch.object(path=variables.get("new_path") + '_c2/' + variables.get("file_name")).upload(mode='wb', data=content, pre_sign=False)
         
 @task(name='ETL Task2_3')
 def etl_task2_3(new_branch: str):
     repo = lakefs.repository(variables.get("repo"))
     branch = repo.branch(new_branch+'_etl_task2')    
-    content = branch.object(path=variables.get("file_name")).reader(mode='r').read()
+    content = branch.object(path=variables.get("file_name")).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 4:
         raise Exception("Column _c3 not found in schema struct<_c0:string,_c1:string,_c2:string>")
     else:
-        return branch.object(path=variables.get("new_path") + '_c3/' + variables.get("file_name")).upload(mode='wb', data=content)
+        return branch.object(path=variables.get("new_path") + '_c3/' + variables.get("file_name")).upload(mode='wb', data=content, pre_sign=False)
         
 @task(name='ETL Task3')
 def etl_task3(new_branch: str):
     repo = lakefs.repository(variables.get("repo"))
     branch = repo.branch(new_branch+'_etl_task3')    
-    content = branch.object(path=variables.get("file_name")).reader(mode='r').read()
+    content = branch.object(path=variables.get("file_name")).reader(mode='r', pre_sign=False).read()
     if len(content.split(",")) < 5:
         raise Exception("Column _c4 not found in schema struct<_c0:string,_c1:string,_c2:string,_c3:string>")
     else:
-        return branch.object(path=variables.get("new_path") + '_c4/' + variables.get("file_name")).upload(mode='wb', data=content)
+        return branch.object(path=variables.get("new_path") + '_c4/' + variables.get("file_name")).upload(mode='wb', data=content, pre_sign=False)
        
 @flow(name='lakeFS New DAG', flow_run_name=generate_flow_run_name)
 def lakefs_new_dag():
