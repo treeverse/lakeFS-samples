@@ -8,6 +8,7 @@
 ./hooks-webhooks-demo.ipynb
 ./hooks-schema-and-pii-validation.ipynb
 ./hooks-schema-validation.ipynb
+./hooks-metadata-validation.ipynb
 
 # This only works against lakeFS cloud
 ./rbac-demo.ipynb
