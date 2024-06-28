@@ -1,0 +1,46 @@
+#Commit Metadata Validator
+#
+#Args:
+# - Key (string) is the metadata field name to check
+# - Value (map<string,string>)  is optional parameters.
+#     Currently supported: "pattern" whose value is a regexp pattern to match the metadata field value against
+
+#Validate the existence of mandatory metadata describing a dataset.
+#A metadata file should exist either in the same directory as the modified dataset, or in any parent directory.
+#The closest metadata file would take precedence (i.e. same folder > parent > 2nd parent).
+#Metadata file must contain required fields and must match the structure passed via arguments
+
+name: Validate Commit Metadata and Dataset Metadata Fields
+on:
+  pre-merge:
+    branches:
+      - main
+hooks:
+  - id: check_commit_metadata
+    type: lua
+    properties:
+      script_path: scripts/commit_metadata_validator.lua # location of this script in the repository!
+      args:
+        notebook_url: {"pattern": "github.com/.*"}
+        spark_version:  {}
+  - id: validate_datasets
+    type: lua
+    properties:
+      script_path: scripts/dataset_validator.lua
+      args:
+        prefix: 'datasets/'
+        metadata_file_name: dataset_metadata.yaml
+        fields:
+          - name: contains_pii
+            required: true
+            type: boolean
+          - name: approval_link
+            required: true
+            type: string
+            match_pattern: 'https?:\/\/.*'
+          - name: rank
+            required: true
+            type: number
+          - name: department
+            type: string
+            choices: ['hr', 'it', 'other']

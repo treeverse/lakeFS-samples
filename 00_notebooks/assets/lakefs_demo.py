@@ -22,3 +22,13 @@ def print_commit(log):
     print('Parents:', log.parents)
     print('Metadata:')
     pprint(log.metadata)
+
+def lakefs_ui_endpoint(lakefsEndPoint):
+    if lakefsEndPoint.startswith('http://host.docker.internal'):
+        lakefsUIEndPoint = lakefsEndPoint.replace('host.docker.internal','127.0.0.1')
+    elif lakefsEndPoint.startswith('http://lakefs'):
+        lakefsUIEndPoint = lakefsEndPoint.replace('lakefs','127.0.0.1')
+    else:
+        lakefsUIEndPoint = lakefsEndPoint
+        
+    return lakefsUIEndPoint
