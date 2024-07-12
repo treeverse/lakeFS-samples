@@ -1,0 +1,2 @@
+lakefs>=0.4.0
+tabulate
