@@ -12,6 +12,7 @@
 
 # This only works against lakeFS cloud
 ./rbac-demo.ipynb
+./data-collaboration.ipynb
 
 # These notebooks include a deliberate failure as part of 
 # the data Audit step, and so will always throw an error (by design)
