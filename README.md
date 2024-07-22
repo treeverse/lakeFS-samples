@@ -80,6 +80,8 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
     * Isolating Airflow job run and atomic promotion to production
     * Integration of lakeFS with Airflow via Hooks
     * Troubleshooting production issues
+    * Integration of lakeFS with Airflow and Databricks
+    * Integration of lakeFS with Airflow and Iceberg
 * [Airflow (2)](./01_standalone_examples/airflow-02/) - lakeFS + Airflow
 * [Azure Databricks](./01_standalone_examples/azure-databricks/)
 * [AWS Databricks](./01_standalone_examples/aws-databricks/)
