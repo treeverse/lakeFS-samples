@@ -2,7 +2,19 @@
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
-**This sample captures a collection of Databricks notebooks and GitHub Action code that demonstrate how to run Databricks ETL jobs in an isolated environment by using lakeFS.**
+Data engineers typically don't develop against production data due to concerns regarding PII, time, and scale. Instead, they develop ETL jobs on a subset of data and promote code via Git. The challenge is that this code is not tested on production data until promotion. This process can lead to issues because the subset of data used will differ from the production environment.
+
+### Solution with lakeFS: ###
+
+-Git Action Integration: lakeFS can use a Git action during pull requests to import code to lakeFS
+
+-Isolated Production Copy: Every promotion creates an isolated copy of the production data using a [zero-copy import](https://docs.lakefs.io/understand/performance-best-practices.html#use-zero-copy-import) to lakeFS
+
+-Safe Testing: Code runs against this isolated copy, allowing testing in a production-like environment
+
+-Safety Net: If anything fails, the code isn't promoted, providing a safety net
+
+This demo shows how lakeFS uses Git actions to perform a zero-copy import of production data for ETL promotions in both Python and Scala. This allows testing against production-like data and only promotes successful code changes. In this demo, we’ll see how changing an ETL job can trigger a validation error through a Git action.
 
 ## Prerequisites
 * lakeFS installed and running on a server or in the cloud. If you don't have lakeFS already running then either use [lakeFS Cloud](https://demo.lakefs.io/) which provides free lakeFS server on-demand with a single click or refer to [lakeFS Quickstart](https://docs.lakefs.io/quickstart/) doc.
@@ -94,63 +106,22 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 ## Demo Instructions for Python ETL Jobs
 
 1. Create a new branch in your Git repository. Select the newly created branch.
+<img src="./files/images/1-CreateBranch.gif" width="534" height="303"/>
 1. Remove the comment from the last 5 lines of code in **ETL Job.py** inside the **databricks-notebooks** folder and Commit your changes.
+<img src="./files/images/2-remove Last 5 lines.gif" width="534" height="303"/>
 1. Go to the **Pull requests** tab in your Git repo, create Pull Request.
+<img src="./files/images/3-Create PR.gif" width="534" height="303"/>
 1. Go to the **Actions** tab in your Git repo. Git Action will start running automatically and validation checks will fail.
+<img src="./files/images/4-actions.gif" width="534" height="303"/>
 1. Go back to the **Code** tab in your Git repo and select the branch created in 1st step. Comment back the last 5 lines of code in **ETL Job.py** and Commit your changes.
+
+   <img src="./files/images/5-fixCode.gif" width="534" height="303"/>
 1. Go back to the **Actions** tab in your Git repo. Git Action will start running again and validation checks will pass this time.
+<img src="./files/images/6-PassedETL.gif" width="534" height="303"/>
 
-## Demo Instructions for Scala ETL Jobs
-#### Additional Setup
+We just safely promoted our ETL jobs using lakeFS and Git actions. By creating a branch, modifying code, and running validation checks, you ensured that changes are tested in an isolated environment. 
 
-1. This demo will compile Scala programs and will build a JAR file. Demo will upload the JAR file to AWS S3. Demo will also create a Databricks cluster on the fly and will install the JAR file and lakeFS libraries. So, additional setup steps are required.
-
-1. Remove **pr_commit_run_databricks_etl_job.yml** file from **.github/workflows** folder in your Git repo.
-
-1. Upload **pr_commit_run_scala_etl_jobs.yml** file in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/scala_etl_jobs** folder to **.github/workflows** folder in your Git repo.
-
-1. Create folder **scala_etl_jobs** in your Git repo.
-
-1. Upload all files in **lakeFS-samples/01_standalone_examples/databricks-ci-cd/scala_etl_jobs** folder to **scala_etl_jobs** folder in your Git repo.
-
-1. Add following secrets in your Git repo:
-* AWS Access Key so GitHub Action can upload JAR file to S3 and Databricks cluster can access S3 bucket:
-
-      AWS_ACCESS_KEY
-
-* AWS Secret Key so GitHub Action can upload JAR file to S3 and Databricks cluster can access S3 bucket:
-
-      AWS_SECRET_KEY
-
-* LakeFS Access Key so Databricks cluster can access lakeFS server:
-
-      LAKEFS_ACCESS_KEY
-
-* LakeFS Secret Key so Databricks cluster can access lakeFS server:
-
-      LAKEFS_SECRET_KEY
-
-7. Add following variables in your Git repo to upload JAR file to S3:
-* AWS Region e.g. us-east-1:
-
-      AWS_REGION
-
-* AWS S3 bucket name e.g. sample-jars:
-
-      AWS_BUCKET_FOR_JARS
-
-* Root folder name in S3 bucket used above e.g. uploaded-jars:
-
-      AWS_BUCKET_ROOT_FOLDER_FOR_JARS
-
-#### Demo Instructions
-1. Create a new branch in your Git repository. Select the newly created branch.
-1. Remove the comment from the last 4 lines of code in **etl_jobs.scala** inside the **scala_etl_jobs/src/main/scala/example** folder and Commit your changes.
-1. Go to the **Pull requests** tab in your Git repo, create Pull Request.
-1. Go to the **Actions** tab in your Git repo. Git Action will start running automatically and validation checks will fail.
-1. Go back to the **Code** tab in your Git repo and select the branch created in 1st step. Comment back the last 4 lines of code in **etl_jobs.scala** and Commit your changes.
-1. Go back to the **Actions** tab in your Git repo. Git Action will start running again and validation checks will pass this time.
-
+For a Scala ETL job demo, go to the "scala-demo" section. Below, find useful references for this demo, and for Git actions.
 
 ## Useful Information
 
