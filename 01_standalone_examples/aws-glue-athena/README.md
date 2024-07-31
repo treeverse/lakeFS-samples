@@ -4,9 +4,9 @@ Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-cours
 
 This repository includes following Glue jobs:
 
-1. glue-athena-demo-notebook:
+1. glue-exporter-athena-demo-notebook:
 * Use Case: Isolated Dev/Test Environments
-* This interactive notebook demonstrate integration of lakeFS with [Glue Catalog](https://docs.lakefs.io/integrations/glue_hive_metastore.html) and [Athena](https://docs.lakefs.io/integrations/athena.html). 
+* This interactive notebook demonstrate integration of lakeFS with [Glue Catalog](https://docs.lakefs.io/integrations/glue_metastore.html) and [Athena](https://docs.lakefs.io/integrations/athena.html). 
 
 2. glue-lakefs-demo:
 * Use Case: Version Control of multi-buckets pipelines
@@ -20,7 +20,7 @@ This repository includes following Glue jobs:
 ## Setup
 
 Download these programs from GitHub and import it in your AWS Glue Studio:
-1. glue-athena-demo-notebook:
+1. glue-exporter-athena-demo-notebook:
 * Upload this as a Jupyter notebook in your AWS Glue Studio.
 
 2. glue-lakefs-demo:
@@ -30,7 +30,7 @@ Download these programs from GitHub and import it in your AWS Glue Studio:
 
 ## Demo Instructions
 
-1. glue-athena-demo-notebook:
+1. glue-exporter-athena-demo-notebook:
 * Open this notebook in Glue Studio and follow the instructions.
 
 2. glue-lakefs-demo:
