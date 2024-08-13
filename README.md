@@ -91,6 +91,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
 * [Image Segmentation Demo: ML Data Version Control and Reproducibility at Scale](./01_standalone_examples/image-segmentation/)
+* [lakeFS Mount Demo: Fast Data Loading for Deep Learning Workloads with lakeFS Mount](./01_standalone_examples/deep-learning-with-mount/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [Kafka integration](./01_standalone_examples/kafka/)
 * [Flink integration](./01_standalone_examples/flink/)
