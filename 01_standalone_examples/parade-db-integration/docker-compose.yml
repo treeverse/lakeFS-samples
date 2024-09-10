@@ -60,7 +60,7 @@ services:
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
 
-                MinIO admin:   http://127.0.0.1:59001/
+                MinIO admin:   http://127.0.0.1:9007/
                 
                        Username : minioadmin
                        Password : minioadmin
@@ -68,11 +68,11 @@ services:
           echo "------------------------------------------------"
           wait-for -t 60 jupyter-notebook:8888 && echo '
 
-                Jupyter:       http://127.0.0.1:58888/
+                Jupyter:       http://127.0.0.1:8895/
                 '
           echo "------------------------------------------------"
           echo ""
-          echo "      lakeFS Web UI: http://127.0.0.1:58000/"
+          echo "      lakeFS Web UI: http://127.0.0.1:8007/"
           echo ""
           echo "                                           >(.＿.)<"
           echo "                                             (  )_ "
