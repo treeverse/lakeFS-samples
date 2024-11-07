@@ -1,6 +1,6 @@
 # Overview
 
-[lakeFS](https://lakefs.io/) is a data versioning application that brings git-like versioning to object storage. It can interface with many object storage applications on the backend, and provide a S3 API gateway for object storage clients to connect to. In this demo, we'll configure OpenShift AI to connect over S3 interace to lakeFS, which will version the data in a backend [Minio](https://min.io/docs/minio/kubernetes/openshift/index.html) instance.
+[lakeFS](https://lakefs.io/) is a data versioning application that brings git-like versioning to object storage. It can interface with many object storage applications on the backend, and provide a S3 API gateway for object storage clients to connect to. In this demo, we'll configure OpenShift AI to connect over S3 interace to lakeFS, which will version the data in a backend [MinIO](https://min.io/docs/minio/kubernetes/openshift/index.html) instance.
 
 ![lakefs](img/lakefs.png)
 
@@ -37,13 +37,13 @@ git clone https://github.com/treeverse/lakeFS-samples.git
 cd lakeFS-samples/01_standalone_examples/red-hat-openshift-ai/cluster-configuration
 ```
 
-4. Deploy Minio in the lakefs project using the `minio-via-lakefs.yaml` file.
+4. Deploy MinIO in the lakefs project using the `minio-via-lakefs.yaml` file.
 
 ```
 oc apply -f minio-via-lakefs.yaml
 ```
 
-5. Edit the `lakefs-minio.yaml` file to configure the Minio access credentials. The values can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user.
+5. Edit the `lakefs-minio.yaml` file to configure the MinIO access credentials. The values can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user.
 
 ```
 blockstore:
@@ -67,11 +67,11 @@ oc apply -f lakefs-minio.yaml
 
 You should now be able to run through the [Fraud Detection demo](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2.13/html/openshift_ai_tutorial_-_fraud_detection_example/index). When cloning the notebooks from the repo, be sure to pull them from the `lakeFS-samples` repo as the notebooks there have been modified from the default notebooks to incorporate lakeFS.
 
-See [lakeFS documentation](https://docs.lakefs.io/) and [Minio documentation for OpenShift](https://min.io/docs/minio/kubernetes/openshift/index.html) for details.
+See [lakeFS documentation](https://docs.lakefs.io/) and [MinIO documentation for OpenShift](https://min.io/docs/minio/kubernetes/openshift/index.html) for details.
 
 # File Descriptions
 
-- [lakefs-local.yaml](./lakefs-local.yaml): Bring up lakeFS using local object storage. This would be useful for a quick demo where Minio is not included.
-- [lakefs-minio.yaml](./lakefs-minio.yaml): Bring up lakeFS configured to use Minio as backend object storage. This will be used in the lakeFS demo.
-- [minio-direct.yaml](./minio-direct.yaml): This file would only be used if lakeFS is not in the picture and OpenShift AI will communicate directly with Minio. It will bring up Minio as it is in the default Fraud Detection demo, complete with configuring Minio storage buckets and the OpenShift AI data connections. It may serve useful in debugging an issue.
-- [minio-via-lakefs.yaml](./minio-via-lakefs.yaml): Bring up Minio for the modified Fraud Detection demo that includes lakeFS, complete with configuring Minio storage buckets, but do NOT configure the OpenShift AI data connections. This will be used in the lakeFS demo.
+- [lakefs-local.yaml](./lakefs-local.yaml): Bring up lakeFS using local object storage. This would be useful for a quick demo where MinIO is not included.
+- [lakefs-minio.yaml](./lakefs-minio.yaml): Bring up lakeFS configured to use MinIO as backend object storage. This will be used in the lakeFS demo.
+- [minio-direct.yaml](./minio-direct.yaml): This file would only be used if lakeFS is not in the picture and OpenShift AI will communicate directly with MinIO. It will bring up MinIO as it is in the default Fraud Detection demo, complete with configuring MinIO storage buckets and the OpenShift AI data connections. It may serve useful in debugging an issue.
+- [minio-via-lakefs.yaml](./minio-via-lakefs.yaml): Bring up MinIO for the modified Fraud Detection demo that includes lakeFS, complete with configuring MinIO storage buckets, but do NOT configure the OpenShift AI data connections. This will be used in the lakeFS demo.
