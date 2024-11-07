@@ -43,7 +43,14 @@ cd lakeFS-samples/01_standalone_examples/red-hat-openshift-ai/cluster-configurat
 oc apply -f minio-via-lakefs.yaml
 ```
 
-5. Edit the `lakefs-minio.yaml` file to configure the MinIO access credentials. The values can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user.
+5. Edit the `lakefs-minio.yaml` file to configure the MinIO access credentials. The values can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user. In OpenShift web console, switch to the Administrator persona using the drop-down at the top left:
+    * Expand the **Workloads** navigation
+    * Click on **Secrets**
+    * Filter for 'minio' name
+    * Click on the **minio-root-user** secret
+    * Scroll down and click on 'Reveal values' to see the user and password
+    * Put those values in the lakefs-minio.yaml file
+    * Use that file to deploy lakeFS
 
 ```
 blockstore:
