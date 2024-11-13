@@ -173,6 +173,10 @@ spec:
               print('creating my-storage bucket')
               if bucket not in [bu["Name"] for bu in s3.list_buckets()["Buckets"]]:
                 s3.create_bucket(Bucket=bucket)
+              bucket = 'quickstart'
+              print('creating quickstart bucket')
+              if bucket not in [bu["Name"] for bu in s3.list_buckets()["Buckets"]]:
+                s3.create_bucket(Bucket=bucket)
               EOF
           command:
             - /bin/bash

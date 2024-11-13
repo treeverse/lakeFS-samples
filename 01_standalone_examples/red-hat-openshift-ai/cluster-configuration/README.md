@@ -43,53 +43,28 @@ Deploy MinIO in the `lakefs` project using the `minio-via-lakefs.yaml` file.
 ```
 oc apply -f minio-via-lakefs.yaml
 ```
-A random MinIO root user and password will be generated, stored in a `secret`, and used to populate MinIO with two storage buckets. One called **my-storage** and another called **pipeline artifacts**.
+A random MinIO root user and password will be generated, stored in a `secret`, and used to populate MinIO with three storage buckets:
+* **my-storage** 
+* **pipeline artifacts**
+* **quickstart**
+
 
 ### Deploy LakeFS
-Edit the `lakefs-minio.yaml` file to configure the MinIO access credentials. The values can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user (ie. kubeadmin).
+Deploy LakeFS in the **lakefs** project using the `lakefs-minio.yaml` file. This yaml will not only deploy lakefs but also:
+* connect it with minio buckets created earlier
+* create two lakefs repo:
+  * **quickstart:** as a sample data repo
+  * **my-storage** which is connected to backed my-storage s3 bucket created earlier
 
-- Switch to the **Administrator** persona using the drop-down at the top left
-- Expand the **Workloads** navigation
-- Click on **Secrets**
-- Filter for 'minio' name
-- Click on the **minio-root-user** secret
-- Scroll down and click on **Reveal values** to see the MinIO root user and password
-- Replace **MINIO_ROOT_USER** and **MINIO_ROOT_USER_PASSWORD** in the `lakefs-minio.yaml` as shown below with the values in the `secret`
 
-```
-blockstore:
-  type: s3
-  s3:
-    force_path_style: true
-    endpoint: http://minio:9000
-    discover_bucket_region: false
-    credentials:
-      access_key_id: MINIO_ROOT_USER
-      secret_access_key: MINIO_ROOT_USER_PASSWORD
-```
-
-Deploy LakeFS in the **lakefs** project using the `lakefs-minio.yaml` file.
 
 ```
 oc apply -f lakefs-minio.yaml
 ```
-
-### Configure LakeFS
-You can now log into the OpenShift cluster's web console as a regular user (ie. developer). Follow the arrows in the screenshot below to find the LakeFS `route`, which provides external access to the LakeFS administrator. Use the LakeFS route to access the LakeFS UI. Create your repo, which will use the two storage buckets in MinIO as its backend storage.
-
-For this demo, you can use the following credentials to access the LakeFS UI.
-
+Lakefs credentials if needed:
 * **User**: admin
 * **Access Key**: something
 * **Secret Access Key**: simple
-
-![lakefs](img/lakefs-route.png)
-
-NOTES:
-- You can also follow those steps, but click on MinIO in the topology, to find the `route` to access MinIO's console or S3 interface.
-- If you don't see the visual layout as shown in the screenshot, then click on the icon highlighted below to change the view.
-
-![lakefs](img/topology.png)
 
 ### Access OpenShift AI Console
 From the OpenShift web console, you can now open the OpenShift AI web console as shown below.

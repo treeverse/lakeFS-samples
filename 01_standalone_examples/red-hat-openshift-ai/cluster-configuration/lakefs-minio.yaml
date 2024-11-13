@@ -92,15 +92,25 @@ spec:
                 sleep 5
               done
               echo "lakeFS is ready!"
-              
+              echo
+              echo
               # Create repository using lakeFS API
-              echo "Creating repository..."
+              echo "Creating quickstart repository..."
+              curl -u "something:simple" \
+                   -X POST \
+                   -H "Content-Type: application/json" \
+                   -d '{"name": "quickstart", "storage_namespace": "s3://quickstart/", "default_branch": "main", "sample_data": true}' \
+                   http://my-lakefs.lakefs-fraud-detection.svc.cluster.local/api/v1/repositories || true
+              echo "quickstart repository created!"
+              echo
+              echo
+              echo "Creating my-storage repository..."
               curl -u "something:simple" \
                    -X POST \
                    -H "Content-Type: application/json" \
                    -d '{"name": "my-storage", "storage_namespace": "s3://my-storage/", "default_branch": "main"}' \
                    http://my-lakefs.lakefs-fraud-detection.svc.cluster.local/api/v1/repositories || true
-              echo "Repository created!"
+              echo "my-storage repository created!"
       restartPolicy: Never
       serviceAccountName: demo-setup
 ---
