@@ -8,6 +8,7 @@ services:
       # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
       - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
     ports:
+    # ports used
       - 8888:8888 # Jupyter
       - 4040:4040 # Spark
     volumes:
