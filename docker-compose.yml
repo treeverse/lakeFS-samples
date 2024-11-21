@@ -11,6 +11,7 @@ services:
       - 8888:8888 # Jupyter
       - 4040:4040 # Spark
     volumes:
+    # volumes used
       - ./00_notebooks:/home/jovyan/notebooks
       - ./data:/data
 
