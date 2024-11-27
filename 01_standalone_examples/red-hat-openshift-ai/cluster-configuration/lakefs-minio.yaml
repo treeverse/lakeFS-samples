@@ -87,7 +87,7 @@ spec:
             - |
               # Wait for lakeFS to be ready
               echo "Waiting for lakeFS service to be ready..."
-              while ! curl -s http://my-lakefs.lakefs-fraud-detection.svc.cluster.local:80/_health; do
+              while ! curl -s http://my-lakefs.lakefs.svc.cluster.local:80/_health; do
                 echo -n "."
                 sleep 5
               done
@@ -100,7 +100,7 @@ spec:
                    -X POST \
                    -H "Content-Type: application/json" \
                    -d '{"name": "quickstart", "storage_namespace": "s3://quickstart/", "default_branch": "main", "sample_data": true}' \
-                   http://my-lakefs.lakefs-fraud-detection.svc.cluster.local/api/v1/repositories || true
+                   http://my-lakefs.lakefs.svc.cluster.local/api/v1/repositories || true
               echo "quickstart repository created!"
               echo
               echo
@@ -109,7 +109,7 @@ spec:
                    -X POST \
                    -H "Content-Type: application/json" \
                    -d '{"name": "my-storage", "storage_namespace": "s3://my-storage/", "default_branch": "main"}' \
-                   http://my-lakefs.lakefs-fraud-detection.svc.cluster.local/api/v1/repositories || true
+                   http://my-lakefs.lakefs.svc.cluster.local/api/v1/repositories || true
               echo "my-storage repository created!"
       restartPolicy: Never
       serviceAccountName: demo-setup
