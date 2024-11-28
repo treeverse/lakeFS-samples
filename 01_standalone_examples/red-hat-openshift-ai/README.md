@@ -116,7 +116,7 @@ See [LakeFS documentation](https://docs.lakefs.io/) and [MinIO documentation for
 
 # File Descriptions
 
-- [lakefs-local.yaml](./lakefs-local.yaml): Bring up LakeFS using local object storage. This would be useful for a quick demo where MinIO is not included.
-- [lakefs-minio.yaml](./lakefs-minio.yaml): Bring up LakeFS configured to use MinIO as backend object storage. This will be used in the LakeFS demo.
-- [minio-direct.yaml](./minio-direct.yaml): This file would only be used if LakeFS is not in the picture and OpenShift AI will communicate directly with MinIO. It will bring up MinIO as it is in the default Fraud Detection demo, complete with configuring MinIO storage buckets and the OpenShift AI data connections. It may serve useful in debugging an issue.
-- [minio-via-lakefs.yaml](./minio-via-lakefs.yaml): Bring up MinIO for the modified Fraud Detection demo that includes LakeFS, complete with configuring MinIO storage buckets, but do NOT configure the OpenShift AI data connections. This will be used in the LakeFS demo.
+- [lakefs-local.yaml](./cluster-configuration/lakefs-local.yaml): Bring up LakeFS using local object storage. This would be useful for a quick demo where MinIO is not included.
+- [lakefs-minio.yaml](./cluster-configuration/lakefs-minio.yaml): Bring up LakeFS configured to use MinIO as backend object storage. This will be used in the LakeFS demo.
+- [minio-direct.yaml](./cluster-configuration/minio-direct.yaml): This file would only be used if LakeFS is not in the picture and OpenShift AI will communicate directly with MinIO. It will bring up MinIO as it is in the default Fraud Detection demo, complete with configuring MinIO storage buckets and the OpenShift AI data connections. It may serve useful in debugging an issue.
+- [minio-via-lakefs.yaml](./cluster-configuration/minio-via-lakefs.yaml): Bring up MinIO for the modified Fraud Detection demo that includes LakeFS, complete with configuring MinIO storage buckets, but do NOT configure the OpenShift AI data connections. This will be used in the LakeFS demo.
