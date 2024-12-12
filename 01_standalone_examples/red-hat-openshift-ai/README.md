@@ -45,7 +45,7 @@ oc apply -f minio-via-lakefs.yaml
 ```
 A random MinIO root user and password will be generated, stored in a `secret`, and used to populate MinIO with three storage buckets:
 * **my-storage** 
-* **pipeline artifacts**
+* **pipeline-artifacts**
 * **quickstart**
 
 
@@ -54,7 +54,7 @@ Deploy lakeFS in the **lakefs** project using the `lakefs-minio.yaml` file. This
 * connect it with MinIO buckets created earlier
 * create two lakeFS repo:
   * **quickstart:** as a sample data repo
-  * **my-storage** which is connected to backed my-storage s3 bucket created earlier
+  * **my-storage** which is connected to backend my-storage s3 bucket created earlier
 
 
 
@@ -67,14 +67,13 @@ You can now log into the OpenShift cluster's web console as a regular user (ie. 
 
 For this demo, you will use the following credentials to access the lakeFS UI.
 
-* **User**: admin
 * **Access Key**: something
 * **Secret Access Key**: simple
 
-![lakefs](img/lakefs-route.png)
+  ![lakefs](img/lakefs-route.png)
 
 NOTES:
-- You can also follow those steps, but click on MinIO in the topology, to find the `route` to access MinIO's console or S3 interface. MinIO access credentials can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user (ie. kubeadmin).
+- You can also follow above steps, but click on MinIO in the topology, to find the `route` to access MinIO's console or S3 interface. MinIO access credentials can be found in the `minio-root-user` secret within the OpenShift web console when logged in as an admin user (ie. kubeadmin).
 
   - Switch to the **Administrator** persona using the drop-down at the top left
   - Expand the **Workloads** navigation
@@ -85,7 +84,7 @@ NOTES:
 
 - If you don't see the visual layout as shown in the screenshot, then click on the icon highlighted below to change the view.
 
-![lakefs](img/topology.png)
+  ![lakefs](img/topology.png)
 
 ### Access OpenShift AI Console
 From the OpenShift web console, you can now open the OpenShift AI web console as shown below.
@@ -100,13 +99,111 @@ After logging in to the OpenShift AI web console, follow the arrows below to cre
 
 ## Fraud Detection Demo
 
-You may now run through the [Fraud Detection demo](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2-latest/html/openshift_ai_tutorial_-_fraud_detection_example/index) in the new **lakefs** data science project. 
+You may now run through the [Fraud Detection demo](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2-latest/html/openshift_ai_tutorial_-_fraud_detection_example/index) in the new **lakefs** data science project. Refer to following notes for the different sections of this demo:
 
-NOTES: 
+2.2. Setting up your data science project:
 * Use the `lakefs` data science project for the demo. You do not need to create a new project.
-* When going through the demo, follow the steps to manually configure the storage data connections. **Do not** follow steps that use a script to automate the MinIO storage deployment, configuration and data connections. 
-* When cloning the notebooks from the git repo in to the workbench, be sure to pull them from the `lakeFS-samples` repo as the notebooks there have been modified from the default notebooks to incorporate lakeFS. Do not use the notebook git repos shown in the demo. 
 
+2.3. Storing data with data connections:
+* When going through the demo, follow the steps to manually configure the storage data connections. **Do not** follow steps that use a script to automate the MinIO storage deployment, configuration and data connections. 
+
+2.3.1. Creating data connections to your own S3-compatible object storage:
+* When creating "My Storage" data connection, use lakeFS access key ("something"), secret key ("simple"), endpoint ("http://my-lakefs"), region ("us-east-1") and bucket ("my-storage") instead of MinIO access key and endpoint:
+
+  ![My Storage data connection](img/data-connection-my-storage.png)
+
+* When creating "Pipeline Artifacts" data connection, use MinIO access key, secret key, endpoint (the route to access MinIO's S3 interface), region ("us-east-1") and bucket ("pipeline-artifacts"):
+
+  ![Pipeline Artifacts data connection](img/data-connection-pipeline-artifacts.png)
+
+3.1. Creating a workbench and selecting a notebook image:
+* While creating Workbench add environment variables to access lakeFS: 
+  * LAKECTL_SERVER_ENDPOINT_URL = http://my-lakefs
+  * LAKEFS_REPO_NAME = my-storage
+  * LAKEFS_DEFAULT_REGION =us-east-1 
+  * LAKECTL_CREDENTIALS_ACCESS_KEY_ID = something
+  * LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY = simple
+
+  ![Workbench lakeFS Environment Variables](img/workbench-lakefs-env-variables.png)
+
+3.2. Importing the tutorial files into the Jupyter environment:
+* After cloning and selecting latest branch for the Fraud Detection tutorial repository (https://github.com/rh-aiservices-bu/fraud-detection.git), double-click the newly-created `fraud-detection` folder in the file browser and click on "Upload Files" icon:
+
+  ![Fraud Detection Tutorial fraud-detection folder](img/fraud-detection-tutorial-image1.png)
+
+* Select and upload tutorial notebooks changed for the lakeFS tutorial (ending with lakeFS) which are saved in `lakeFS-samples/red-hat-openshift-ai/fraud-detection` folder of `lakeFS-samples` repo (https://github.com/treeverse/lakeFS-samples.git):
+
+  ![Fraud Detection Tutorial upload lakeFS Notebooks](img/fraud-detection-tutorial-image2.png)
+
+* Double-click the `ray-scripts` subfolder inside `fraud-detection` folder in the file browser and click on "Upload Files" icon:
+
+  ![Fraud Detection Tutorial ray-scripts subfolder](img/fraud-detection-tutorial-image3.png)
+
+* Select and upload `train_tf_cpu_lakefs.py` changed for the lakeFS tutorial which is saved in `lakeFS-samples/red-hat-openshift-ai/fraud-detection/ray-scripts` folder of `lakeFS-samples` repo:
+
+  ![Fraud Detection Tutorial upload ray script](img/fraud-detection-tutorial-image4.png)
+
+* After uploading `train_tf_cpu_lakefs.py` file, file browser will show two Python programs:
+
+  ![Fraud Detection Tutorial ray-scripts subfolder after uploading script](img/fraud-detection-tutorial-image5.png)
+
+* Double-click the `pipeline` subfolder inside `fraud-detection` folder in the file browser and click on "Upload Files" icon:
+
+  ![Fraud Detection Tutorial pipeline subfolder](img/fraud-detection-tutorial-image11.png)
+
+* Select and upload `7_get_data_train_upload_lakefs.py` and `build_lakefs.sh` changed for the lakeFS tutorial which is saved in `lakeFS-samples/red-hat-openshift-ai/fraud-detection/pipeline` folder of `lakeFS-samples` repo:
+
+  ![Fraud Detection Tutorial upload pipeline](img/fraud-detection-tutorial-image12.png)
+
+3.4. Training a model:
+* In your notebook environment, open the `1_experiment_train_lakefs.ipynb` file instead of `1_experiment_train.ipynb` and follow the instructions directly in the notebook. The instructions guide you through some simple data exploration, experimentation, and model training tasks.
+
+4.1. Preparing a model for deployment:
+* In your notebook environment, open the `2_save_model_lakefs.ipynb` file instead of `2_save_model.ipynb` and follow the instructions directly in the notebook.
+
+4.2. Deploying a model:
+* Use the lakeFS branch name in the path that leads to the version folder that contains your model file: `train01/models/fraud`:
+
+  ![Fraud Detection Tutorial Deploy Model](img/fraud-detection-tutorial-image6.png)
+
+4.3. Testing the model API:
+* In your notebook environment, open the `3_rest_requests_multi_model_lakefs.ipynb` file instead of `3_rest_requests_multi_model.ipynb` and follow the instructions directly in the notebook.
+* In your notebook environment, open the `4_grpc_requests_multi_model_lakefs.ipynb` file instead of `4_grpc_requests_multi_model.ipynb` and follow the instructions directly in the notebook.
+* In your notebook environment, open the `5_rest_requests_single_model_lakefs.ipynb` file instead of `5_rest_requests_single_model.ipynb` and follow the instructions directly in the notebook.
+
+5.1. Automating workflows with data science pipelines:
+* Instead of creating Red Hat OpenShift AI pipeline from stratch, you can run already created pipeline called `6 Train Save lakefs.pipeline`. In your notebook environment, open `6 Train Save lakefs.pipeline` and click the play button in the toolbar of the pipeline editor to run the pipeline. If you want to create the pipeline from stratch then follow the tutorial instructions but make following changes in section 5.1.5:
+
+5.1.5. Configure the data connection to the S3 storage bucket:
+* Under Kubernetes Secrets, use the secret name for  `pipeline-artifacts` data connection for the following environment variables in **both nodes** of the pipeline:
+  * AWS_ACCESS_KEY_ID
+  * AWS_SECRET_ACCESS_KEY
+  * AWS_S3_ENDPOINT
+  * AWS_DEFAULT_REGION
+  * AWS_S3_BUCKET
+
+  ![Fraud Detection Tutorial Pipeline Kubernetes Secrets 1](img/fraud-detection-tutorial-image7.png)
+
+  ![Fraud Detection Tutorial Pipeline Kubernetes Secrets 1](img/fraud-detection-tutorial-image8.png)
+
+* Under Kubernetes Secrets, use the secret name for `my-storage` data connection when adding following lakeFS environment variables in **both nodes** of the pipeline: 
+  * LAKECTL_SERVER_ENDPOINT_URL = AWS_S3_ENDPOINT
+  * LAKECTL_CREDENTIALS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+  * LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+  * LAKEFS_REPO_NAME = AWS_S3_BUCKET
+  * LAKEFS_DEFAULT_REGION =AWS_DEFAULT_REGION
+
+  ![Fraud Detection Tutorial Pipeline Kubernetes Secrets 1](img/fraud-detection-tutorial-image9.png)
+
+  ![Fraud Detection Tutorial Pipeline Kubernetes Secrets 1](img/fraud-detection-tutorial-image10.png)
+
+5.2. Running a data science pipeline generated from Python code:
+* Use `7_get_data_train_upload_lakefs.yaml` instead of `7_get_data_train_upload.yaml` when importing pipeline in OpenShift AI.
+
+6.1. Distributing training jobs with Ray:
+* In your notebook environment, open the `8_distributed_training_lakefs.ipynb` file instead of `8_distributed_training.ipynb`. Change MinIO Access and Secret keys in the 2nd code cell of the notebook and run the notebook.
+
+  Optionally, if you want to view the Python code for this section, you can find it in the ray-scripts/train_tf_cpu_lakefs.py file.
 
 See [lakeFS documentation](https://docs.lakefs.io/) and [MinIO documentation for OpenShift](https://min.io/docs/minio/kubernetes/openshift/index.html) for details.
 
