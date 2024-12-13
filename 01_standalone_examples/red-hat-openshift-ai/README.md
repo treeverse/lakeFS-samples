@@ -34,7 +34,7 @@ Clone the [lakeFS-samples.git](https://github.com/treeverse/lakeFS-samples.git) 
 ```
 git clone https://github.com/treeverse/lakeFS-samples.git
 
-cd lakeFS-samples/red-hat-openshift-ai/cluster-configuration
+cd lakeFS-samples/01_standalone_examples/red-hat-openshift-ai/cluster-configuration
 ```
 
 ### Deploy MinIO
