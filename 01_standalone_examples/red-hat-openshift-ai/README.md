@@ -91,12 +91,6 @@ From the OpenShift web console, you can now open the OpenShift AI web console as
 
 ![lakefs](img/oai-console.png)
 
-### Create a Data Science Project
-After logging in to the OpenShift AI web console, follow the arrows below to create a new Data Science Project called **lakefs** if it was not automatically created.
-
-![lakefs](img/project.png)
-
-
 ## Fraud Detection Demo
 
 You may now run through the [Fraud Detection demo](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/2-latest/html/openshift_ai_tutorial_-_fraud_detection_example/index) in the new **lakefs** data science project. Refer to following notes for the different sections of this demo:
