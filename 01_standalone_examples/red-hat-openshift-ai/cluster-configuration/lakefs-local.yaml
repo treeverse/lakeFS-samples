@@ -1,0 +1,173 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: my-lakefs
+  namespace: lakefs
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-lakefs
+    meta.helm.sh/release-namespace: lakefs
+data:
+  config.yaml: |
+    database:
+      type: local
+    blockstore:
+      type: local
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: '2'
+    meta.helm.sh/release-name: my-lakefs
+    meta.helm.sh/release-namespace: lakefs
+  resourceVersion: '102204'
+  name: my-lakefs
+  namespace: lakefs
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lakefs
+      app.kubernetes.io/instance: my-lakefs
+      app.kubernetes.io/name: lakefs
+  template:
+    metadata:
+      labels:
+        app: lakefs
+        app.kubernetes.io/instance: my-lakefs
+        app.kubernetes.io/name: lakefs
+      annotations:
+        checksum/config: 2dde95d5a2b50bddc89371d1692db1005db9407701085531ea77ce14b56c6ec1
+    spec:
+      restartPolicy: Always
+      serviceAccountName: default
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources: {}
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: lakefs
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: LAKEFS_AUTH_ENCRYPT_SECRET_KEY
+              value: asdjfhjaskdhuioaweyuiorasdsjbaskcbkj
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/lakefs
+            - name: lakefs-volume
+              mountPath: /lakefs
+          terminationMessagePolicy: File
+          image: 'treeverse/lakefs:1.38.0'
+          args:
+            - run
+            - '--config'
+            - /etc/lakefs/config.yaml
+      serviceAccount: default
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-lakefs
+            items:
+              - key: config.yaml
+                path: config.yaml
+            defaultMode: 420
+        - name: lakefs-volume
+          emptyDir:
+            sizeLimit: 100Mi
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-lakefs
+  namespace: lakefs
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+  annotations:
+    meta.helm.sh/release-name: my-lakefs
+    meta.helm.sh/release-namespace: lakefs
+spec:
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/name: lakefs
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: lakefs-route
+  namespace: lakefs
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  host: lakefs-route-lakefs.apps-crc.testing
+  to:
+    kind: Service
+    name: my-lakefs
+    weight: 100
+  port:
+    targetPort: http
+  wildcardPolicy: None
