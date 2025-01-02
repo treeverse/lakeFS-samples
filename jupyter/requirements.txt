@@ -1,7 +1,7 @@
 lakefs_client>=0.106.0
 lakefs>=0.4.0
 jupysql>=0.5.2
-boto3
+boto3==1.34.44
 jupyter_contrib_nbextensions
 tabulate
 papermill
