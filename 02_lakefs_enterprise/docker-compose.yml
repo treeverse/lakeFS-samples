@@ -107,7 +107,7 @@ services:
       start_period: 5s
 
   fluffy:
-    image: "${FLUFFY_REPO:-treeverse}/fluffy:${TAG:-0.4.0}"
+    image: "${FLUFFY_REPO:-treeverse}/fluffy:${TAG:-latest}"
     command: "${COMMAND:-run}"
     ports:
       - "8085:8000"
