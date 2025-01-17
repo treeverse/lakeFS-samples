@@ -23,8 +23,7 @@ This repository includes a Jupyter Notebook which you can run on your local mach
    ```bash
       docker build -t lakefs-mount-demo .
 
-      docker run -d -p 8892:8888 --privileged --user root -e GRANT_SUDO=yes -v $PWD:/home/jovyan -v $PWD/jupyter_notebook_config.py:/home/jovyan/.jupyter/jupyter_notebook_config.py --name lakefs-mount-demo lakefs-mount-demo
-
+      docker run -d -p 8892:8888 --privileged -e NB_USER=root -e NB_UID=0 -e NB_GID=0 -e CHOWN_HOME=yes -w "/root" -v $PWD:/root --name lakefs-mount-demo lakefs-mount-demo /usr/local/bin/start-notebook.sh --allow-root  --NotebookApp.token='' --NotebookApp.password=''
    ```
 
 3. Copy the Everest binary for Linux x86_64 OS on your laptop inside "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder.
