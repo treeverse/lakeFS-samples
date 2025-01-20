@@ -1,0 +1,268 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-cfg-map-lakefs
+spec:
+  selector: {}
+  template:
+    spec:
+      containers:
+        - args:
+            - -ec
+            - |-
+              echo -n 'Waiting for minio root user secret'
+              while ! oc get secret minio-root-user 2>/dev/null | grep -qF minio-root-user; do
+                echo -n .
+                sleep 5
+              done; echo
+
+              cat << EOF | oc apply -f-
+              kind: ConfigMap
+              apiVersion: v1
+              metadata:
+                name: my-lakefs
+                labels:
+                  app.kubernetes.io/managed-by: Helm
+                annotations:
+                  meta.helm.sh/release-name: my-lakefs
+                  meta.helm.sh/release-namespace: lakefs
+              data:
+                config.yaml: |
+                  logging:
+                    format: json
+                    level: WARN
+                    output: "-"
+                  database:
+                    type: "local"
+                  auth:
+                    encrypt:
+                      secret_key: "10a718b3f285d89c36e9864494cdd1507f3bc85b342df24736ea81f9a1134bcc"
+                  blockstore:
+                    type: s3
+                    s3:
+                      force_path_style: true
+                      endpoint: http://minio:9000
+                      discover_bucket_region: false
+                      credentials:
+                        access_key_id: $(MINIO_ROOT_USER)
+                        secret_access_key: $(MINIO_ROOT_PASSWORD)
+                  installation:
+                    user_name: admin
+                    access_key_id: something
+                    secret_access_key: simple
+              EOF
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio-root-user
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-root-user
+                  key: MINIO_ROOT_PASSWORD
+          command:
+            - /bin/bash
+          image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+          imagePullPolicy: IfNotPresent
+          name: create-ds-connections
+      restartPolicy: Never
+      serviceAccountName: demo-setup
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-lakefs-repo
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-repo
+          image: curlimages/curl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Wait for lakeFS to be ready
+              echo "Waiting for lakeFS service to be ready..."
+              while ! curl -s http://my-lakefs.lakefs.svc.cluster.local:80/_health; do
+                echo -n "."
+                sleep 5
+              done
+              echo "lakeFS is ready!"
+              echo
+              echo
+              # Create repository using lakeFS API
+              echo "Creating quickstart repository..."
+              curl -u "something:simple" \
+                   -X POST \
+                   -H "Content-Type: application/json" \
+                   -d '{"name": "quickstart", "storage_namespace": "s3://quickstart/", "default_branch": "main", "sample_data": true}' \
+                   http://my-lakefs.lakefs.svc.cluster.local/api/v1/repositories || true
+              echo "quickstart repository created!"
+              echo
+              echo
+              echo "Creating my-storage repository..."
+              curl -u "something:simple" \
+                   -X POST \
+                   -H "Content-Type: application/json" \
+                   -d '{"name": "my-storage", "storage_namespace": "s3://my-storage/", "default_branch": "main"}' \
+                   http://my-lakefs.lakefs.svc.cluster.local/api/v1/repositories || true
+              echo "my-storage repository created!"
+      restartPolicy: Never
+      serviceAccountName: demo-setup
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: '2'
+    meta.helm.sh/release-name: my-lakefs
+    meta.helm.sh/release-namespace: lakefs
+  name: my-lakefs
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lakefs
+      app.kubernetes.io/instance: my-lakefs
+      app.kubernetes.io/name: lakefs
+  template:
+    metadata:
+      labels:
+        app: lakefs
+        app.kubernetes.io/instance: my-lakefs
+        app.kubernetes.io/name: lakefs
+      annotations:
+        checksum/config: 2dde95d5a2b50bddc89371d1692db1005db9407701085531ea77ce14b56c6ec1
+    spec:
+      restartPolicy: Always
+      serviceAccountName: default
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources: {}
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: lakefs
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: LAKEFS_AUTH_ENCRYPT_SECRET_KEY
+              value: asdjfhjaskdhuioaweyuiorasdsjbaskcbkj
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/lakefs
+            - name: lakefs-volume
+              mountPath: /lakefs
+          terminationMessagePolicy: File
+          image: 'treeverse/lakefs:1.38.0'
+          args:
+            - run
+            - '--config'
+            - /etc/lakefs/config.yaml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-lakefs
+            items:
+              - key: config.yaml
+                path: config.yaml
+            defaultMode: 420
+        - name: lakefs-volume
+          emptyDir:
+            sizeLimit: 100Mi
+      dnsPolicy: ClusterFirst
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: my-lakefs
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+  annotations:
+    meta.helm.sh/release-name: my-lakefs
+    meta.helm.sh/release-namespace: lakefs
+spec:
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/name: lakefs
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: lakefs-route
+  labels:
+    app: lakefs
+    app.kubernetes.io/instance: my-lakefs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: lakefs
+    app.kubernetes.io/version: 1.38.0
+    helm.sh/chart: lakefs-1.3.14
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: my-lakefs
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

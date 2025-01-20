@@ -96,11 +96,13 @@ while has_more do
             -- find nearest metadata file
             while has_parent do
                 parsed = path.parse(current)
+
                 if not parsed.parent or parsed.parent == "" then
-                    has_parent = false
-                    break
+                    current_descriptor = args.metadata_file_name
+                else
+                    current_descriptor = path.join("/", parsed.parent, args.metadata_file_name)
                 end
-                current_descriptor = path.join("/", parsed.parent, args.metadata_file_name)
+
                 -- check if this descriptor has already been cached
                 if metadata_files[current_descriptor] then
                     -- cache hit
@@ -123,6 +125,11 @@ while has_more do
                     end
                 end
 
+                if not parsed.parent or parsed.parent == "" then
+                    has_parent = false
+                    break
+                end
+
                 current = parsed.parent
             end
 
@@ -139,7 +146,9 @@ end
 
 -- now let's review all the metadata files for this commit:
 for metadata_filename, metadata_file in pairs(metadata_files) do
-    for _, field_descriptor in ipairs(args.fields) do
-        check_field(field_descriptor, metadata_file[field_descriptor.name], metadata_filename)
+    if metadata_file then
+        for _, field_descriptor in ipairs(args.fields) do
+            check_field(field_descriptor, metadata_file[field_descriptor.name], metadata_filename)
+        end
     end
 end

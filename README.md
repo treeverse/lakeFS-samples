@@ -91,10 +91,13 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [AWS Glue and Iceberg](./01_standalone_examples/aws-glue-iceberg/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
+* [lakeFS Mount Demo: Fast Data Loading and Reproducibility for Deep Learning Workloads with lakeFS Mount](./01_standalone_examples/lakefs-mount-demo/)
+* [Reproducibility and Data Version Control for **LangChain** and **LLM/OpenAI** Models](./01_standalone_examples/llm-openai-langchain-integration/)<br/>_See also the [accompanying blog](https://lakefs.io/blog/lakefs-langchain-loader/)_
 * [Image Segmentation Demo: ML Data Version Control and Reproducibility at Scale](./01_standalone_examples/image-segmentation/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [Kafka integration](./01_standalone_examples/kafka/)
 * [Flink integration](./01_standalone_examples/flink/)
+* [Red Hat OpenShift AI integration](./01_standalone_examples/red-hat-openshift-ai/)
 * [How to backup, migrate or clone a repo](./01_standalone_examples/backup-migrate-or-clone-repo/)
 * [Running lakeFS with PostgreSQL as K/V store](./01_standalone_examples/docker-compose-with-postgres/)
 
