@@ -32,4 +32,7 @@ This repository includes a Jupyter Notebook which you can run on your local mach
 
 ## Demo Instructions
 
-1. Once you have successfully completed setup then open "lakeFS Mount Demo" notebook from JupyterLab UI and follow the instructions.
+Demo includes following 3 notebooks. Open any notebook from the JupyterLab UI and follow the instructions.
+1. "lakeFS Mount Demo" notebook demonstrates how to mount lakeFS datasets on laptop or server as local filesystem.
+1. "lakeFS Mount Demo with Git Integration" notebook demonstrates lakeFS Mount feature as well as how it integrates with Git. In this demo, Git is used to version control your code while lakeFS is used to version control your data and model.
+1. "lakeFS Hugging Face Mount Demo" notebook demonstrates lakeFS Mount feature but uses Hugging Face dataset.
