@@ -2,13 +2,13 @@
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
-This repository includes a Jupyter Notebook which you can run on your local machine.
+This demo includes a Jupyter Notebook which you can run on your local machine.
 
 ## Prerequisites
 * Docker installed on your local machine
-* This demo requires connecting to a lakeFS Server. You can either install lakeFS Server locally (https://docs.lakefs.io/quickstart.html), or spin up for free on the lakeFS cloud (https://lakefs.cloud). 
 * Watch [this video](https://www.youtube.com/watch?v=BgKuoa8LAaU) to understand the use case as well as the demo.
 * [Contact lakeFS](https://lakefs.io/contact-sales/) to get the lakeFS Everest binary for Linux x86_64 OS. Download and save the binary on your laptop.
+* OPTIONAL: [Contact lakeFS](https://lakefs.io/contact-sales/) to get the token for Fluffy if you want to provision lakeFS Enterprise server.
 
 ## Setup
 
@@ -18,17 +18,44 @@ This repository includes a Jupyter Notebook which you can run on your local mach
    git clone https://github.com/treeverse/lakeFS-samples && cd lakeFS-samples/01_standalone_examples/lakefs-mount-demo
    ```
 
-2. Run following commands to download and run Docker container which includes Python, Hugging Face datasets library, Pytorch, Jupyter Notebook and lakeFS Python client (Docker image size is around 10GB):
+2. You now have two options: 
+
+   ### **Run a Jupyter Notebook server with your existing lakeFS Server**
+
+   If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
    ```bash
-      docker build -t lakefs-mount-demo .
-
-      docker run -d -p 8892:8888 --privileged -e NB_USER=root -e NB_UID=0 -e NB_GID=0 -e CHOWN_HOME=yes -w "/root" -v $PWD:/root -v $PWD/../../data/alpaca_training_imgs:/root/alpaca_training_imgs --name lakefs-mount-demo lakefs-mount-demo /usr/local/bin/start-notebook.sh --allow-root  --NotebookApp.token='' --NotebookApp.password=''
+   docker compose up
    ```
 
-3. Copy the Everest binary for Linux x86_64 OS on your laptop inside "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder.
+   Once you've finished, run the following to remove all the containers: 
 
-4. Open JupyterLab UI [http://127.0.0.1:8892/](http://127.0.0.1:8892/) in your web browser.
+   ```bash
+   docker compose down
+   ```
+
+   ### **Don't have a lakeFS Server or Object Store?**
+
+   If you want to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter then first login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so Fluffy proprietary image can be retrieved:
+
+   ```bash
+   docker login -u externallakefs
+   ```
+
+   then bring up the full stack:
+   ```bash
+   docker compose --profile local-lakefs-enterprise up
+   ```
+
+3. Copy the Everest binary for Linux x86_64 OS on your laptop inside 
+
+   "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder.
+
+## URLs and login details
+
+* JupyterLab UI http://localhost:8892/
+* lakeFS Enterprise (if provisioned) http://localhost:8084/ (`AKIAIOSFOLKFSSAMPLES` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
+* MinIO (if provisioned) http://localhost:9005/ (`minioadmin`/`minioadmin`)
 
 ## Demo Instructions
 
