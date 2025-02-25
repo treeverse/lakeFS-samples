@@ -51,7 +51,7 @@ services:
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
           lakefs run &
           echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- curl -u "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID":"$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
+          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
 
