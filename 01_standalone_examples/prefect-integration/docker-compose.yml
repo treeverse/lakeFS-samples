@@ -91,13 +91,15 @@ services:
       - LAKEFS_INSTALLATION_USER_NAME=everything-bagel
       - LAKEFS_INSTALLATION_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
       - LAKEFS_INSTALLATION_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
           lakefs run --local-settings &
           echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- curl -u "$$LAKEFS_INSTALLATION_ACCESS_KEY_ID":"$$LAKEFS_INSTALLATION_SECRET_ACCESS_KEY" -X POST -H "Content-Type: application/json" -d '{ "name": "quickstart", "storage_namespace": "s3://quickstart", "default_branch": "main", "sample_data": true }' http://localhost:8000/api/v1/repositories || true
+          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
           # wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://example s3://example || true
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
