@@ -1,0 +1,27 @@
+{
+	"annotation": {
+		"folder": "02086079",
+		"filename": "n02086079_10159",
+		"source": {
+			"database": "ImageNet database"
+		},
+		"size": {
+			"width": "350",
+			"height": "265",
+			"depth": "3"
+		},
+		"segment": "0",
+		"object": {
+			"name": "Pekinese",
+			"pose": "Unspecified",
+			"truncated": "0",
+			"difficult": "0",
+			"bndbox": {
+				"xmin": "67",
+				"ymin": "8",
+				"xmax": "315",
+				"ymax": "253"
+			}
+		}
+	}
+}

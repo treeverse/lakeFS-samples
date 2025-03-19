@@ -1,0 +1,27 @@
+{
+	"annotation": {
+		"folder": "02085620",
+		"filename": "n02085620_368",
+		"source": {
+			"database": "ImageNet database"
+		},
+		"size": {
+			"width": "500",
+			"height": "333",
+			"depth": "3"
+		},
+		"segment": "0",
+		"object": {
+			"name": "Chihuahua",
+			"pose": "Unspecified",
+			"truncated": "0",
+			"difficult": "0",
+			"bndbox": {
+				"xmin": "155",
+				"ymin": "24",
+				"xmax": "418",
+				"ymax": "316"
+			}
+		}
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"annotation": {
+		"folder": "02085782",
+		"filename": "n02085782_1058",
+		"source": {
+			"database": "ImageNet database"
+		},
+		"size": {
+			"width": "240",
+			"height": "182",
+			"depth": "3"
+		},
+		"segment": "0",
+		"object": {
+			"name": "Japanese_spaniel",
+			"pose": "Unspecified",
+			"truncated": "0",
+			"difficult": "0",
+			"bndbox": {
+				"xmin": "82",
+				"ymin": "53",
+				"xmax": "169",
+				"ymax": "127"
+			}
+		}
+	}
+}
