@@ -1,8 +1,8 @@
-# Reproducibility and Data Version Control for LangChain and LLM/OpenAI Models
+# Reproducibility and Building an AI Agent by using lakeFS, LangChain and LLM/OpenAI Models
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
-This repository includes a Jupyter Notebook with LangChain and OpenAI libraries which you can run on your local machine.
+This repository includes Jupyter Notebooks with LangChain and OpenAI libraries which you can run on your local machine.
 
 ## Let's Get Started 👩🏻‍💻
 
@@ -43,4 +43,7 @@ If you've brought up the full stack you'll also have:
 
 ## Demo Instructions
 
-Open Jupyter UI [http://localhost:8891](http://localhost:8891) in your web browser. Open "LLM OpenAI LangChain Demo" notebook from Jupyter UI and follow the instructions.
+Open Jupyter UI [http://localhost:8891](http://localhost:8891) in your web browser, open one of the provided notebooks from JupyterLab UI and follow the instructions:
+
+1. AI Agent Demo: Build an AI Agent by using lakeFS, LangChain and OpenAI
+2. LLM OpenAI LangChain Demo: Reproducibility and Data version control for LangChain and LLM/OpenAI Models
