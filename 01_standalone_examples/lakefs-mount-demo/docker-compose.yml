@@ -3,21 +3,22 @@ name: lakefs-mount-demo
 services:
   jupyter-notebook:
     build: ./jupyter
-    privileged: true
-    environment:
-      # log-level is set to WARN because of noisy stdout problem
-      # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/root --allow-root
-      - NB_USER=root
-      - NB_UID=0
-      - NB_GID=0
-      - CHOWN_HOME=yes
-    working_dir: /root
     ports:
       - 8892:8888 # Jupyter
     volumes:
-      - $PWD:/root
-      - $PWD/../../data/alpaca_training_imgs:/root/alpaca_training_imgs
+      - $PWD:/home/jovyan/notebooks
+      - $PWD/../../data/alpaca_training_imgs:/home/jovyan/notebooks/alpaca_training_imgs
+    # Create container in privileged mode and
+    # run "unshare --map-root-user --mount" before executing everest mount command in the notebook.
+    # That way you'll create a new namespace and be acting as root in that namespace
+    # (you'll still be jovyan user, but it will be the root in the namespace),
+    # and within it you'll be able to use mount.
+    privileged: true
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          sudo unshare --map-root-user --mount
+          exec jupyter lab --allow-root --log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
 
   lakefs:
     image: treeverse/lakefs:1
@@ -139,4 +140,4 @@ services:
 
 networks:
   default:
-    name: bagel
+    name: lakefs-mount-demo-network

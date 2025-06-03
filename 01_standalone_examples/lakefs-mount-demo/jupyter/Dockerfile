@@ -4,7 +4,7 @@ USER root
 
 RUN apt-get update && apt install -y fuse
 
-RUN pip install lakefs==0.8.0
+RUN pip install lakefs==0.11.1
 RUN pip install lakefs-spec==0.11.1
 RUN pip install datasets==3.2.0
 RUN pip install 'datasets[vision]'
