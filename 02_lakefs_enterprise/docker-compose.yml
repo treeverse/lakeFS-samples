@@ -15,7 +15,7 @@ services:
       - ../data:/data
 
   lakefs:
-    image: treeverse/lakefs:1
+    image: treeverse/lakefs-enterprise:latest
     pull_policy: always
     ports:
       - "8084:8000"
@@ -40,6 +40,7 @@ services:
       - LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
       - LAKEFS_AUTH_API_ENDPOINT=http://fluffy:9006/api/v1
       - LAKEFS_AUTH_UI_CONFIG_RBAC=internal
+      - LAKEFS_FEATURES_ICEBERG_CATALOG=true
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
@@ -124,4 +125,4 @@ services:
 
 networks:
   default:
-    name: bagel
+    name: lakefs-enterprise-samples-network
