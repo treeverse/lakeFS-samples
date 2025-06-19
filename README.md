@@ -89,6 +89,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [AWS Glue and Athena](./01_standalone_examples/aws-glue-athena/)
 * [AWS Glue and Trino](./01_standalone_examples/aws-glue-trino/)
 * [AWS Glue and Iceberg](./01_standalone_examples/aws-glue-iceberg/)
+* [lakeFS Iceberg REST Catalog with Trino client](./01_standalone_examples/trino/)
 * [lakeFS + Dagster](./01_standalone_examples/dagster-integration/)
 * [lakeFS + Prefect](./01_standalone_examples/prefect-integration/)
 * [lakeFS Mount Demo: Fast Data Loading and Reproducibility for Deep Learning Workloads with lakeFS Mount](./01_standalone_examples/lakefs-mount-demo/)
