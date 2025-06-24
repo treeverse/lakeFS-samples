@@ -1,0 +1,14 @@
+version: "3.9"
+name: lakefs-with-trino
+services:
+  trino:
+    image: trinodb/trino:475
+    container_name: trino
+    ports:
+      - 8080:8080
+    volumes:
+      - $PWD/lakefs.properties:/etc/trino/catalog/lakefs.properties
+
+networks:
+  default:
+    name: lakefs-with-trino-network
