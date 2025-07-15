@@ -15,7 +15,7 @@ cd lakeFS-samples/02_lakefs_enterprise
 
 ### **Run a lakeFS Enterprise server**
 
-Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so Fluffy proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token for Fluffy:
+Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token for lakeFS Enterprise:
 
 ```bash
 docker login -u externallakefs
