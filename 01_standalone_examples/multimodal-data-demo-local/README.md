@@ -45,6 +45,20 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 
 4. Open JupyterLab UI [http://127.0.0.1:8893/](http://127.0.0.1:8893/) in your web browser.
 
+### Environment Details
+
+* **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
+* **lakeFS Enterprise** is provisioned as part of this environment.
+* **MinIO** is provided as an S3-compatible object store. You can use other S3-compatible object stores including S3, GCS, as well as Azure Blob Storage.
+
+#### URLs and login details
+
+* Jupyter http://localhost:8893/
+* lakeFS http://localhost:8003/ (`AKIAIOSFOLKFSSAMPLES` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
+* MinIO http://localhost:9003/ (`minioadmin`/`minioadmin`)
+* Spark UI http://localhost:4043/
+
 ## Demo Instructions
 
 1. Once you have successfully completed setup then open "Image Segmentation Iceberg" notebook from JupyterLab UI and follow the instructions.
+
