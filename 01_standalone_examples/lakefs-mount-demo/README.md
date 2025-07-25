@@ -8,7 +8,7 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
 * Docker installed on your local machine
 * Watch [this video](https://www.youtube.com/watch?v=BgKuoa8LAaU) to understand the use case as well as the demo.
 * [Contact lakeFS](https://lakefs.io/contact-sales/) to get the lakeFS Everest binary for Linux x86_64 OS. Download and save the binary on your laptop.
-* OPTIONAL: [Contact lakeFS](https://lakefs.io/contact-sales/) to get the token for Fluffy if you want to provision lakeFS Enterprise server.
+* OPTIONAL: [Contact lakeFS](https://lakefs.io/contact-sales/) to get the token for lakeFS Enterprise if you want to provision lakeFS Enterprise server.
 
 ## Setup
 
@@ -20,7 +20,7 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
 
 2. You now have two options: 
 
-   ### **Run a Jupyter Notebook server with your existing lakeFS Server**
+   ### **Run a Jupyter Notebook server with your existing lakeFS Enterprise Server**
 
    If you have already [installed lakeFS](https://docs.lakefs.io/deploy/) or are utilizing [lakeFS cloud](https://lakefs.cloud/), all you need to run is the Jupyter notebook server:
 
@@ -34,9 +34,9 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
    docker compose down
    ```
 
-   ### **Don't have a lakeFS Server or Object Store?**
+   ### **Don't have a lakeFS Enterprise Server or Object Store?**
 
-   If you want to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter then first login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so Fluffy proprietary image can be retrieved:
+   If you want to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter then first login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved:
 
    ```bash
    docker login -u externallakefs
