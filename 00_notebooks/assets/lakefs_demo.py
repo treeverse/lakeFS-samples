@@ -1,5 +1,6 @@
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 import os
+import lakefs
 
 def print_diff(diff):
     results = map(
@@ -28,6 +29,8 @@ def lakefs_ui_endpoint(lakefsEndPoint):
         lakefsUIEndPoint = lakefsEndPoint.replace('host.docker.internal','127.0.0.1')
     elif lakefsEndPoint.startswith('http://lakefs'):
         lakefsUIEndPoint = lakefsEndPoint.replace('lakefs','127.0.0.1')
+        if lakefs.client.Client().sdk_client.internal_api.get_lake_fs_version().version_context == 'lakeFS-Enterprise':
+            lakefsUIEndPoint = lakefsUIEndPoint.replace('8000','8084')
     else:
         lakefsUIEndPoint = lakefsEndPoint
         
