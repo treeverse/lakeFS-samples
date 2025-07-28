@@ -95,6 +95,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [lakeFS Mount Demo: Fast Data Loading and Reproducibility for Deep Learning Workloads with lakeFS Mount](./01_standalone_examples/lakefs-mount-demo/)
 * [Reproducibility and Building an AI Agent by using lakeFS, **LangChain** and **LLM/OpenAI** Models](./01_standalone_examples/llm-openai-langchain-integration/)<br/>_See also the [accompanying blog](https://lakefs.io/blog/lakefs-langchain-loader/)_
 * [Image Segmentation Demo: ML Data Version Control and Reproducibility at Scale](./01_standalone_examples/image-segmentation/)
+* [Multimodal Data Demo: ML Data Version Control and Reproducibility of Multimodal Data](./01_standalone_examples/multimodal-data-demo-local/)
 * [Labelbox integration](./01_standalone_examples/labelbox-integration/)
 * [Kafka integration](./01_standalone_examples/kafka/)
 * [Flink integration](./01_standalone_examples/flink/)
