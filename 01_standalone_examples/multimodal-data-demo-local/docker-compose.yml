@@ -51,7 +51,7 @@ services:
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
 
-                MinIO admin:   http://127.0.0.1:9005/
+                MinIO admin:   http://127.0.0.1:9003/
                 
                                Username : minioadmin
                                Password : minioadmin
@@ -59,11 +59,11 @@ services:
           echo "------------------------------------------------"
           wait-for -t 60 jupyter-notebook:8888 && echo '
 
-                Jupyter:       http://127.0.0.1:8894/
+                Jupyter:       http://127.0.0.1:8893/
                 '
           echo "------------------------------------------------"
           echo ""
-          echo "lakeFS Web UI: http://127.0.0.1:8084/      >(.＿.)<"
+          echo "lakeFS Web UI: http://127.0.0.1:8003/      >(.＿.)<"
           echo "                                             (  )_ "
           echo ""
           echo "                Access Key ID    : $$LAKECTL_CREDENTIALS_ACCESS_KEY_ID"
