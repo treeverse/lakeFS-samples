@@ -21,7 +21,7 @@ services:
           exec jupyter lab --allow-root --log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
 
   lakefs:
-    image: treeverse/lakefs:1
+    image: treeverse/lakefs-enterprise:latest
     pull_policy: always
     ports:
       - "8084:8000"
@@ -44,7 +44,6 @@ services:
       - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
       - LAKEFS_DATABASE_TYPE=postgres
       - LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
-      - LAKEFS_AUTH_API_ENDPOINT=http://fluffy:9006/api/v1
       - LAKEFS_AUTH_UI_CONFIG_RBAC=internal
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -117,24 +116,6 @@ services:
       interval: 10s
       retries: 5
       start_period: 5s
-    profiles:
-      - local-lakefs-enterprise
-
-  fluffy:
-    image: "${FLUFFY_REPO:-treeverse}/fluffy:${TAG:-latest}"
-    command: "${COMMAND:-run}"
-    ports:
-      - "8085:8000"
-      - "9006:9000"
-    depends_on:
-      - "postgres"
-    environment:
-      - FLUFFY_LOGGING_LEVEL=INFO
-      - FLUFFY_DATABASE_TYPE=postgres
-      - FLUFFY_DATABASE_POSTGRES_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
-      - FLUFFY_AUTH_ENCRYPT_SECRET_KEY=some random secret string
-      - FLUFFY_AUTH_SERVE_LISTEN_ADDRESS=0.0.0.0:9006
-    entrypoint: [ "/app/wait-for", "postgres:5432", "--", "/app/fluffy" ]
     profiles:
       - local-lakefs-enterprise
 
