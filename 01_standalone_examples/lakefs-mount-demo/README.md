@@ -8,7 +8,7 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
 * Docker installed on your local machine
 * Watch [this video](https://www.youtube.com/watch?v=BgKuoa8LAaU) to understand the use case as well as the demo.
 * [Contact lakeFS](https://lakefs.io/contact-sales/) to get the lakeFS Everest binary for Linux x86_64 OS. Download and save the binary on your laptop.
-* OPTIONAL: [Contact lakeFS](https://lakefs.io/contact-sales/) to get the token for lakeFS Enterprise if you want to provision lakeFS Enterprise server.
+* OPTIONAL: [Contact lakeFS](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise if you want to provision lakeFS Enterprise server.
 
 ## Setup
 
@@ -42,9 +42,10 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
    docker login -u externallakefs
    ```
 
-   then bring up the full stack:
+   Copy the lakeFS license file to "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder,
+   then change lakeFS license file name and installation ID in the following command and run the command to bring up the full stack:
    ```bash
-   docker compose --profile local-lakefs-enterprise up
+   LAKEFS_LICENSE_FILE_NAME=license-org-name-installation-id.token LAKEFS_INSTALLATION_ID=installation-id docker compose --profile local-lakefs-enterprise up
    ```
 
 3. Copy the Everest binary for Linux x86_64 OS on your laptop inside 
