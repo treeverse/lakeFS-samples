@@ -40,6 +40,10 @@ services:
       - LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
       - LAKEFS_AUTH_UI_CONFIG_RBAC=internal
       - LAKEFS_FEATURES_ICEBERG_CATALOG=true
+      - LAKEFS_LICENSE_PATH=/tmp/lakefs/$LAKEFS_LICENSE_FILE_NAME
+      - LAKEFS_INSTALLATION_FIXED_ID=$LAKEFS_INSTALLATION_ID
+    volumes:
+      - $PWD:/tmp/lakefs
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
