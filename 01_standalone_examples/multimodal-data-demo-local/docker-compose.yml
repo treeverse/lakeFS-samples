@@ -6,13 +6,13 @@ services:
     environment:
       # log-level is set to WARN because of noisy stdout problem
       # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
-      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
     ports:
       - 8893:8888 # Jupyter
       - 4043:4040 # Spark
       - 5002:5000 # MLflow
     volumes:
-      - $PWD:/home/jovyan
+      - $PWD:/home/jovyan/notebooks
       - ../../data:/data
 
   lakefs:
