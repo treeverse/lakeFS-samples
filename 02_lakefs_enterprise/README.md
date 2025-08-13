@@ -15,16 +15,16 @@ cd lakeFS-samples/02_lakefs_enterprise
 
 ### **Run a lakeFS Enterprise server**
 
-Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token for lakeFS Enterprise:
+Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise:
 
 ```bash
 docker login -u externallakefs
 ```
 
-Run following command to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter:
+Copy the lakeFS license file to "lakeFS-samples/02_lakefs_enterprise" folder, then change lakeFS license file name and installation ID in the following command and run the command to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter:
 
 ```bash
-docker compose up
+LAKEFS_LICENSE_FILE_NAME=license-org-name-installation-id.token LAKEFS_INSTALLATION_ID=installation-id docker compose up
 ```
 
 Once the stack's up and running, open the Jupyter Notebook (http://localhost:8894) and check out the [catalog of sample notebooks](../00_notebooks/00_index.ipynb) to explore lakeFS. 
