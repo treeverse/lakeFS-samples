@@ -25,7 +25,7 @@ def delete_demo_objects(context):
                 message='Deleted existing demo objects using dagster!',
                 metadata={"committed_from": "dagster-operator",
                          '::lakefs::Dagster::url[url:ui]': context.resources.dagster_ui_endpoint+'/runs/' \
-                         +context.run.run_id+'?selection="delete_demo_objects"&logs=query%3A"delete_demo_objects"',
+                         +context.run.run_id+'?selection=name%3A"delete_demo_objects"&logs=query%3Aname%3A"delete_demo_objects"',
                          })
 
         print_commit_result(result=ref.get_commit().id, message='lakeFS commit id is: ',
@@ -65,7 +65,7 @@ def commit_etl_branch(context):
         message='committing to lakeFS using dagster!',
         metadata={"committed_from": "dagster-operator",
                  '::lakefs::Dagster::url[url:ui]': context.resources.dagster_ui_endpoint+'/runs/' \
-                 +context.run.run_id+'?selection="commit_etl_branch"&logs=query%3A"commit_etl_branch"',
+                 +context.run.run_id+'?selection=name%3A"commit_etl_branch"&logs=query%3Aname%3A"commit_etl_branch"',
                  })
     
     print_commit_result(result=ref.get_commit().id, message='lakeFS commit id is: ',
@@ -82,7 +82,7 @@ def merge_etl_branch(context):
                 + context.resources.variables["sourceBranch"] + ' branch',
         metadata={"committer": "dagster-operator",
                  '::lakefs::Dagster::url[url:ui]': context.resources.dagster_ui_endpoint+'/runs/' \
-                  +context.run.run_id+'?selection="merge_etl_branch"&logs=query%3A"merge_etl_branch"',
+                  +context.run.run_id+'?selection=name%3A"merge_etl_branch"&logs=query%3Aname%3A"merge_etl_branch"',
                  })
     print_commit_result(result=mergeResult, message='lakeFS merge reference is: ',
                         lakefs_ui_endpoint=context.resources.lakefs_ui_endpoint, repo=context.resources.variables["repo"])
