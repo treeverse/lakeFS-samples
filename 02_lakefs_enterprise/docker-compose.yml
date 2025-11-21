@@ -25,11 +25,98 @@ services:
       minio-setup:
         condition: service_completed_successfully
     environment:
-      - LAKEFS_BLOCKSTORE_TYPE=s3
-      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
-      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
-      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
-      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
+      - LAKEFS_BLOCKSTORES_SIGNING_SECRET_KEY=some random secret string
+      - |
+        LAKEFS_BLOCKSTORES_STORES=
+        [
+          {
+            "id":"minio",
+            "backward_compatible":true,
+            "description":"Primary on-prem MinIO storage for lakeFS Samples",
+            "type":"s3",
+            "s3":
+            {
+              "endpoint":"http://minio:9000",
+              "force_path_style":true,
+              "credentials":
+              {
+                "access_key_id":"minioadmin",
+                "secret_access_key":"minioadmin"
+              }
+            }
+          },
+          {
+            "id":"local",
+            "description":"POSIX complaint Local storage",
+            "type":"local",
+            "local":
+            {
+              "path":"/tmp/local1",
+              "import_enabled":true
+            }
+          },
+          {
+            "id":"s3-us-east-1",
+            "description":"AWS S3 storage for production data",
+            "type":"s3",
+            "s3":
+            {
+              "region":"us-east-1",
+              "credentials":
+              {
+                "access_key_id":"AWS access key",
+                "secret_access_key":"AWS secret key"
+              }
+            }
+          },
+          {
+            "id":"s3-us-west-2",
+            "description":"AWS S3 storage for development data",
+            "type":"s3",
+            "s3":
+            {
+              "region":"us-west-2",
+              "credentials":
+              {
+                "access_key_id":"AWS access key",
+                "secret_access_key":"AWS secret key"
+              }
+            }
+          },
+          {
+            "id":"s3-eu-west-3",
+            "description":"AWS S3 storage for data for European customers",
+            "type":"s3",
+            "s3":
+            {
+              "region":"eu-west-3",
+              "credentials":
+              {
+                "access_key_id":"AWS access key",
+                "secret_access_key":"AWS secret key"
+              }
+            }
+          },
+          {
+            "id":"azure-analytics",
+            "description":"Azure Blob storage for analytics data",
+            "type":"azure",
+            "azure":
+            {
+              "storage_account":"Azure storage account name",
+              "storage_access_key":"Azure storage account access key"
+            }
+          },
+          {
+            "id":"gcs-dev",
+            "description":"Google Cloud Storage for development data",
+            "type":"gs",
+            "gs":
+            {
+              "credentials_file":"/tmp/lakefs/gcp_service_account_key_file_name.json"
+            }
+          }
+        ]
       - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
       - LAKEFS_LOGGING_LEVEL=INFO
       - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
@@ -50,7 +137,7 @@ services:
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
           lakefs run &
           echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
+          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --storage-id minio --sample-data || true
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
 

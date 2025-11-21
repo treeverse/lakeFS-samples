@@ -21,6 +21,10 @@ Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the 
 docker login -u externallakefs
 ```
 
+If you want to use lakeFS [Multiple Storage Backends](https://docs.lakefs.io/latest/howto/multiple-storage-backends/) feature then change "lakeFS-samples/02_lakefs_enterprise/docker-compose.yml" file to update credentials for AWS S3 and/or Azure Blob Storage. If you want to use Google Cloud Storage (GCS) then copy GCP Service Account key JSON file to "lakeFS-samples/02_lakefs_enterprise" folder and change the file name in Docker Compose file. Refer to [Multiple Storage Backends documentation](https://docs.lakefs.io/latest/howto/multiple-storage-backends/) for additional information.
+
+If you DO NOT want to use lakeFS Multiple Storage Backends feature then don't change the Docker Compose file.
+
 Copy the lakeFS license file to "lakeFS-samples/02_lakefs_enterprise" folder, then change lakeFS license file name and installation ID in the following command and run the command to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter:
 
 ```bash
