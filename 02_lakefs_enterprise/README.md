@@ -13,7 +13,7 @@ git clone https://github.com/treeverse/lakeFS-samples.git
 cd lakeFS-samples/02_lakefs_enterprise
 ```
 
-### **Run a lakeFS Enterprise server**
+##### **Login to Treeverse Dockerhub**
 
 Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise:
 
@@ -21,9 +21,23 @@ Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the 
 docker login -u externallakefs
 ```
 
+##### **Multiple Storage Backends**
+
 If you want to use lakeFS [Multiple Storage Backends](https://docs.lakefs.io/latest/howto/multiple-storage-backends/) feature then change "lakeFS-samples/02_lakefs_enterprise/docker-compose.yml" file to update credentials for AWS S3 and/or Azure Blob Storage. If you want to use Google Cloud Storage (GCS) then copy GCP Service Account key JSON file to "lakeFS-samples/02_lakefs_enterprise" folder and change the file name in Docker Compose file. Refer to [Multiple Storage Backends documentation](https://docs.lakefs.io/latest/howto/multiple-storage-backends/) for additional information.
 
 If you DO NOT want to use lakeFS Multiple Storage Backends feature then don't change the Docker Compose file.
+
+##### **AWS Glue Catalog Sync of Iceberg Tables**
+
+If you want to sync Iceberg tables created in lakeFS to AWS Glue Catalog then export the following environment variables:
+
+```bash
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
+export AWS_REGION=us-east-1
+```
+
+##### **Copy the lakeFS license file and run a lakeFS Enterprise server**
 
 Copy the lakeFS license file to "lakeFS-samples/02_lakefs_enterprise" folder, then change lakeFS license file name and installation ID in the following command and run the command to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter:
 

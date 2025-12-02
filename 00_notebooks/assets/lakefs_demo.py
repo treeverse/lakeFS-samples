@@ -1,6 +1,7 @@
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
 import os
 import lakefs
+import requests
 
 def print_diff(diff):
     results = map(
@@ -35,3 +36,37 @@ def lakefs_ui_endpoint(lakefsEndPoint):
         lakefsUIEndPoint = lakefsEndPoint
         
     return lakefsUIEndPoint
+
+def lakefs_iceberg_glue_catalog_push(lakefsEndPoint, lakefsAccessKey, lakefsSecretKey,
+                                     lakefs_repo_name, lakefs_reference,
+                                     iceberg_namespace, iceberg_table_name, glue_database):
+    # Push to Glue
+    # Construct the push endpoint URL
+    # Endpoint: POST /api/v1/iceberg/remotes/{catalog_id}/push
+    glue_catalog_id = os.getenv("GLUE_CATALOG_ID", "glue_catalog")
+    push_url = f"{lakefsEndPoint}/api/v1/iceberg/remotes/{glue_catalog_id}/push"
+    
+    payload = {
+        "source": {
+            "repository_id": lakefs_repo_name,
+            "reference_id": lakefs_reference,
+            "namespace": [iceberg_namespace],
+            "table": iceberg_table_name
+        },
+        "destination": {
+            "namespace": [glue_database],
+            "table": iceberg_table_name
+        },
+        "create_namespace": True,
+        "force_update": True
+    }
+    
+    auth = (lakefsAccessKey, lakefsSecretKey)
+    response = requests.post(push_url, json=payload, auth=auth)
+    
+    if response.status_code == 204:
+        response_text = f"{iceberg_table_name} table was successfully pushed to Glue Database {glue_database}"
+    else:
+        response_text = response.text
+    
+    return response_text
