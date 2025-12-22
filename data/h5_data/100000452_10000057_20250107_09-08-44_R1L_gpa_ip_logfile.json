@@ -1,0 +1,32 @@
+{
+    "comment": "Self data collection",
+    "detection_type": ["OSC", "SBR", "ROR"],
+    "tags": ["single_label", "stationary"],
+    "contents": {
+        "R1R": {
+            "category": "adult",
+            "age": 53,
+            "gender": "M",
+            "height": 192,
+            "weight": 93
+        },
+        "R1L": {
+            "category": "empty"
+        },
+        "R2L": {
+            "category": "empty"
+        },
+        "R2C": {
+            "category": "empty"
+        },
+        "R2R": {
+            "category": "empty"
+        }
+    },
+    "file_id": 70000377,
+    "date": "20241108_09-46-25",
+    "position": "R1L",
+    "n_samples": 1200,
+    "session_id": 7000048,
+    "sensor_type": ["XYZ", "ABC"]
+}

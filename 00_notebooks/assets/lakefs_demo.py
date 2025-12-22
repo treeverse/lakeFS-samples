@@ -70,3 +70,9 @@ def lakefs_iceberg_glue_catalog_push(lakefsEndPoint, lakefsAccessKey, lakefsSecr
         response_text = response.text
     
     return response_text
+
+def upload_objects(branch, local_path):
+    for path, subdirs, files in os.walk(local_path):
+        for file in files:
+            contentToUpload = open(path+'/'+file, 'rb').read() # Only a single file per upload which must be named \\\"content\\\"
+            print(branch.object(path.lstrip('/')+'/'+file).upload(data=contentToUpload, mode='wb', pre_sign=False))
