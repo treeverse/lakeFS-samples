@@ -2,7 +2,7 @@
 
 Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
 
-This repository includes a Jupyter Notebook which you can run on your local machine. The notebook demonstrates ML Data Version Control and Reproducibility of Multimodal Data.
+This repository includes multiple Jupyter Notebook which you can run on your local machine. The notebook demonstrates ML Data Version Control and Reproducibility of Multimodal Data including structured, unstructured and vector database.
 
 In the ever-evolving landscape of machine learning (ML), data stands as the cornerstone upon which triumphant models are built. However, as ML projects expand and encompass larger and different types of datasets, the challenge of efficiently managing and controlling multimodal data at scale becomes more pronounced.
 
@@ -13,7 +13,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 
 * In this demo, we will demonstrate:
 1. How to use lakeFS to version control your data when working with your data locally.
-3. We will be leveraging the technology stack of: MinIO, Iceberg, PyTorch and MLflow
+3. We will be leveraging the technology stack of: MinIO, Iceberg, PyTorch, MLflow and OpenAI (optional)
 
 
 ## Prerequisites
@@ -61,4 +61,5 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 ## Demo Instructions
 
 1. Once you have successfully completed setup then open "Image Segmentation Iceberg" notebook from JupyterLab UI and follow the instructions.
+2. If you would like to try OpenAI and vector database example: complete "Image Segmentation Iceberg" notebook first then open "LLM OpenAI LangChain Demo" notebook from JupyterLab UI and follow the instructions.
 

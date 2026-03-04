@@ -1,0 +1,26 @@
+{
+	"annotation": {
+		"folder": "02085620",
+		"filename": "0a1a2b14e",
+		"source": {
+			"database": "Airbus Ship Detection Challenge"
+		},
+		"size": {
+			"width": "200",
+			"height": "130",
+			"depth": "3"
+		},
+		"segment": "0",
+		"object": {
+			"pose": "Unspecified",
+			"truncated": "0",
+			"difficult": "0",
+			"bndbox": {
+				"xmin": "65",
+				"ymin": "50",
+				"xmax": "249",
+				"ymax": "404"
+			}
+		}
+	}
+}
