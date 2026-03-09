@@ -19,6 +19,32 @@ RUN pip install lakefs==0.12.0 boto3==1.21.32 tabulate==0.9.0 petastorm==0.12.1 
 # Used openai 0.28.1 (old version) for langchain v0.0.331 compatibility
 RUN conda install -c pytorch faiss-cpu=1.8.0
 
+# Name your environment and choose the Python version
+ARG env_name=metadata_search_env
+ARG py_ver=3.10
+
+# You can add additional libraries here
+RUN mamba create --yes -p "${CONDA_DIR}/envs/${env_name}" \
+    python=${py_ver} \
+    'ipykernel' \
+    'jupyterlab' && \
+    mamba clean --all -f -y
+
+# Any additional `pip` installs can be added by using the following line
+# Using `mamba` is highly recommended though
+RUN "${CONDA_DIR}/envs/${env_name}/bin/pip" install --no-cache-dir \
+    'duckdb==1.3.2' \
+    'pyiceberg==0.10.0' \
+    'pyarrow==22.0.0' \
+    'numpy==1.21.2' \
+    'pandas==1.5.3' && \
+    mamba clean --all -f -y
+
+# Create Python kernel and link it to jupyter
+RUN "${CONDA_DIR}/envs/${env_name}/bin/python" -m ipykernel install --user --name="${env_name}" --display-name "Python (Metadata Search Kernel)" && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
 USER $NB_UID
 
 # Set up iPython pretty tables and Spark SQL magic

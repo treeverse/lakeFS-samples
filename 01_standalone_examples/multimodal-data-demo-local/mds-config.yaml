@@ -1,0 +1,33 @@
+# lakeFS connection details
+lakefs:
+  endpoint: "http://lakefs:8000"
+  access_key_id: AKIAIOSFOLKFSSAMPLES
+  secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  # MinIO S3 configuration for Iceberg catalog
+  s3_endpoint: "http://minio:9000"
+  s3_path_style_access: "true"
+  s3_use_ssl: "false"
+  
+# Synchronization settings
+metadata_settings:
+  # Number of concurrent operations allowed (default: 100)
+  concurrency: 100
+  # Maximum number of commits to process in a single run per branch
+  max_commits: 1000
+  # Time in seconds to wait between polling for new commits
+  period_seconds: 60
+  # The timestamp (ISO 8601 format) from which to start processing commits
+  since: ""
+
+# Repositories and branches to track for metadata export
+# The key is the repository name, and the value is a list of branch names
+repositories:
+  "multimodal-data-local-repo":
+    branches:
+      - "main"
+      - "LOCAL-experiment-*"
+
+# Web server configuration
+webserver:
+  host: "0.0.0.0" # Listen on all interfaces
+  port: 8000
