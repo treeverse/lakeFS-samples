@@ -61,5 +61,6 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 ## Demo Instructions
 
 1. Once you have successfully completed setup then open "Image Segmentation Iceberg" notebook from JupyterLab UI and follow the instructions.
-2. If you would like to try OpenAI and vector database example: complete "Image Segmentation Iceberg" notebook first then open "LLM OpenAI LangChain Demo" notebook from JupyterLab UI and follow the instructions.
+2. If you would like to try Metadata Search example: complete "Image Segmentation Iceberg" notebook first then open "metadata-search" notebook from JupyterLab UI and **use "Python (Metadata Search Kernel)" to run the notebook**.
+3. If you would like to try OpenAI and vector database example: complete "Image Segmentation Iceberg" notebook first then open "LLM OpenAI LangChain Demo" notebook from JupyterLab UI and follow the instructions.
 

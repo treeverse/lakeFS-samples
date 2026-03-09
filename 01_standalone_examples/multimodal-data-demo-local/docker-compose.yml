@@ -46,6 +46,12 @@ services:
     volumes:
       - $PWD:/tmp/lakefs
     entrypoint: ["/bin/sh", "-c"]
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/api/v1/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
     command:
         - |
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
@@ -76,6 +82,36 @@ services:
           echo "-------- Let's go and have axolotl fun! --------"
           echo ""
           wait
+
+  lakefs-init:
+    image: treeverse/lakefs-enterprise:latest
+    depends_on:
+      lakefs:
+        condition: service_healthy
+    environment:
+      LAKECTL_SERVER_ENDPOINT_URL: http://lakefs:8000
+      LAKECTL_CREDENTIALS_ACCESS_KEY_ID: AKIAIOSFOLKFSSAMPLES
+      LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "echo 'starting LakeFS initialization';
+      lakectl repo create lakefs://multimodal-data-local-repo s3://example/multimodal-data-local-repo --default-branch main || echo 'repo creation failed or already exists';
+      echo 'LakeFS repository initialization completed';"
+
+  lakefs-mds:
+    image: treeverse/mds:latest
+    ports:
+      - "8004:8000"
+    depends_on:
+      lakefs-init:
+        condition: service_completed_successfully
+    volumes:
+      - $PWD/mds-config.yaml:/app/config.yaml
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+    restart: unless-stopped  # Restart if it crashes, but not if manually stopped
+    stop_grace_period: 30s   # Wait 30 seconds for graceful shutdown before SIGKILL
 
   minio-setup:
     image: minio/mc:RELEASE.2023-05-18T16-59-00Z
