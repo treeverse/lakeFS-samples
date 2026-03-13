@@ -47,7 +47,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 
 ### Environment Details
 
-* **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
+* **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python, PySpark and MLflow. 
 * **lakeFS Enterprise** is provisioned as part of this environment.
 * **MinIO** is provided as an S3-compatible object store. You can use other S3-compatible object stores including S3, GCS, as well as Azure Blob Storage.
 
@@ -56,6 +56,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 * Jupyter http://localhost:8893/
 * lakeFS http://localhost:8003/ (`AKIAIOSFOLKFSSAMPLES` / `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
 * MinIO http://localhost:9003/ (`minioadmin`/`minioadmin`)
+* MLflow UI http://localhost:5002/
 * Spark UI http://localhost:4043/
 
 ## Demo Instructions
