@@ -3,6 +3,7 @@ name: lakefs-multimodal-data-demo-local
 services:
   jupyter-notebook:
     build: .
+    user: "1000:100"
     environment:
       # log-level is set to WARN because of noisy stdout problem
       # -> See https://github.com/jupyter-server/jupyter_server/issues/1279
@@ -14,6 +15,13 @@ services:
     volumes:
       - $PWD:/home/jovyan/notebooks
       - ../../data:/data
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo 'Starting MLflow server in background'
+        mlflow server -h 0.0.0.0 &
+        echo 'Starting Jupyter'
+        exec /usr/local/bin/start-notebook.sh
 
   lakefs:
     image: treeverse/lakefs-enterprise:latest
