@@ -1,0 +1,68 @@
+version: "3.8"
+name: lakefs-sso
+services:
+  lakefs:
+    image: treeverse/lakefs-enterprise:latest
+  #  pull_policy: always
+    container_name: lakefs
+    network_mode: "host"
+    depends_on:
+      keycloak:
+        condition: service_started
+    environment:
+      - LAKEFS_BLOCKSTORE_TYPE=local
+      - LAKEFS_DATABASE_TYPE=local
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_LOGGING_LEVEL=INFO
+      - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
+      - LAKEFS_LICENSE_PATH=/tmp/lakefs/$LAKEFS_LICENSE_FILE_NAME
+      - LAKEFS_INSTALLATION_FIXED_ID=$LAKEFS_INSTALLATION_ID
+      - LAKEFS_AUTH_UI_CONFIG_RBAC=internal
+    volumes:
+      - $PWD:/tmp/lakefs
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+          echo "Sleep to wait for Keycloak to start up and be ready to accept connections"
+          sleep 15
+          lakefs run -c /tmp/lakefs/lakefs-oidc.yaml &
+          echo "------------------------------------------------"
+          echo ""
+          echo "lakeFS Web UI: http://localhost:8000      >(.＿.)<"
+          echo "                                             (  )_ "
+          echo ""
+          echo "                Username    : lakefs"
+          echo "                Password: lakefs"
+          echo ""
+          echo "-------- Let's go and have axolotl fun! --------"
+          echo ""
+          wait
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    container_name: keycloak
+    network_mode: "host"
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/keycloak/bin/kc.sh start-dev --import-realm &
+        echo "Sleep to wait for Keycloak to start up and be ready to accept connections"
+        sleep 15
+        /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin 2>/dev/null;
+        /opt/keycloak/bin/kcadm.sh update realms/master -s sslRequired=NONE
+        /opt/keycloak/bin/kcadm.sh update realms/dev-realm -s sslRequired=NONE
+        wait
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://localhost:8080
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+
+volumes:
+  keycloak_data:

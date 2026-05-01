@@ -1,0 +1,28 @@
+auth:
+  logout_redirect_url: http://localhost:8080/realms/dev-realm/protocol/openid-connect/logout
+  oidc:
+    persist_friendly_name: true
+    friendly_name_claim_name: username
+    default_initial_groups: ["Admins"]
+    validate_id_token_claims:
+      primary_group: /lakeFS-Users
+  providers:
+    oidc:
+      callback_base_url: http://localhost:8000
+      client_id: lakefs-oidc
+      client_secret: dev-lakefs-secret
+      url: http://localhost:8080/realms/dev-realm
+      post_login_redirect_url: /
+      logout_client_id_query_parameter: "client_id"
+      logout_endpoint_query_parameters:
+        - post_logout_redirect_uri 
+        - http://localhost:8000/oidc/login
+  encrypt:
+    secret_key: "secret"
+  ui_config:
+    login_url: /oidc/login
+    logout_url: /oidc/logout
+    login_cookie_names:
+      - internal_auth_session
+      - oidc_auth_session
+#    rbac: internal
