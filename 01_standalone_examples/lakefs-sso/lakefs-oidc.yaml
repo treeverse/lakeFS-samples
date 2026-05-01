@@ -25,4 +25,3 @@ auth:
     login_cookie_names:
       - internal_auth_session
       - oidc_auth_session
-#    rbac: internal
