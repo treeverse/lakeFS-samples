@@ -3,7 +3,7 @@ name: lakefs-sso
 services:
   lakefs:
     image: treeverse/lakefs-enterprise:latest
-  #  pull_policy: always
+    pull_policy: always
     container_name: lakefs
     network_mode: "host"
     depends_on:
@@ -60,6 +60,7 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HOSTNAME: http://localhost:8080
+      JAVA_TOOL_OPTIONS: "-XX:UseSVE=0"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
