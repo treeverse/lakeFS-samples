@@ -1,0 +1,149 @@
+{
+  "id": "dev-realm",
+  "realm": "dev-realm",
+  "enabled": true,
+  "displayName": "lakeFS SSO (OIDC)",
+  "groups": [
+    {
+      "name": "lakeFS-Users"
+    }
+  ],
+  "users": [
+    {
+      "username": "lakefs",
+      "enabled": true,
+      "email": "lakefsadmin@example.com",
+      "firstName": "LakeFS",
+      "lastName": "Admin",
+      "attributes": {
+        "primary_group": [
+          "/lakeFS-Users"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "lakefs",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "lakeFS-Users"
+      ]
+    },
+    {
+      "username": "dev",
+      "enabled": true,
+      "email": "devuser@example.com",
+      "firstName": "Dev",
+      "lastName": "User",
+      "attributes": {
+        "primary_group": [
+          "/lakeFS-Users"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "dev",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "lakeFS-Users"
+      ]
+    },
+    {
+      "username": "guest",
+      "enabled": true,
+      "email": "nogroup@example.com",
+      "firstName": "No",
+      "lastName": "Group",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "guest",
+          "temporary": false
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "lakefs-oidc",
+      "protocol": "openid-connect",
+      "name": "Local OIDC Client",
+      "description": "OIDC client for local lakeFS",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-lakefs-secret",
+      "redirectUris": [
+        "http://localhost:8000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8000"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:8000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "config": {
+            "user.attribute": "username",
+            "claim.name": "username",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "config": {
+            "user.attribute": "email",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "config": {
+            "full.path": "true",
+            "claim.name": "groups",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "primary_group",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "primary_group",
+            "claim.name": "primary_group",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false
+    }
+  ]
+}
