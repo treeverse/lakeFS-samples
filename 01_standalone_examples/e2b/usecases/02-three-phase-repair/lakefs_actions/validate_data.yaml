@@ -1,0 +1,34 @@
+name: Data Quality Pre-Merge Gate
+on:
+  pre-merge:
+    branches:
+      - main
+
+hooks:
+  - id: check_validation_result
+    type: lua
+    properties:
+      script: |
+        local json = require("encoding/json")
+        local lakefs = require("lakefs")
+
+        -- Read the latest validation result written by the agent
+        local code, body = lakefs.get_object(
+          action.repository_id,
+          action.source_ref,
+          "validation/latest_result.json"
+        )
+
+        if code ~= 200 then
+          error("Pre-merge gate: could not find validation/latest_result.json on branch '"
+            .. action.source_ref .. "'. Run the agent loop before merging.")
+        end
+
+        local result = json.unmarshal(body)
+
+        if result["status"] ~= "passed" then
+          error("Pre-merge gate FAILED: latest validation did not pass. "
+            .. "Summary: " .. (result["summary"] or "unknown"))
+        end
+
+        print("Pre-merge gate PASSED: " .. (result["summary"] or "ok"))

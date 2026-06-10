@@ -1,0 +1,17 @@
+# Virtual workspace root for the lakeFS + E2B agentic demos.
+#
+# This repo hosts several self-contained use cases under usecases/, all sharing
+# the plumbing in shared/. `uv sync` from here installs every member (the shared
+# package + each use case) editable into one .venv.
+[tool.uv.workspace]
+members = ["shared", "usecases/*"]
+
+[tool.uv.sources]
+lakefs-e2b-common = { workspace = true }
+
+# Workspace-wide test run (`uv run pytest`). importlib mode lets the use cases each
+# keep a tests/test_validation.py without module-name collisions. Members are installed
+# editable, so no pythonpath wiring is needed.
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["usecases", "shared"]

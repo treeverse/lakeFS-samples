@@ -1,0 +1,33 @@
+[project]
+name = "data-agent-demo"
+version = "0.2.0"
+description = "AI Data Agent: iterative LLM-driven data repair using E2B sandboxes, lakeFS versioned branches, and OpenAI"
+requires-python = ">=3.11"
+dependencies = [
+    "lakefs-e2b-common",
+    "e2b>=1.0.0",
+    "lakefs",
+    "boto3>=1.28.0",
+    "botocore>=1.31.0",
+    "pandas>=2.0.0",
+    "pyarrow>=12.0.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "openai>=1.0.0",
+    "python-dateutil>=2.8.0",
+    "pytest>=7.0.0",
+]
+
+[tool.uv.sources]
+lakefs-e2b-common = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_demo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

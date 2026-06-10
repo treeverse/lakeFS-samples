@@ -1,0 +1,13 @@
+order_id,customer_id,order_date,amount,currency,status,product_category
+ORD-001,CUST-101,2024-01-15,150.50,USD,completed,electronics
+ORD-002,,2024-01-16,200.00,USD,completed,clothing
+ORD-003,CUST-103,01/17/2024,-50.00,USD,completed,electronics
+ORD-004,CUST-104,2024-01-18,300.00,USD,SHIPPED,electronics
+ORD-005,CUST-105,2024-01-19,0.00,USD,completed,Electronics
+ORD-001,CUST-106,2024-01-20,175.00,USD,completed,clothing
+ORD-007,CUST-107,2024-13-01,90.00,USD,pending,clothing
+ORD-008,CUST-108,2024-01-22,500.00,EUR,completed,electronics
+ORD-009,CUST-109,2024-01-23,125.00,USD,unknown_status,clothing
+ORD-010,CUST-110,2024-01-24,275.00,USD,completed,CLOTHING
+ORD-011,CUST-111,2024-01-25,89.99,USD,cancelled,books
+ORD-012,CUST-112,2022-06-15,420.00,USD,shipped,home
