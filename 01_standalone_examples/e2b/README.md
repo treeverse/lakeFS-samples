@@ -80,10 +80,3 @@ cat usecases/02-three-phase-repair/README.md
 
 Each use case reads its own `.env` (copy from the local `.env.example`). Secrets
 are never committed — `.env` files are gitignored.
-
----
-
-## History
-
-Use cases 1 and 2 previously lived on separate branches (`main` and `demo-v2`).
-Those branches are preserved for reference; this monorepo layout supersedes them.
