@@ -201,9 +201,9 @@ After all three phases pass, 4 valid rows remain.
 ## Quickstart
 
 ```bash
-# 1. Clone the repo and install the uv workspace (from the repo root)
-git clone https://github.com/treeverse/lakefs-e2b-agentic-data-pr
-cd lakefs-e2b-agentic-data-pr
+# 1. Clone lakeFS-samples and install the uv workspace (from this example's root)
+git clone https://github.com/treeverse/lakeFS-samples
+cd lakeFS-samples/01_standalone_examples/e2b
 uv sync
 
 # 2. Enter this use case (all commands below run from here)
