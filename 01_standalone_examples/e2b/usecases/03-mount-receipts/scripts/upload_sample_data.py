@@ -5,6 +5,10 @@ import json
 import tempfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent / ".env")
+
 from lakefs_e2b_common.lakefs_client import commit, get_or_create_repo, make_client, write_object
 from mount_receipts.config import load_config
 from mount_receipts.sample_data import generate

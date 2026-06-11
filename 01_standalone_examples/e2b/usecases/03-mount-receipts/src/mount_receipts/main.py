@@ -5,6 +5,11 @@ import argparse
 import json
 import os
 from datetime import datetime
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 from mount_receipts.config import load_config
 from mount_receipts.orchestrator import print_report, run

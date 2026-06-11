@@ -4,6 +4,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent / ".env")
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from agent_demo.config import load_config

@@ -3,6 +3,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent / ".env")
+
 from lakefs_e2b_common.lakefs_client import get_or_create_repo, make_client, upload_lakefsactions_yaml
 from mount_receipts.config import load_config
 
