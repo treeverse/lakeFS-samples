@@ -4,11 +4,6 @@ from __future__ import annotations
 import argparse
 import sys
 from datetime import datetime
-from pathlib import Path
-
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 from agent_demo.agent_loop import run
 from agent_demo.config import load_config

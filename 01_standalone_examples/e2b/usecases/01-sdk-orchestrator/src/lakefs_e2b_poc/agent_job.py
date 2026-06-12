@@ -60,7 +60,6 @@ def _make_s3():
         config=BotocoreConfig(
             request_checksum_calculation="when_required",
             response_checksum_validation="when_required",
-            s3={"addressing_style": "path"},
         ),
     )
 
