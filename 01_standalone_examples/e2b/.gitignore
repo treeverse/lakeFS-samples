@@ -1,0 +1,22 @@
+.env
+*.env
+# editor swap files (vim) — may contain secret fragments
+*.swp
+*.swo
+*.swn
+.*.sw[a-p]
+**/outputs/*.json
+**/outputs/*.csv
+**/outputs/*.md
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+*.egg-info/
+dist/
+build/
+.DS_Store
+
+# everest enterprise binary copied into the template build context (not redistributable)
+usecases/03-mount-receipts/template/everest

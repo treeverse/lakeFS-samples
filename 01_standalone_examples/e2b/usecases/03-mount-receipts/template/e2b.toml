@@ -1,0 +1,18 @@
+# This is a config for E2B sandbox template.
+# Build your own template from the e2b.Dockerfile in this directory:
+#   e2b template build --name mount-receipts
+# E2B then fills in your own team_id and template_id below. The values here are placeholders.
+
+# Python SDK
+# from e2b import Sandbox, AsyncSandbox
+# sandbox = Sandbox.create("mount-receipts") # Sync sandbox
+# sandbox = await AsyncSandbox.create("mount-receipts") # Async sandbox
+
+# JS SDK
+# import { Sandbox } from 'e2b'
+# const sandbox = await Sandbox.create('mount-receipts')
+
+team_id = "your-e2b-team-id"
+dockerfile = "e2b.Dockerfile"
+template_name = "mount-receipts"
+template_id = "your-template-id"
