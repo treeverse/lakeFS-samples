@@ -58,10 +58,25 @@ class RunResult:
     merged: bool
     phases: list[dict] = field(default_factory=list)
     validation: dict | None = None
+    gate_blocked: bool = False      # the lakeFS pre-merge gate rejected the merge
+    gate_message: str = ""          # the gate's reason, when it blocked
 
 
 def _divider() -> None:
     print("─" * 60)
+
+
+def _extract_gate_reason(msg: str) -> str:
+    """Pull the human-readable gate reason out of a lakeFS pre-merge hook error blob."""
+    marker = "Pre-merge gate"
+    i = msg.find(marker)
+    reason = msg[i:] if i != -1 else msg
+    # Trim the Lua stack traceback that lakeFS appends after the message.
+    for cut in ("\\nstack traceback", "\nstack traceback"):
+        j = reason.find(cut)
+        if j != -1:
+            reason = reason[:j]
+    return reason.strip()
 
 
 def run(cfg: Config, *, source_branch: str | None = None, do_merge: bool = True, keep_sandbox: bool = False) -> RunResult:
@@ -149,11 +164,26 @@ def run(cfg: Config, *, source_branch: str | None = None, do_merge: bool = True,
 
     passed = bool(validation and validation.get("status") == "passed")
     merged = False
+    gate_blocked = False
+    gate_message = ""
     if passed and do_merge:
         print(f"\n  Merging '{branch_name}' into '{source}'...")
-        merge_ref = merge_branch(repo.branch(branch_name), repo.branch(source))
-        merged = True
-        print(f"  Merged. ref: {merge_ref}")
+        try:
+            merge_ref = merge_branch(repo.branch(branch_name), repo.branch(source))
+            merged = True
+            print(f"  Merged. ref: {merge_ref}")
+        except Exception as exc:
+            # A pre-merge hook rejection is an EXPECTED outcome — the gate independently
+            # re-validated the (LLM-written) ledger and refused a policy violation. Report
+            # it cleanly instead of crashing; the branch is left un-merged for inspection.
+            msg = str(exc)
+            if "pre-merge hook" in msg or "Pre-merge gate" in msg:
+                gate_blocked = True
+                gate_message = _extract_gate_reason(msg)
+                print(f"  Pre-merge gate BLOCKED the merge — '{branch_name}' left un-merged.")
+                print(f"  Gate: {gate_message}")
+            else:
+                raise
     elif not passed:
         print(f"\n  Validation did not pass — '{branch_name}' left un-merged for inspection.")
 
@@ -165,6 +195,8 @@ def run(cfg: Config, *, source_branch: str | None = None, do_merge: bool = True,
         merged=merged,
         phases=phase_summaries,
         validation=validation,
+        gate_blocked=gate_blocked,
+        gate_message=gate_message,
     )
 
 
@@ -181,5 +213,10 @@ def print_report(cfg: Config, result: RunResult) -> None:
         v = result.validation
         print(f"  Ledger   : {v.get('accepted')} accepted, {v.get('rejected')} rejected, {v.get('dropped')} dropped")
         print(f"  Summary  : {v.get('summary')}")
+    if result.gate_blocked:
+        # The validator passed its own check, but lakeFS's independent gate caught a
+        # policy violation it missed — exactly what the gate exists for.
+        print(f"  Gate     : BLOCKED MERGE — the LLM-written validator self-reported pass,")
+        print(f"             but lakeFS independently rejected: {result.gate_message}")
     print(f"  lakeFS UI: {cfg.lakefs_endpoint}/repositories/{cfg.lakefs_repository}/objects?ref={result.branch_name}")
     _divider()

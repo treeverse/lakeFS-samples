@@ -17,7 +17,8 @@ is talking to lakeFS. State is passed between phases through files on the mount:
     validation/generated_validator.py (Phase-3 validator the LLM wrote at runtime)
     validation/validator_input.json   (records + policy handed to that script)
     validation/rule_outcomes.json      (per-row accept/reject the script produced)
-    ledger.csv                       (final accepted rows; gate re-validates this)
+    validation/gate_input.json         (typed rows the lakeFS gate re-validates)
+    ledger.csv                       (final accepted rows)
     rejects.csv                      (dropped + rejected rows, with reasons)
     validation/latest_result.json    (read by the lakeFS pre-merge gate)
 """
@@ -40,8 +41,11 @@ from mount_receipts.extraction import (
     sha256_file,
 )
 from mount_receipts.validation import (
+    MIN_YEAR,
     POLICY_CAP_USD,
     FileOutcome,
+    apply_cross_row_uniqueness,
+    gate_input_rows,
     validate_ledger,
 )
 
@@ -160,19 +164,42 @@ def _total_number(raw) -> str:
         return str(raw)
 
 
+def _tamper_accepted(result) -> None:
+    """Corrupt one accepted row's record in place so it violates policy (currency → EUR).
+
+    Used only when DEMO_TAMPER is set. The row's FileOutcome stays "accepted" (so the
+    self-reported result still says passed), but the committed ledger + gate inputs now
+    carry a non-USD row — which the lakeFS pre-merge gate independently rejects.
+    """
+    accepted = result.accepted
+    if not accepted:
+        print(json.dumps({"demo_tamper": "skipped — no accepted rows"}), file=sys.stderr)
+        return
+    victim = accepted[0]
+    rec = victim.record or {}
+    original = rec.get("currency")
+    rec["currency"] = "EUR"
+    print(json.dumps({"demo_tamper": "active", "row": victim.source_file,
+                      "currency": f"{original} -> EUR (gate should block this merge)"}),
+          file=sys.stderr)
+
+
 def phase_validate(root: str, model: str) -> dict:
     triage = _read_json(_p(root, "triage.json"))
     draft_doc = _read_json(_p(root, "ledger_draft.json"))
     draft = sorted(draft_doc["rows"], key=lambda r: r["source_file"])
     today = _today()
 
-    # The business-rule validator is WRITTEN BY THE MODEL at runtime and executed inside
-    # this sandbox — code we have never seen, contained by E2B. (Structural phase-1 drops
-    # and phase-2 extraction failures below stay deterministic; they were already decided.)
+    # The per-receipt validator is WRITTEN BY THE MODEL at runtime and executed inside this
+    # sandbox — code we have never seen, contained by E2B. It judges each receipt on its own
+    # (RULES_SPEC rules 1–6); the host then layers the cross-row invoice-uniqueness rule on
+    # top deterministically (LLMs reliably mishandle that whole-batch rule). Structural
+    # phase-1 drops and phase-2 extraction failures below stay deterministic too.
     gen = codegen.generate_and_run_validator(
         root, draft, today=today, policy_cap=POLICY_CAP_USD, model=model
     )
-    rule_outcomes = {o["source_file"]: o for o in gen["outcomes"]}
+    generated = {o["source_file"]: o for o in gen["outcomes"]}
+    rule_outcomes = apply_cross_row_uniqueness(draft, generated)
 
     outcomes: list[FileOutcome] = []
     # phase-1 drops
@@ -182,29 +209,46 @@ def phase_validate(root: str, model: str) -> dict:
     for d in draft_doc.get("extraction_failed", []):
         outcomes.append(FileOutcome(d["file"], "rejected", 2, d["reason"]))
 
-    # phase-3 outcomes, as decided by the generated validator
+    # phase-3 outcomes (generated per-receipt verdict + deterministic uniqueness)
+    decided: dict[str, str] = {}
     for row in draft:
         rec = row["record"]
-        o = rule_outcomes.get(row["source_file"], {"outcome": "rejected", "reasons": ["validator produced no outcome"]})
-        reasons = [r for r in (o.get("reasons") or []) if r]
-        if o.get("outcome") == "accepted" and not reasons:
+        o = rule_outcomes[row["source_file"]]
+        decided[row["source_file"]] = o["outcome"]
+        if o["outcome"] == "accepted":
             outcomes.append(FileOutcome(row["source_file"], "accepted", 3, "", rec))
         else:
-            outcomes.append(FileOutcome(row["source_file"], "rejected", 3, "; ".join(reasons) or "rejected", rec))
+            outcomes.append(FileOutcome(row["source_file"], "rejected", 3, "; ".join(o["reasons"]) or "rejected", rec))
 
     result = validate_ledger(triage["inbox"], outcomes)
 
-    # human-facing ledger + rejects. Policy-relevant columns come first and are comma-free
-    # (ISO date, currency code, numeric total); the free-text `vendor` is last so the
-    # lakeFS pre-merge hook can re-parse the ledger without a full CSV reader.
+    # DEMO_TAMPER (off by default): corrupt one accepted row AFTER it passed validation, so
+    # the agent still self-reports "passed" but the committed ledger actually violates
+    # policy — letting you watch the lakeFS gate independently catch it and block the merge.
+    if os.environ.get("DEMO_TAMPER", "").strip() not in ("", "0", "false", "False"):
+        _tamper_accepted(result)
+
+    # Typed inputs for the lakeFS pre-merge gate. The hook re-derives accept/reject for
+    # every drafted row from these primitives — independently of the LLM-written validator
+    # — and blocks the merge if the validator accepted a row that violates policy.
+    gate_rows = gate_input_rows(draft, decided)
+
+    _write_json(_p(root, "validation", "gate_input.json"), {
+        "today": today.isoformat(),
+        "policy_cap": POLICY_CAP_USD,
+        "min_year": MIN_YEAR,
+        "rows": gate_rows,
+    })
+
+    # human-facing ledger + rejects (ISO dates, numeric totals for downstream consumers)
     with open(_p(root, "ledger.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["source_file", "invoice_no", "date", "currency", "total", "num_items", "vendor"])
+        w.writerow(["source_file", "vendor", "invoice_no", "date", "currency", "total", "num_items"])
         for o in result.accepted:
             r = o.record or {}
-            w.writerow([o.source_file, r.get("invoice_no", ""), _iso_date(r.get("date", "")),
-                        (r.get("currency", "") or "").upper(), _total_number(r.get("total")),
-                        len(r.get("line_items") or []), r.get("vendor", "")])
+            w.writerow([o.source_file, r.get("vendor", ""), r.get("invoice_no", ""),
+                        _iso_date(r.get("date", "")), (r.get("currency", "") or "").upper(),
+                        _total_number(r.get("total")), len(r.get("line_items") or [])])
     with open(_p(root, "rejects.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["source_file", "outcome", "phase", "reason"])

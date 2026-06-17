@@ -12,13 +12,13 @@ hooks:
         local json = require("encoding/json")
         local lakefs = require("lakefs")
 
-        -- Policy constants — mirror mount_receipts/validation.py. The gate enforces these
-        -- INDEPENDENTLY: it does not trust the agent's self-reported "status", it re-derives
-        -- the verdict from the committed ledger itself. The validator that produced the
-        -- ledger was written by the LLM at runtime, so its correctness cannot be assumed —
-        -- this hook is the authoritative, non-bypassable check.
-        local POLICY_CAP = 500.0
-        local MIN_YEAR = 2023
+        -- This gate enforces the ledger policy INDEPENDENTLY. The validator that produced
+        -- the ledger was WRITTEN BY THE LLM at runtime, so its correctness cannot be
+        -- assumed — the hook re-derives accept/reject for every drafted row from typed
+        -- inputs (validation/gate_input.json) and blocks the merge if the validator
+        -- accepted any row that violates policy. It does not trust the agent's reported
+        -- status. (lakeFS's Lua has no string-pattern functions, so all checks below use
+        -- json + numbers + plain string compares only.)
         local MAX_YEAR = 2099
 
         local repo = action.repository_id
@@ -36,85 +36,93 @@ hooks:
             .. "'. Summary: " .. (result["summary"] or "unknown"))
         end
 
-        -- 2) Re-read the committed ledger and re-validate every accepted row ourselves.
-        local lrc, ledger = lakefs.get_object(repo, ref, "ledger.csv")
-        if lrc ~= 200 then
-          error("Pre-merge gate: ledger.csv not found on '" .. ref .. "'.")
+        -- 2) Re-derive the verdict for every drafted row from the typed gate inputs.
+        local grc, gbody = lakefs.get_object(repo, ref, "validation/gate_input.json")
+        if grc ~= 200 then
+          error("Pre-merge gate: validation/gate_input.json not found on '" .. ref .. "'.")
+        end
+        local gate = json.unmarshal(gbody)
+        local rows = gate["rows"] or {}
+        local today = gate["today"] or ""
+        local cap = gate["policy_cap"]
+        local min_year = gate["min_year"]
+
+        -- Count invoice numbers across the WHOLE batch so a duplicate is caught even when
+        -- its twin was rejected for another reason (and so isn't in the accepted ledger).
+        local inv_count = {}
+        for _, row in ipairs(rows) do
+          local inv = row["invoice_no"] or ""
+          if inv ~= "" then inv_count[inv] = (inv_count[inv] or 0) + 1 end
         end
 
-        -- Split a CSV line on commas. The producing code keeps the policy columns
-        -- (source_file, invoice_no, date, currency, total) comma-free and puts the
-        -- free-text `vendor` LAST, so reading fixed leading indices is safe even if a
-        -- vendor name contains commas.
-        local function split_csv(line)
-          local fields = {}
-          for field in (line .. ","):gmatch("([^,]*),") do
-            fields[#fields + 1] = field
-          end
-          return fields
-        end
-
-        local lines = {}
-        for line in ledger:gmatch("[^\r\n]+") do
-          lines[#lines + 1] = line
-        end
-
-        local problems = {}
-        local seen_invoice = {}
-        local accepted = 0
-
-        -- Row 1 is the header; every data row in ledger.csv is an accepted receipt.
-        for i = 2, #lines do
-          local f = split_csv(lines[i])
-          local source = f[1] or ("row " .. i)
-          local invoice = f[2] or ""
-          local date = f[3] or ""
-          local currency = (f[4] or ""):upper()
-          local total_s = f[5] or ""
-          accepted = accepted + 1
-
-          if currency ~= "USD" then
-            problems[#problems + 1] = source .. ": non-USD currency (" .. currency .. ")"
+        -- Returns "" if the row passes policy, or a reason string if it should be rejected.
+        local function gate_reason(row)
+          local why = ""
+          local function add(msg)
+            if why == "" then why = msg else why = why .. ", " .. msg end
           end
 
-          local total = tonumber(total_s)
+          if (row["vendor"] or "") == "" then add("missing vendor") end
+
+          local total = row["total"]   -- number, or nil when unparseable/missing
           if total == nil then
-            problems[#problems + 1] = source .. ": total not numeric (" .. total_s .. ")"
-          elseif total <= 0 then
-            problems[#problems + 1] = source .. ": non-positive total (" .. total_s .. ")"
-          elseif total > POLICY_CAP then
-            problems[#problems + 1] = source .. ": total " .. total_s .. " exceeds cap " .. POLICY_CAP
-          end
-
-          local y = date:match("^(%d%d%d%d)%-%d%d%-%d%d$")
-          if not y then
-            problems[#problems + 1] = source .. ": date not ISO YYYY-MM-DD (" .. date .. ")"
+            add("missing/unparseable total")
           else
-            local yr = tonumber(y)
-            if yr < MIN_YEAR or yr > MAX_YEAR then
-              problems[#problems + 1] = source .. ": date year out of range (" .. date .. ")"
+            if row["check_sum"] then
+              local sum = 0
+              for _, a in ipairs(row["item_amounts"] or {}) do sum = sum + a end
+              local d = total - sum
+              if d < 0 then d = -d end
+              if d > 0.01 then add("total != sum(line items)") end
             end
+            if total > cap then add("total exceeds cap " .. tostring(cap)) end
           end
 
-          if invoice ~= "" then
-            if seen_invoice[invoice] then
-              problems[#problems + 1] = source .. ": duplicate invoice number (" .. invoice .. ")"
-            end
-            seen_invoice[invoice] = true
+          local cur = row["currency"] or ""
+          if cur == "" then add("missing currency")
+          elseif cur ~= "USD" then add("non-USD currency (" .. cur .. ")") end
+
+          local diso = row["date_iso"] or ""
+          if diso == "" then
+            add("missing/unparseable date")
+          else
+            if diso > today then add("future-dated (" .. diso .. ")") end   -- ISO strings compare correctly
+            local yr = row["year"] or 0
+            if yr ~= 0 and (yr < min_year or yr > MAX_YEAR) then add("date year out of range (" .. diso .. ")") end
+          end
+
+          local inv = row["invoice_no"] or ""
+          if inv ~= "" and inv_count[inv] > 1 then add("duplicate invoice number (" .. inv .. ")") end
+
+          return why
+        end
+
+        local violations = ""
+        local nviol = 0
+        local accepted = 0
+        for _, row in ipairs(rows) do
+          if row["decided"] == "accepted" then accepted = accepted + 1 end
+          local why = gate_reason(row)
+          -- Block the dangerous direction: the validator accepted a policy-violating row.
+          if row["decided"] == "accepted" and why ~= "" then
+            local msg = (row["source_file"] or "?") .. " — " .. why
+            if violations == "" then violations = msg else violations = violations .. " | " .. msg end
+            nviol = nviol + 1
           end
         end
 
-        -- 3) Cross-check the agent's self-reported accepted count against what is actually
-        --    in the ledger — catches a half-written ledger or a doctored result file.
+        -- Cross-check the agent's self-reported accepted count against the gate inputs.
         if result["accepted"] ~= nil and result["accepted"] ~= accepted then
-          problems[#problems + 1] = "accepted-count mismatch: result claims "
-            .. tostring(result["accepted"]) .. " but ledger.csv holds " .. accepted
+          local msg = "accepted-count mismatch: result reports " .. tostring(result["accepted"])
+            .. " but gate_input has " .. accepted
+          if violations == "" then violations = msg else violations = violations .. " | " .. msg end
+          nviol = nviol + 1
         end
 
-        if #problems > 0 then
-          error("Pre-merge gate FAILED (independent re-validation found "
-            .. #problems .. " issue(s)): " .. table.concat(problems, " | "))
+        if nviol > 0 then
+          error("Pre-merge gate FAILED (independent re-validation found " .. nviol
+            .. " violation(s)): " .. violations)
         end
 
         print("Pre-merge gate PASSED: independently re-validated " .. accepted
-          .. " accepted row(s). " .. (result["summary"] or ""))
+          .. " accepted row(s) of " .. #rows .. " drafted. " .. (result["summary"] or ""))

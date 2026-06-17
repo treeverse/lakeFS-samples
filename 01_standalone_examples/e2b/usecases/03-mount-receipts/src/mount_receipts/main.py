@@ -39,6 +39,8 @@ def main() -> int:
                 "sandbox_url": result.sandbox_url,
                 "passed": result.passed,
                 "merged": result.merged,
+                "gate_blocked": result.gate_blocked,
+                "gate_message": result.gate_message,
                 "phases": result.phases,
                 "validation": result.validation,
             },

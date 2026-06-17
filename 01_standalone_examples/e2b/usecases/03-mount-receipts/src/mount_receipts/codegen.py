@@ -173,9 +173,10 @@ def generate_and_run_validator(
                   file=sys.stderr)
 
     # All attempts exhausted — keep the demo runnable with the reference implementation.
+    # Per-receipt rules only (uniqueness is layered on by the host), mirroring RULES_SPEC.
     print(json.dumps({"validator": "fallback-reference", "attempts": MAX_ATTEMPTS,
                       "last_error": (last_error or "")[:500]}), file=sys.stderr)
-    outcomes = business_rule_outcomes(rows, today=today, policy_cap=policy_cap)
+    outcomes = business_rule_outcomes(rows, today=today, policy_cap=policy_cap, include_uniqueness=False)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump({"outcomes": outcomes}, f, indent=2)
     return {"outcomes": outcomes, "generated": False, "attempts": MAX_ATTEMPTS, "validator_path": None}

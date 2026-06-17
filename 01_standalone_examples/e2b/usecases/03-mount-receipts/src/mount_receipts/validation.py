@@ -41,10 +41,11 @@ AMOUNT_TOLERANCE = 0.01
 # and as the fallback if code generation can't produce a working validator.
 RULES_SPEC = f"""\
 You are given receipts that were already extracted into structured records. Decide, for
-each record, whether it is `accepted` or `rejected` under these business rules. A record
-is REJECTED if it violates ANY rule; list every violated rule as a short reason string.
+each record INDEPENDENTLY, whether it is `accepted` or `rejected` under these per-receipt
+business rules. A record is REJECTED if it violates ANY rule; list every violated rule as
+a short reason string.
 
-Rules:
+Rules (each applies to a single record on its own):
   1. `vendor` must be a non-empty string.
   2. `total` must be present and parseable as a number. Amounts may arrive as numbers or
      as strings like "$1,234.50" — strip "$" and thousands separators before parsing.
@@ -54,9 +55,10 @@ Rules:
      its year must be >= {MIN_YEAR}.
   5. `currency` must be present and equal to "USD" (case-insensitive).
   6. `total` must be <= the policy cap (`policy_cap`, ${POLICY_CAP_USD:.2f}).
-  7. `invoice_no` must be unique across the whole batch. If two or more records share the
-     same non-empty `invoice_no`, EVERY record carrying that number is rejected as a
-     duplicate.
+
+Do NOT implement cross-record / uniqueness checks — the host enforces invoice-number
+uniqueness deterministically after your validator runs (and the lakeFS pre-merge gate
+independently re-checks ALL rules, including uniqueness). Judge each record by itself.
 
 I/O contract for the script you write:
   - It is invoked as:  python <script> <input_json_path> <output_json_path>
@@ -181,13 +183,50 @@ def business_rule_outcomes(
     *,
     today: date,
     policy_cap: float = POLICY_CAP_USD,
+    include_uniqueness: bool = True,
 ) -> list[dict]:
-    """Reference implementation of :data:`RULES_SPEC` over the drafted rows.
+    """Reference implementation of the business rules over the drafted rows.
 
     ``rows`` is the ``ledger_draft.json`` shape: ``[{"source_file": str, "record": {...}}]``.
-    Returns one ``{"source_file", "outcome", "reasons"}`` dict per row. This is exactly
-    what the LLM-generated validator is asked to reproduce; it is used by the unit tests
-    and as the fallback when code generation fails (see ``codegen.generate_and_run_validator``).
+    Returns one ``{"source_file", "outcome", "reasons"}`` dict per row.
+
+    With ``include_uniqueness=True`` this is the complete policy (the unit-test oracle).
+    With ``include_uniqueness=False`` it covers only the per-receipt rules — matching what
+    the LLM-generated validator is asked to produce (see :data:`RULES_SPEC`); the host then
+    layers cross-row uniqueness on top via :func:`apply_cross_row_uniqueness`. The
+    code-generation fallback uses the ``False`` variant so both paths behave identically.
+    """
+    inv_counts: dict[str, int] = {}
+    if include_uniqueness:
+        for row in rows:
+            inv = (row["record"].get("invoice_no") or "").strip()
+            if inv:
+                inv_counts[inv] = inv_counts.get(inv, 0) + 1
+
+    outcomes: list[dict] = []
+    for row in sorted(rows, key=lambda r: r["source_file"]):
+        rec = row["record"]
+        reasons = check_business_rules(rec, today=today, seen_invoice_nos=set(), policy_cap=policy_cap)
+        if include_uniqueness:
+            inv = (rec.get("invoice_no") or "").strip()
+            if inv and inv_counts.get(inv, 0) > 1:
+                reasons.append(f"duplicate invoice number ({inv})")
+        outcomes.append({
+            "source_file": row["source_file"],
+            "outcome": "rejected" if reasons else "accepted",
+            "reasons": reasons,
+        })
+    return outcomes
+
+
+def apply_cross_row_uniqueness(rows: list[dict], generated: dict[str, dict]) -> dict[str, dict]:
+    """Layer deterministic invoice-number uniqueness on top of the per-receipt verdicts.
+
+    The LLM-generated validator judges each receipt on its own (RULES_SPEC rules 1–6) — it
+    reliably mishandles the cross-row uniqueness rule, so the host owns that one rule here.
+    ``generated`` maps source_file -> {"outcome", "reasons"} (the validator's per-receipt
+    verdict). Any row whose non-empty invoice number repeats across the batch is rejected
+    with a duplicate reason. Returns the final source_file -> {"outcome", "reasons"} map.
     """
     inv_counts: dict[str, int] = {}
     for row in rows:
@@ -195,19 +234,62 @@ def business_rule_outcomes(
         if inv:
             inv_counts[inv] = inv_counts.get(inv, 0) + 1
 
-    outcomes: list[dict] = []
-    for row in sorted(rows, key=lambda r: r["source_file"]):
-        rec = row["record"]
-        reasons = check_business_rules(rec, today=today, seen_invoice_nos=set(), policy_cap=policy_cap)
-        inv = (rec.get("invoice_no") or "").strip()
+    final: dict[str, dict] = {}
+    for row in rows:
+        sf = row["source_file"]
+        g = generated.get(sf, {"outcome": "rejected", "reasons": ["validator produced no outcome"]})
+        reasons = [r for r in (g.get("reasons") or []) if r]
+        inv = (row["record"].get("invoice_no") or "").strip()
         if inv and inv_counts.get(inv, 0) > 1:
             reasons.append(f"duplicate invoice number ({inv})")
-        outcomes.append({
-            "source_file": row["source_file"],
-            "outcome": "rejected" if reasons else "accepted",
-            "reasons": reasons,
+        accepted = g.get("outcome") == "accepted" and not reasons
+        final[sf] = {"outcome": "accepted" if accepted else "rejected", "reasons": reasons}
+    return final
+
+
+def gate_input_rows(rows: list[dict], decided: dict[str, str]) -> list[dict]:
+    """Project the drafted rows into typed fields the lakeFS pre-merge hook re-validates.
+
+    The hook cannot parse dates or arbitrary CSV in its (pattern-less) Lua runtime, so the
+    host normalises each drafted row here into primitives the hook can re-check with plain
+    arithmetic and string compares: parsed ``total``/amounts, an ISO ``date``, the ``year``,
+    and the validator's ``decided`` verdict for the row. The hook independently re-derives
+    accept/reject from these fields and blocks the merge if the (LLM-written) validator
+    accepted a row that violates policy. ``decided`` maps source_file -> "accepted"|"rejected".
+
+    Note this is *data preparation*, not the verdict: the policy decision is re-made in Lua.
+    """
+    out: list[dict] = []
+    for row in sorted(rows, key=lambda r: r["source_file"]):
+        rec = row["record"]
+        sf = row["source_file"]
+        total = _parse_amount(rec.get("total"))
+        items = rec.get("line_items") or []
+        amounts = [_parse_amount(it.get("amount") if isinstance(it, dict) else None) for it in items]
+        all_parseable = items and all(a is not None for a in amounts)
+
+        raw_date = (rec.get("date") or "").strip()
+        date_iso, year = "", 0
+        if raw_date:
+            try:
+                parsed = dateparser.parse(raw_date).date()
+                date_iso, year = parsed.isoformat(), parsed.year
+            except (ValueError, OverflowError, TypeError):
+                date_iso, year = "", 0
+
+        out.append({
+            "source_file": sf,
+            "decided": decided.get(sf, "rejected"),
+            "vendor": (rec.get("vendor") or "").strip(),
+            "currency": (rec.get("currency") or "").strip().upper(),
+            "total": total,                      # JSON null when unparseable/missing
+            "item_amounts": [a for a in amounts if a is not None] if all_parseable else [],
+            "check_sum": bool(all_parseable),
+            "date_iso": date_iso,                # "" when missing/unparseable
+            "year": year,                        # 0 when unknown
+            "invoice_no": (rec.get("invoice_no") or "").strip(),
         })
-    return outcomes
+    return out
 
 
 @dataclass

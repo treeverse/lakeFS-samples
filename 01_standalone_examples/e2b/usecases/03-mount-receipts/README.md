@@ -42,31 +42,48 @@ agent works in **three progressive phases**, each committed to its branch:
 |-------|--------------|------------------------------------|
 | **1 — Triage (structural)** | hash-dedupe, drop corrupt/unreadable & unsupported files, drop non-receipts (vision `is_receipt`) | a corrupt file, an exact duplicate, a beach photo, a `.txt` note |
 | **2 — Extract (multimodal)** | gpt-4o reads each kept file → `{vendor, date, invoice_no, currency, line_items, total}` cached as sidecars → `ledger_draft` (multi-page PDFs are page-stacked so a total on page 2 is read) | (the low-contrast receipt still extracts) |
-| **3 — Validate (business rules)** | the agent is handed the rules + extracted receipts and **writes its own Python validator at runtime**, which is then executed in the sandbox: `total == sum(items)`, date sane & not future, currency = USD, unique invoice no, total ≤ \$500 cap | math mismatch, future-dated, EUR, duplicate invoice #, over-cap |
+| **3 — Validate (business rules)** | the agent **writes its own Python validator at runtime** for the per-receipt rules and runs it in the sandbox: `total == sum(items)`, date sane & not future, currency = USD, total ≤ \$500 cap. The host then applies the cross-row **unique invoice no** rule deterministically. | math mismatch, future-dated, EUR, over-cap, duplicate invoice # |
 
 A clean run produces **4 accepted / 5 rejected / 4 dropped**, written to `ledger.csv` and
 `rejects.csv`.
 
 ### Why the validator is generated at runtime — and why lakeFS still gates
 
-The validation logic in Phase 3 is **not shipped in the repo** — the agent writes it on the
-fly from a rule *specification* (`mount_receipts/validation.py: RULES_SPEC`) and executes it
-inside the sandbox (`mount_receipts/codegen.py`). That is the point of running it in E2B:
-**you are executing code you have never seen, generated at runtime, and the sandbox contains
-whatever it does** — a self-repair loop re-prompts the model if its script crashes or
+The per-receipt validation logic in Phase 3 is **not shipped in the repo** — the agent writes
+it on the fly from a rule *specification* (`mount_receipts/validation.py: RULES_SPEC`) and
+executes it inside the sandbox (`mount_receipts/codegen.py`). That is the point of running it
+in E2B: **you are executing code you have never seen, generated at runtime, and the sandbox
+contains whatever it does** — a self-repair loop re-prompts the model if its script crashes or
 violates the I/O contract, with a reference implementation as a last-resort fallback so the
-demo always completes. The exact generated script, its input, and its output are committed
-to the branch under `validation/` so the run is fully auditable.
+demo always completes. The exact generated script, its input, and its output are committed to
+the branch under `validation/` so the run is fully auditable.
+
+> **Why one rule stays deterministic.** The model judges each receipt *on its own*. The only
+> cross-record rule — invoice-number uniqueness, which needs a whole-batch pass — is the one
+> LLMs reliably get wrong, so the host owns it (`apply_cross_row_uniqueness`). The generated
+> code still does the substantive per-receipt work; this just keeps the happy path reliable.
 
 Because that validator is LLM-written and therefore *untrusted*, lakeFS does **not** take its
-word for it. The **pre-merge Action** (`lakefs_actions/validate_ledger.yaml`) re-reads the
-committed `ledger.csv` and **independently re-derives** pass/fail — re-checking currency, the
-\$500 cap, ISO date/year, invoice-number uniqueness, and that the accepted-row count matches
-the agent's self-reported result. It does not trust `validation/latest_result.json`'s status
-field alone. So a half-processed, invalid, or self-certified ledger physically cannot be
-promoted to `main`, regardless of what code the agent ran or who triggers the merge. **E2B is
-the compute trust boundary (run unknown code safely); lakeFS is the data trust boundary
-(unknown data can't reach `main`).**
+word for it. The **pre-merge Action** (`lakefs_actions/validate_ledger.yaml`) reads the typed
+`validation/gate_input.json` the agent committed and **independently re-derives** accept/reject
+for **every** drafted row — re-checking `total == sum(items)`, the \$500 cap, currency, ISO
+date/year, **and** invoice-number uniqueness across the whole batch — then blocks the merge if
+the validator accepted any row that violates policy (and cross-checks the accepted-row count).
+It does not trust `validation/latest_result.json`'s status field. So a half-processed,
+invalid, or self-certified ledger physically cannot be promoted to `main`, regardless of what
+code the agent ran or who triggers the merge. **E2B is the compute trust boundary (run unknown
+code safely); lakeFS is the data trust boundary (unknown data can't reach `main`).**
+
+### See the gate fire
+
+In the happy path the gate re-validates and the clean ledger merges. To watch it *block* a bad
+ledger, set `DEMO_TAMPER=1`: after validation passes, one accepted row is corrupted to a
+non-USD currency (the agent still self-reports "passed"), and the lakeFS gate independently
+rejects the merge — nothing reaches `main`.
+
+```bash
+DEMO_TAMPER=1 uv run python -m mount_receipts.main   # gate blocks the merge
+```
 
 ---
 
@@ -99,9 +116,9 @@ the compute trust boundary (run unknown code safely); lakeFS is the data trust b
                  ┌──────────────────────┐
                  │      lakeFS          │
                  │  • agent branch      │
-                 │  • pre-merge gate    │  ← re-validates ledger.csv
-                 │                      │    independently (doesn't
-                 │                      │    trust the agent's status)
+                 │  • pre-merge gate    │  ← re-derives every row's
+                 │                      │    verdict from gate_input.json
+                 │                      │    (doesn't trust the status)
                  └──────────┬───────────┘
                             │ merge only when the gate passes
                             ▼

@@ -24,6 +24,7 @@ class Config:
     openai_model: str
     # demo controls
     demo_today: str            # pin "today" for reproducible date checks; "" = real today
+    demo_tamper: str           # "1" corrupts an accepted row so the lakeFS gate blocks; "" = off
 
     def lakectl_envs(self) -> dict[str, str]:
         """Env vars everest/lakectl read inside the sandbox (creds never passed as CLI flags)."""
@@ -40,6 +41,8 @@ class Config:
         envs["OPENAI_MODEL"] = self.openai_model
         if self.demo_today:
             envs["DEMO_TODAY"] = self.demo_today
+        if self.demo_tamper:
+            envs["DEMO_TAMPER"] = self.demo_tamper
         return envs
 
 
@@ -57,4 +60,5 @@ def load_config() -> Config:
         openai_api_key=require("OPENAI_API_KEY"),
         openai_model=optional("OPENAI_MODEL", "gpt-4o"),
         demo_today=optional("DEMO_TODAY"),
+        demo_tamper=optional("DEMO_TAMPER"),
     )

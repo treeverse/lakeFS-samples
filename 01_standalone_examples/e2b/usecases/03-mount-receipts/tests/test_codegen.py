@@ -21,7 +21,8 @@ import json, sys
 from datetime import date
 from mount_receipts.validation import business_rule_outcomes
 inp = json.load(open(sys.argv[1]))
-out = business_rule_outcomes(inp["rows"], today=date.fromisoformat(inp["today"]), policy_cap=inp["policy_cap"])
+out = business_rule_outcomes(inp["rows"], today=date.fromisoformat(inp["today"]),
+                             policy_cap=inp["policy_cap"], include_uniqueness=False)
 json.dump({"outcomes": out}, open(sys.argv[2], "w"))
 """
 
@@ -105,8 +106,8 @@ def test_falls_back_to_reference_after_exhaustion(tmp_path):
 
     assert res["generated"] is False
     assert res["attempts"] == codegen.MAX_ATTEMPTS
-    # Fallback output must match the canonical reference exactly.
-    assert res["outcomes"] == business_rule_outcomes(rows, today=TODAY)
+    # Fallback output must match the per-receipt reference (uniqueness added later by host).
+    assert res["outcomes"] == business_rule_outcomes(rows, today=TODAY, include_uniqueness=False)
     # The contract output file is still written so downstream/audit stays consistent.
     doc = json.load(open(tmp_path / "validation" / "rule_outcomes.json"))
     assert {o["source_file"] for o in doc["outcomes"]} == {"ok.jpg", "bad.jpg"}
