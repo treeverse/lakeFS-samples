@@ -12,23 +12,109 @@ hooks:
         local json = require("encoding/json")
         local lakefs = require("lakefs")
 
-        -- Read the ledger validation result the agent committed on its branch.
-        local code, body = lakefs.get_object(
-          action.repository_id,
-          action.source_ref,
-          "validation/latest_result.json"
-        )
+        -- Policy constants — mirror mount_receipts/validation.py. The gate enforces these
+        -- INDEPENDENTLY: it does not trust the agent's self-reported "status", it re-derives
+        -- the verdict from the committed ledger itself. The validator that produced the
+        -- ledger was written by the LLM at runtime, so its correctness cannot be assumed —
+        -- this hook is the authoritative, non-bypassable check.
+        local POLICY_CAP = 500.0
+        local MIN_YEAR = 2023
+        local MAX_YEAR = 2099
 
-        if code ~= 200 then
-          error("Pre-merge gate: could not find validation/latest_result.json on branch '"
-            .. action.source_ref .. "'. Run the receipts agent before merging.")
+        local repo = action.repository_id
+        local ref = action.source_ref
+
+        -- 1) The agent must have produced a validation result on its branch.
+        local rc, body = lakefs.get_object(repo, ref, "validation/latest_result.json")
+        if rc ~= 200 then
+          error("Pre-merge gate: validation/latest_result.json not found on '" .. ref
+            .. "'. Run the receipts agent before merging.")
         end
-
         local result = json.unmarshal(body)
-
         if result["status"] ~= "passed" then
-          error("Pre-merge gate FAILED: ledger did not pass validation. "
-            .. "Summary: " .. (result["summary"] or "unknown"))
+          error("Pre-merge gate FAILED: agent reported status '" .. tostring(result["status"])
+            .. "'. Summary: " .. (result["summary"] or "unknown"))
         end
 
-        print("Pre-merge gate PASSED: " .. (result["summary"] or "ok"))
+        -- 2) Re-read the committed ledger and re-validate every accepted row ourselves.
+        local lrc, ledger = lakefs.get_object(repo, ref, "ledger.csv")
+        if lrc ~= 200 then
+          error("Pre-merge gate: ledger.csv not found on '" .. ref .. "'.")
+        end
+
+        -- Split a CSV line on commas. The producing code keeps the policy columns
+        -- (source_file, invoice_no, date, currency, total) comma-free and puts the
+        -- free-text `vendor` LAST, so reading fixed leading indices is safe even if a
+        -- vendor name contains commas.
+        local function split_csv(line)
+          local fields = {}
+          for field in (line .. ","):gmatch("([^,]*),") do
+            fields[#fields + 1] = field
+          end
+          return fields
+        end
+
+        local lines = {}
+        for line in ledger:gmatch("[^\r\n]+") do
+          lines[#lines + 1] = line
+        end
+
+        local problems = {}
+        local seen_invoice = {}
+        local accepted = 0
+
+        -- Row 1 is the header; every data row in ledger.csv is an accepted receipt.
+        for i = 2, #lines do
+          local f = split_csv(lines[i])
+          local source = f[1] or ("row " .. i)
+          local invoice = f[2] or ""
+          local date = f[3] or ""
+          local currency = (f[4] or ""):upper()
+          local total_s = f[5] or ""
+          accepted = accepted + 1
+
+          if currency ~= "USD" then
+            problems[#problems + 1] = source .. ": non-USD currency (" .. currency .. ")"
+          end
+
+          local total = tonumber(total_s)
+          if total == nil then
+            problems[#problems + 1] = source .. ": total not numeric (" .. total_s .. ")"
+          elseif total <= 0 then
+            problems[#problems + 1] = source .. ": non-positive total (" .. total_s .. ")"
+          elseif total > POLICY_CAP then
+            problems[#problems + 1] = source .. ": total " .. total_s .. " exceeds cap " .. POLICY_CAP
+          end
+
+          local y = date:match("^(%d%d%d%d)%-%d%d%-%d%d$")
+          if not y then
+            problems[#problems + 1] = source .. ": date not ISO YYYY-MM-DD (" .. date .. ")"
+          else
+            local yr = tonumber(y)
+            if yr < MIN_YEAR or yr > MAX_YEAR then
+              problems[#problems + 1] = source .. ": date year out of range (" .. date .. ")"
+            end
+          end
+
+          if invoice ~= "" then
+            if seen_invoice[invoice] then
+              problems[#problems + 1] = source .. ": duplicate invoice number (" .. invoice .. ")"
+            end
+            seen_invoice[invoice] = true
+          end
+        end
+
+        -- 3) Cross-check the agent's self-reported accepted count against what is actually
+        --    in the ledger — catches a half-written ledger or a doctored result file.
+        if result["accepted"] ~= nil and result["accepted"] ~= accepted then
+          problems[#problems + 1] = "accepted-count mismatch: result claims "
+            .. tostring(result["accepted"]) .. " but ledger.csv holds " .. accepted
+        end
+
+        if #problems > 0 then
+          error("Pre-merge gate FAILED (independent re-validation found "
+            .. #problems .. " issue(s)): " .. table.concat(problems, " | "))
+        end
+
+        print("Pre-merge gate PASSED: independently re-validated " .. accepted
+          .. " accepted row(s). " .. (result["summary"] or ""))

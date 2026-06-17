@@ -31,6 +31,51 @@ MIN_YEAR = 2023
 AMOUNT_TOLERANCE = 0.01
 
 
+# The Phase-3 business rules, written as a *specification* rather than as the code that
+# enforces them. At runtime the agent is handed this spec plus the extracted receipts and
+# is asked to WRITE its own Python validator, which is then executed inside the E2B
+# sandbox (see ``codegen.py``). That is the whole point of running it in E2B: the
+# validation logic is code we have never seen until the model emits it, and the sandbox
+# contains whatever it does. ``check_business_rules`` / ``business_rule_outcomes`` below
+# are the canonical reference implementation of this same spec — used by the unit tests
+# and as the fallback if code generation can't produce a working validator.
+RULES_SPEC = f"""\
+You are given receipts that were already extracted into structured records. Decide, for
+each record, whether it is `accepted` or `rejected` under these business rules. A record
+is REJECTED if it violates ANY rule; list every violated rule as a short reason string.
+
+Rules:
+  1. `vendor` must be a non-empty string.
+  2. `total` must be present and parseable as a number. Amounts may arrive as numbers or
+     as strings like "$1,234.50" — strip "$" and thousands separators before parsing.
+  3. If `line_items` is non-empty, `total` must equal the sum of the item `amount`s,
+     within a tolerance of {AMOUNT_TOLERANCE}.
+  4. `date` must be present and parseable, must NOT be in the future (after `today`), and
+     its year must be >= {MIN_YEAR}.
+  5. `currency` must be present and equal to "USD" (case-insensitive).
+  6. `total` must be <= the policy cap (`policy_cap`, ${POLICY_CAP_USD:.2f}).
+  7. `invoice_no` must be unique across the whole batch. If two or more records share the
+     same non-empty `invoice_no`, EVERY record carrying that number is rejected as a
+     duplicate.
+
+I/O contract for the script you write:
+  - It is invoked as:  python <script> <input_json_path> <output_json_path>
+  - The input JSON has shape:
+      {{"today": "YYYY-MM-DD", "policy_cap": <number>, "min_year": <int>,
+        "rows": [{{"source_file": str,
+                   "record": {{"vendor": str, "date": str, "invoice_no": str,
+                               "currency": str, "total": <number|string|null>,
+                               "line_items": [{{"name": str, "amount": <number|string>}}]}}}}]}}
+  - It must write the output JSON with shape:
+      {{"outcomes": [{{"source_file": str, "outcome": "accepted"|"rejected",
+                       "reasons": [str]}}]}}
+    with EXACTLY ONE outcome per input row (same `source_file`s), and reasons empty for
+    accepted rows.
+  - You may use the Python standard library and `python-dateutil` (already installed).
+    Do NOT use the network or any other third-party package.
+"""
+
+
 @dataclass
 class FileOutcome:
     """Final disposition of a single inbox file."""
@@ -129,6 +174,40 @@ def check_business_rules(
         reasons.append(f"duplicate invoice number ({invoice_no})")
 
     return reasons
+
+
+def business_rule_outcomes(
+    rows: list[dict],
+    *,
+    today: date,
+    policy_cap: float = POLICY_CAP_USD,
+) -> list[dict]:
+    """Reference implementation of :data:`RULES_SPEC` over the drafted rows.
+
+    ``rows`` is the ``ledger_draft.json`` shape: ``[{"source_file": str, "record": {...}}]``.
+    Returns one ``{"source_file", "outcome", "reasons"}`` dict per row. This is exactly
+    what the LLM-generated validator is asked to reproduce; it is used by the unit tests
+    and as the fallback when code generation fails (see ``codegen.generate_and_run_validator``).
+    """
+    inv_counts: dict[str, int] = {}
+    for row in rows:
+        inv = (row["record"].get("invoice_no") or "").strip()
+        if inv:
+            inv_counts[inv] = inv_counts.get(inv, 0) + 1
+
+    outcomes: list[dict] = []
+    for row in sorted(rows, key=lambda r: r["source_file"]):
+        rec = row["record"]
+        reasons = check_business_rules(rec, today=today, seen_invoice_nos=set(), policy_cap=policy_cap)
+        inv = (rec.get("invoice_no") or "").strip()
+        if inv and inv_counts.get(inv, 0) > 1:
+            reasons.append(f"duplicate invoice number ({inv})")
+        outcomes.append({
+            "source_file": row["source_file"],
+            "outcome": "rejected" if reasons else "accepted",
+            "reasons": reasons,
+        })
+    return outcomes
 
 
 @dataclass

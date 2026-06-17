@@ -42,12 +42,31 @@ agent works in **three progressive phases**, each committed to its branch:
 |-------|--------------|------------------------------------|
 | **1 — Triage (structural)** | hash-dedupe, drop corrupt/unreadable & unsupported files, drop non-receipts (vision `is_receipt`) | a corrupt file, an exact duplicate, a beach photo, a `.txt` note |
 | **2 — Extract (multimodal)** | gpt-4o reads each kept file → `{vendor, date, invoice_no, currency, line_items, total}` cached as sidecars → `ledger_draft` (multi-page PDFs are page-stacked so a total on page 2 is read) | (the low-contrast receipt still extracts) |
-| **3 — Validate (business rules)** | `total == sum(items)`, date sane & not future, currency = USD, unique invoice no, total ≤ \$500 cap | math mismatch, future-dated, EUR, duplicate invoice #, over-cap |
+| **3 — Validate (business rules)** | the agent is handed the rules + extracted receipts and **writes its own Python validator at runtime**, which is then executed in the sandbox: `total == sum(items)`, date sane & not future, currency = USD, unique invoice no, total ≤ \$500 cap | math mismatch, future-dated, EUR, duplicate invoice #, over-cap |
 
 A clean run produces **4 accepted / 5 rejected / 4 dropped**, written to `ledger.csv` and
-`rejects.csv`. A lakeFS **pre-merge Action** (`lakefs_actions/validate_ledger.yaml`) gates
-`main` on `validation/latest_result.json` — so a half-processed or invalid ledger physically
-cannot be promoted, regardless of who triggers the merge.
+`rejects.csv`.
+
+### Why the validator is generated at runtime — and why lakeFS still gates
+
+The validation logic in Phase 3 is **not shipped in the repo** — the agent writes it on the
+fly from a rule *specification* (`mount_receipts/validation.py: RULES_SPEC`) and executes it
+inside the sandbox (`mount_receipts/codegen.py`). That is the point of running it in E2B:
+**you are executing code you have never seen, generated at runtime, and the sandbox contains
+whatever it does** — a self-repair loop re-prompts the model if its script crashes or
+violates the I/O contract, with a reference implementation as a last-resort fallback so the
+demo always completes. The exact generated script, its input, and its output are committed
+to the branch under `validation/` so the run is fully auditable.
+
+Because that validator is LLM-written and therefore *untrusted*, lakeFS does **not** take its
+word for it. The **pre-merge Action** (`lakefs_actions/validate_ledger.yaml`) re-reads the
+committed `ledger.csv` and **independently re-derives** pass/fail — re-checking currency, the
+\$500 cap, ISO date/year, invoice-number uniqueness, and that the accepted-row count matches
+the agent's self-reported result. It does not trust `validation/latest_result.json`'s status
+field alone. So a half-processed, invalid, or self-certified ledger physically cannot be
+promoted to `main`, regardless of what code the agent ran or who triggers the merge. **E2B is
+the compute trust boundary (run unknown code safely); lakeFS is the data trust boundary
+(unknown data can't reach `main`).**
 
 ---
 
@@ -68,6 +87,8 @@ cannot be promoted, regardless of who triggers the merge.
 │   inbox/*.{jpg,png,webp,bmp,tiff,pdf}   (plain file I/O)   │
 │   archive/**                (large; never opened → lazy)   │
 │   sidecars/<file>.json      (extraction cache)             │
+│   validation/generated_validator.py  ← LLM-written, run    │
+│                                         here as a subprocess│
 │   ledger.csv / rejects.csv  (agent writes)                 │
 │   validation/latest_result.json                            │
 │                                                            │
@@ -78,7 +99,9 @@ cannot be promoted, regardless of who triggers the merge.
                  ┌──────────────────────┐
                  │      lakeFS          │
                  │  • agent branch      │
-                 │  • pre-merge gate    │  ← validation status == "passed"
+                 │  • pre-merge gate    │  ← re-validates ledger.csv
+                 │                      │    independently (doesn't
+                 │                      │    trust the agent's status)
                  └──────────┬───────────┘
                             │ merge only when the gate passes
                             ▼

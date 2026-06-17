@@ -14,7 +14,10 @@ is talking to lakeFS. State is passed between phases through files on the mount:
     sidecars/<file>.json             (per-file extraction + outcome, written in triage)
     triage.json                      (kept / dropped lists)
     ledger_draft.json                (rows that reached business-rule validation)
-    ledger.csv                       (final accepted rows)
+    validation/generated_validator.py (Phase-3 validator the LLM wrote at runtime)
+    validation/validator_input.json   (records + policy handed to that script)
+    validation/rule_outcomes.json      (per-row accept/reject the script produced)
+    ledger.csv                       (final accepted rows; gate re-validates this)
     rejects.csv                      (dropped + rejected rows, with reasons)
     validation/latest_result.json    (read by the lakeFS pre-merge gate)
 """
@@ -27,6 +30,9 @@ import os
 import sys
 from datetime import date
 
+from dateutil import parser as dateparser
+
+from mount_receipts import codegen
 from mount_receipts.extraction import (
     extract,
     load_image_png,
@@ -36,7 +42,6 @@ from mount_receipts.extraction import (
 from mount_receipts.validation import (
     POLICY_CAP_USD,
     FileOutcome,
-    check_business_rules,
     validate_ledger,
 )
 
@@ -131,18 +136,43 @@ def _today() -> date:
     return date.fromisoformat(override) if override else date.today()
 
 
-def phase_validate(root: str) -> dict:
+def _iso_date(raw) -> str:
+    """Normalise an extracted date to ISO ``YYYY-MM-DD`` so the lakeFS gate can re-check it.
+
+    Accepted rows have already passed validation (date is parseable), so this rarely falls
+    through; it returns the raw string defensively if parsing ever fails.
+    """
+    try:
+        return dateparser.parse(str(raw)).date().isoformat()
+    except (ValueError, OverflowError, TypeError):
+        return str(raw or "")
+
+
+def _total_number(raw) -> str:
+    """Render ``total`` as a plain, comma-free number string for the ledger CSV / gate."""
+    if raw is None:
+        return ""
+    if isinstance(raw, (int, float)):
+        return f"{float(raw):.2f}"
+    try:
+        return f"{float(str(raw).replace(',', '').replace('$', '').strip()):.2f}"
+    except ValueError:
+        return str(raw)
+
+
+def phase_validate(root: str, model: str) -> dict:
     triage = _read_json(_p(root, "triage.json"))
     draft_doc = _read_json(_p(root, "ledger_draft.json"))
     draft = sorted(draft_doc["rows"], key=lambda r: r["source_file"])
     today = _today()
 
-    # Duplicate invoice numbers are ambiguous → every row sharing one is rejected.
-    inv_counts: dict[str, int] = {}
-    for row in draft:
-        inv = (row["record"].get("invoice_no") or "").strip()
-        if inv:
-            inv_counts[inv] = inv_counts.get(inv, 0) + 1
+    # The business-rule validator is WRITTEN BY THE MODEL at runtime and executed inside
+    # this sandbox — code we have never seen, contained by E2B. (Structural phase-1 drops
+    # and phase-2 extraction failures below stay deterministic; they were already decided.)
+    gen = codegen.generate_and_run_validator(
+        root, draft, today=today, policy_cap=POLICY_CAP_USD, model=model
+    )
+    rule_outcomes = {o["source_file"]: o for o in gen["outcomes"]}
 
     outcomes: list[FileOutcome] = []
     # phase-1 drops
@@ -152,28 +182,29 @@ def phase_validate(root: str) -> dict:
     for d in draft_doc.get("extraction_failed", []):
         outcomes.append(FileOutcome(d["file"], "rejected", 2, d["reason"]))
 
-    # phase-3 business rules
+    # phase-3 outcomes, as decided by the generated validator
     for row in draft:
         rec = row["record"]
-        reasons = check_business_rules(rec, today=today, seen_invoice_nos=set(), policy_cap=POLICY_CAP_USD)
-        inv = (rec.get("invoice_no") or "").strip()
-        if inv and inv_counts.get(inv, 0) > 1:
-            reasons.append(f"duplicate invoice number ({inv})")
-        if reasons:
-            outcomes.append(FileOutcome(row["source_file"], "rejected", 3, "; ".join(reasons), rec))
-        else:
+        o = rule_outcomes.get(row["source_file"], {"outcome": "rejected", "reasons": ["validator produced no outcome"]})
+        reasons = [r for r in (o.get("reasons") or []) if r]
+        if o.get("outcome") == "accepted" and not reasons:
             outcomes.append(FileOutcome(row["source_file"], "accepted", 3, "", rec))
+        else:
+            outcomes.append(FileOutcome(row["source_file"], "rejected", 3, "; ".join(reasons) or "rejected", rec))
 
     result = validate_ledger(triage["inbox"], outcomes)
 
-    # human-facing ledger + rejects
+    # human-facing ledger + rejects. Policy-relevant columns come first and are comma-free
+    # (ISO date, currency code, numeric total); the free-text `vendor` is last so the
+    # lakeFS pre-merge hook can re-parse the ledger without a full CSV reader.
     with open(_p(root, "ledger.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["source_file", "vendor", "invoice_no", "date", "currency", "total", "num_items"])
+        w.writerow(["source_file", "invoice_no", "date", "currency", "total", "num_items", "vendor"])
         for o in result.accepted:
             r = o.record or {}
-            w.writerow([o.source_file, r.get("vendor", ""), r.get("invoice_no", ""), r.get("date", ""),
-                        r.get("currency", ""), r.get("total", ""), len(r.get("line_items") or [])])
+            w.writerow([o.source_file, r.get("invoice_no", ""), _iso_date(r.get("date", "")),
+                        (r.get("currency", "") or "").upper(), _total_number(r.get("total")),
+                        len(r.get("line_items") or []), r.get("vendor", "")])
     with open(_p(root, "rejects.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["source_file", "outcome", "phase", "reason"])
@@ -181,8 +212,14 @@ def phase_validate(root: str) -> dict:
             if o.outcome != "accepted":
                 w.writerow([o.source_file, o.outcome, o.phase, o.reason])
 
-    _write_json(_p(root, "validation", "latest_result.json"), result.to_dict())
-    summary = result.to_dict()
+    result_dict = result.to_dict()
+    result_dict["validator"] = {
+        "generated": gen["generated"],
+        "attempts": gen["attempts"],
+        "source": "validation/generated_validator.py" if gen["generated"] else "reference-fallback",
+    }
+    _write_json(_p(root, "validation", "latest_result.json"), result_dict)
+    summary = dict(result_dict)
     summary["phase"] = "validate"
     print(json.dumps({k: summary[k] for k in ("phase", "status", "summary", "accepted", "rejected", "dropped")}))
     return summary
@@ -202,7 +239,7 @@ def main(argv: list[str]) -> int:
     elif phase == "extract":
         phase_extract(root)
     else:
-        result = phase_validate(root)
+        result = phase_validate(root, model)
         return 0 if result["status"] == "passed" else 1
     return 0
 

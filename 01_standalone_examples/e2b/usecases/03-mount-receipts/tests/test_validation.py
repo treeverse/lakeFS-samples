@@ -7,6 +7,7 @@ import pytest
 
 from mount_receipts.validation import (
     FileOutcome,
+    business_rule_outcomes,
     check_business_rules,
     validate_ledger,
 )
@@ -120,3 +121,30 @@ def test_unexpected_file_fails():
     res = validate_ledger(["a.jpg"], [_acc("a.jpg"), _acc("ghost.jpg")])
     assert not res.passed
     assert "unexpected" in res.summary
+
+
+# --- business_rule_outcomes (the spec the generated validator reproduces) -------
+
+def _row(f, **kw):
+    return {"source_file": f, "record": _rec(**kw)}
+
+
+def test_outcomes_accept_and_reject():
+    rows = [_row("ok.jpg", invoice_no="OK-1"), _row("bad.jpg", invoice_no="BAD-1", currency="EUR")]
+    out = {o["source_file"]: o for o in business_rule_outcomes(rows, today=TODAY)}
+    assert out["ok.jpg"]["outcome"] == "accepted" and out["ok.jpg"]["reasons"] == []
+    assert out["bad.jpg"]["outcome"] == "rejected"
+    assert any("non-USD" in r for r in out["bad.jpg"]["reasons"])
+
+
+def test_outcomes_reject_both_sides_of_a_duplicate_invoice():
+    rows = [_row("a.jpg", invoice_no="DUP"), _row("b.jpg", invoice_no="DUP")]
+    out = business_rule_outcomes(rows, today=TODAY)
+    assert all(o["outcome"] == "rejected" for o in out)
+    assert all(any("duplicate invoice" in r for r in o["reasons"]) for o in out)
+
+
+def test_outcomes_one_per_row():
+    rows = [_row("a.jpg", invoice_no="A"), _row("b.jpg", invoice_no="B"), _row("c.jpg", invoice_no="C")]
+    out = business_rule_outcomes(rows, today=TODAY)
+    assert {o["source_file"] for o in out} == {"a.jpg", "b.jpg", "c.jpg"}
