@@ -81,6 +81,8 @@ This guide sets up a live demo of lakeFS running against a native NetApp ONTAP S
    - Type: TCP, Port: 80
    - Source: `0.0.0.0/0`
    - Description: `ONTAP S3 HTTP via NLB for pre-signed URLs`
+
+   > ⚠️ **PoC only.** This exposes the ONTAP S3 endpoint to the public internet over plaintext HTTP — pre-signed URL signatures and S3 traffic travel unencrypted. For anything beyond a demo, scope the source to your own IP and front the NLB with TLS.
 6. Go to **EC2 → Load Balancers → Create load balancer → Network Load Balancer**
    - Name: `lakefs-ontap-s3`
    - Scheme: **Internet-facing**
@@ -141,82 +143,13 @@ vserver object-store-server bucket policy statement create -vserver fsx -bucket 
 Type `exit` to leave ONTAP CLI.
 
 ---
-### Step 5 — Install and Configure lakeFS OSS or lakeFS Enterprise on EC2
+### Step 5 — Install and Configure lakeFS Enterprise on EC2
 
+> This demo uses **lakeFS Enterprise** because the `everest mount` workflow relies on pre-signed URLs resolving from outside the VPC (the reason for the NLB in Step 3), and mount is an Enterprise feature. You'll need a license token. (lakeFS OSS also works against ONTAP for the API-only flow — see the footnote at the end of this step.)
 
-### Step 5a — Install and Configure lakeFS OSS on EC2
-
-Still on EC2, run:
-
+First, copy the lakeFS Enterprise license file from your machine to EC2:
 ```bash
-# Install Docker and Python
-sudo apt-get update && sudo apt-get install -y docker.io python3-pip
-sudo systemctl start docker
-sudo usermod -aG docker ubuntu
-newgrp docker
-
-# Start Postgres
-docker run -d --name postgres \
-  -e POSTGRES_USER=lakefs \
-  -e POSTGRES_PASSWORD=lakefs \
-  -e POSTGRES_DB=lakefs \
-  -p 5432:5432 \
-  --restart unless-stopped \
-  postgres:15-alpine
-
-# Install lakeFS
-LAKEFS_VERSION=$(curl -s https://api.github.com/repos/treeverse/lakeFS/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
-curl -L "https://github.com/treeverse/lakeFS/releases/download/v${LAKEFS_VERSION}/lakeFS_${LAKEFS_VERSION}_Linux_x86_64.tar.gz" | tar xz
-sudo mv lakefs /usr/local/bin/
-```
-
-Get the SVM management IP from FSx console → Storage Virtual Machines → fsx → Endpoints → Management IP address
-
-Create the config file (replace the values in CAPS):
-```bash
-cat > ~/lakefs.yaml << 'EOF'
-database:
-  type: postgres
-  postgres:
-    connection_string: "postgresql://lakefs:lakefs@localhost:5432/lakefs?sslmode=disable"
-
-auth:
-  encrypt:
-    secret_key: "a7f3d9e2b8c4f1a6e5d0b3c7f2a9e4d1b6c8f3a2"
-
-installation:
-  user_name: admin
-  access_key_id: "AKIAIOSFODNN7EXAMPLE"
-  secret_access_key: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-
-blockstore:
-  type: s3
-  s3:
-    endpoint: "http://REPLACE_WITH_SVM_MANAGEMENT_IP"
-    force_path_style: true
-    region: "us-east-1"
-    credentials:
-      access_key_id: "REPLACE_WITH_ONTAP_ACCESS_KEY"
-      secret_access_key: "REPLACE_WITH_ONTAP_SECRET_KEY"
-
-logging:
-  level: "INFO"
-  format: "text"
-EOF
-```
-
-Start lakeFS:
-```bash
-nohup lakefs run --config ~/lakefs.yaml > ~/lakefs.log 2>&1 &
-```
-
----
-
-### Step 5b — Install and Configure lakeFS Enterprise on EC2
-
-# Copy lakeFS Enterprise license file to EC2:
-```bash
-scp -i license.token ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/license.token
+scp -i ~/.ssh/lakefs-ontap-demo.pem license.token ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
 ```
 
 
@@ -259,6 +192,8 @@ database:
 auth:
   encrypt:
     secret_key: "a7f3d9e2b8c4f1a6e5d0b3c7f2a9e4d1b6c8f3a2"
+  ui_config:
+    rbac: internal
 
 installation:
   user_name: admin
@@ -284,9 +219,6 @@ license:
   path: /home/ubuntu/license.token
 features:
   local_rbac: true
-auth:
-  ui_config:
-    rbac: internal
 EOF
 ```
 
@@ -294,6 +226,14 @@ Start lakeFS:
 ```bash
 nohup lakefs run --config ~/lakefs.yaml > ~/lakefs.log 2>&1 &
 ```
+
+> **Footnote — running lakeFS OSS instead.** If you only need the API-only flow (repos, branches, commits, content-addressed blocks on ONTAP) and don't need `everest mount`, you can run lakeFS OSS instead — no license token, and the NLB / `pre_signed_endpoint` plumbing is unnecessary. Swap the Enterprise install for the OSS binary:
+> ```bash
+> LAKEFS_VERSION=$(curl -s https://api.github.com/repos/treeverse/lakeFS/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+> curl -L "https://github.com/treeverse/lakeFS/releases/download/v${LAKEFS_VERSION}/lakeFS_${LAKEFS_VERSION}_Linux_x86_64.tar.gz" | tar xz
+> sudo mv lakefs /usr/local/bin/
+> ```
+> Then use the same `~/lakefs.yaml` above, minus the `pre_signed_endpoint`, `license`, `features`, and `auth.ui_config` keys.
 
 ---
 
@@ -333,6 +273,47 @@ python3 demo_flow.py
 ### Open these browser tabs:
 1. `http://<EC2_PUBLIC_IP>:8000/repositories` — lakeFS UI
 2. AWS Console → FSx → `lakefs-ontap-demo` — ONTAP storage view
+
+### Mount the dataset as files (lakeFS Enterprise — `everest mount`):
+
+This is the payoff for the Enterprise setup: mounting a lakeFS path as a local filesystem. `everest` streams objects on demand via pre-signed URLs — which is why Step 3's NLB and the `pre_signed_endpoint` config are required.
+
+On EC2, install the `everest` binary (ships with lakeFS Enterprise):
+```bash
+EVEREST_VERSION=REPLACE_WITH_EVEREST_VERSION_NO
+curl -L "https://artifacts.lakefs.io/everest/${EVEREST_VERSION}/everest_${EVEREST_VERSION}_Linux_x86_64.tar.gz" | tar xz
+sudo mv everest /usr/local/bin/
+```
+
+Point `everest` at lakeFS with the credentials from Step 6:
+```bash
+cat > ~/.lakectl.yaml << 'EOF'
+server:
+  endpoint_url: http://localhost:8000
+credentials:
+  access_key_id: <YOUR_KEY>
+  secret_access_key: <YOUR_SECRET>
+EOF
+```
+
+Mount the `main` branch of the demo repo as local files:
+```bash
+mkdir -p ~/churn-data
+everest mount lakefs://churn-features/main/data ~/churn-data
+```
+
+Now browse the versioned dataset as if it were on disk — no copy, fetched on demand:
+```bash
+ls -l ~/churn-data
+cat ~/churn-data/customers.csv
+```
+
+When done, unmount:
+```bash
+everest umount ~/churn-data
+```
+
+> If `everest mount` hangs or errors on fetch, the pre-signed URLs aren't reachable — confirm `pre_signed_endpoint` points at the NLB DNS and that the NLB target (the SVM management IP) is healthy.
 
 ### To show raw S3 objects on ONTAP (optional, great for technical audiences):
 

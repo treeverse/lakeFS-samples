@@ -80,6 +80,8 @@ resource "aws_security_group" "fsx" {
     description     = "All traffic from EC2"
   }
 
+  # PoC only: exposes ONTAP S3 publicly over plaintext HTTP for pre-signed URL
+  # support. For non-demo use, scope cidr_blocks to a known IP and front with TLS.
   ingress {
     from_port   = 80
     to_port     = 80
