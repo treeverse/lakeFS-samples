@@ -96,7 +96,7 @@ Netmask:                         255.255.255.0
 Gateway:                         192.168.64.1
 DNS domain:                      lab.local
 DNS servers:                     8.8.8.8
-Admin password:                  NetApp1!
+Admin password:                  Netapp1!
 ```
 
 Wait for `ontap-sim::>` prompt.
@@ -104,7 +104,7 @@ Wait for `ontap-sim::>` prompt.
 **Verify from Mac:**
 ```bash
 ping -c 3 192.168.64.11
-ssh admin@192.168.64.11  # password: NetApp1!
+ssh admin@192.168.64.11  # password: Netapp1!
 ```
 
 ## Phase 4 — Configure ONTAP S3 (10 min, inside ONTAP)

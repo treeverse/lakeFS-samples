@@ -4,7 +4,7 @@
 **Duration:** ~10 minutes
 **Tabs to have open before you start:**
 1. AWS Console → FSx → `lakefs-ontap-demo`
-2. lakeFS UI → `http://52.87.202.16:8000`
+2. lakeFS UI → `http://<EC2_PUBLIC_IP>:8000`
 3. Terminal (SSH into EC2, lakeFS running)
 
 ---
@@ -44,7 +44,7 @@
 
 ## Tab 2 — lakeFS UI (5 min)
 
-**Navigate to `http://52.87.202.16:8000` → churn-features repository.**
+**Navigate to `http://<EC2_PUBLIC_IP>:8000` → churn-features repository.**
 
 > "Now let's look at lakeFS. This is our repository — think of it like
 > a GitHub repo, but instead of code files, it contains ML training data.
@@ -96,7 +96,7 @@
 
 **Switch to the terminal and SSH into EC2, then SSH to ONTAP:**
 ```
-ssh fsxadmin@10.0.10.251
+ssh fsxadmin@<FSX_MANAGEMENT_IP>
 ```
 
 Password: `Netapp1!`
@@ -136,12 +136,12 @@ exit
 ```
 
 ```bash
-AWS_ACCESS_KEY_ID=WD45C411GSC72OQ8RFPI \
-AWS_SECRET_ACCESS_KEY="HXtcC13CH_qBrq06SBY4Ng5gYGCib6Lq_AN9rN9_" \
+AWS_ACCESS_KEY_ID=$ONTAP_S3_ACCESS_KEY \
+AWS_SECRET_ACCESS_KEY="$ONTAP_S3_SECRET_KEY" \
 AWS_DEFAULT_REGION=us-east-1 \
 aws s3 ls s3://lakefs-data/ \
   --recursive \
-  --endpoint-url http://10.0.10.232
+  --endpoint-url http://<ONTAP_S3_ENDPOINT_IP>
 ```
 
 > "Three levels of visibility in one demo:

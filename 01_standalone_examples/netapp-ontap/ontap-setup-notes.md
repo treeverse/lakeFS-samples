@@ -165,8 +165,8 @@ Enter DNS server IP addresses []: 8.8.8.8
 ...
 Enter the cluster base license key: [leave blank for simulator — no license needed]
 ...
-Enter new admin password:           NetApp1!
-Retype new admin password:          NetApp1!
+Enter new admin password:           Netapp1!
+Retype new admin password:          Netapp1!
 ```
 
 > **Note on IPs:** Replace `192.168.233.x` with addresses in YOUR hostonly
@@ -196,7 +196,7 @@ All commands below are run **inside the ONTAP CLI** (either via SSH or the VM co
 SSH in:
 ```bash
 ssh admin@192.168.233.11     # use your cluster mgmt IP
-# password: NetApp1!  (or whatever you set)
+# password: Netapp1!  (or whatever you set)
 ```
 
 ### 3.1 — Survey the cluster

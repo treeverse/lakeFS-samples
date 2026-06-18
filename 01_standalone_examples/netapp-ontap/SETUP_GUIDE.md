@@ -31,7 +31,7 @@ This guide sets up a live demo of lakeFS running against a native NetApp ONTAP S
    - SSD storage: `1024` GiB
    - Throughput: **Recommended (384 MB/s)**
    - VPC: `demo-lakefs-vpc`
-   - Subnet: `demo-lakefs-ontap-public` (`subnet-05960cb8e849935c0`)
+   - Subnet: `demo-lakefs-ontap-public` (`subnet-xxxxxxxxxxxxxxxxx`)
    - VPC Security Groups: leave default
    - File system admin password: `Netapp1!`
    - SVM name: `fsx`
@@ -87,7 +87,7 @@ This guide sets up a live demo of lakeFS running against a native NetApp ONTAP S
    - Name: `lakefs-ontap-s3`
    - Scheme: **Internet-facing**
    - Listener: TCP port 80
-   - Target group: IP type, TCP port 80, target = SVM management IP (e.g. `10.20.10.188`)
+   - Target group: IP type, TCP port 80, target = the SVM management IP (from Step 4)
 7. Note the NLB DNS name — you'll need it for the lakeFS config (`pre_signed_endpoint`)
 
 > **Terraform users:** Steps 3–7 are handled automatically by `terraform apply`.
@@ -99,7 +99,7 @@ This guide sets up a live demo of lakeFS running against a native NetApp ONTAP S
 Once FSx shows **Available**:
 
 1. Go to **FSx → lakefs-ontap-demo → Administration tab**
-2. Note the **Management endpoint IP address** (e.g. `10.0.10.251`)
+2. Note the **Management endpoint IP address** — this is your `<FSX_MANAGEMENT_IP>`
 
 3. SSH into EC2:
 ```bash
@@ -181,7 +181,8 @@ sudo mv lakefs /usr/local/bin/
 Get the SVM management IP from FSx console → Storage Virtual Machines → fsx → Endpoints → Management IP address.
 Get the NLB DNS from `terraform output ontap_s3_endpoint` or the AWS console.
 
-Create the config file (replace the values in CAPS):
+Create the config file (replace the values in CAPS). Generate the
+`auth.encrypt.secret_key` with `openssl rand -hex 20`:
 ```bash
 cat > ~/lakefs.yaml << 'EOF'
 database:
@@ -191,7 +192,7 @@ database:
 
 auth:
   encrypt:
-    secret_key: "a7f3d9e2b8c4f1a6e5d0b3c7f2a9e4d1b6c8f3a2"
+    secret_key: "REPLACE_WITH_RANDOM_HEX_SECRET"
   ui_config:
     rbac: internal
 

@@ -10,6 +10,9 @@ SVM_IP="${1:?Usage: $0 <SVM_IP> <ONTAP_ACCESS_KEY> <ONTAP_SECRET_KEY>}"
 ONTAP_ACCESS_KEY="${2:?missing ONTAP_ACCESS_KEY}"
 ONTAP_SECRET_KEY="${3:?missing ONTAP_SECRET_KEY}"
 
+# Random encryption secret for lakeFS auth (generated fresh per run).
+AUTH_ENCRYPT_SECRET_KEY="$(openssl rand -hex 20)"
+
 echo "==> Installing dependencies..."
 sudo apt-get update -qq
 sudo apt-get install -y -qq docker.io python3-pip
@@ -41,7 +44,7 @@ database:
 
 auth:
   encrypt:
-    secret_key: "a7f3d9e2b8c4f1a6e5d0b3c7f2a9e4d1b6c8f3a2"
+    secret_key: "${AUTH_ENCRYPT_SECRET_KEY}"
 
 installation:
   user_name: admin
