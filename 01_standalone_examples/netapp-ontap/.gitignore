@@ -1,0 +1,30 @@
+# Secrets — never commit these
+.env
+lakefs.yaml
+*.pid
+
+# lakeFS binary (downloaded locally)
+bin/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
