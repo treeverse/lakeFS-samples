@@ -101,6 +101,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [Red Hat OpenShift AI integration](./01_standalone_examples/red-hat-openshift-ai/)
 * [How to backup, migrate or clone a repo](./01_standalone_examples/backup-migrate-or-clone-repo/)
 * [Running lakeFS with PostgreSQL as K/V store](./01_standalone_examples/docker-compose-with-postgres/)
+* [Running lakeFS with NetApp ONTAP storage](./01_standalone_examples/netapp-ontap/)
 
 ## Got Questions or Want to Chat?
 
