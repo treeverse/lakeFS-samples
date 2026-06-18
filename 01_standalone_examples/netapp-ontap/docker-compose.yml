@@ -1,0 +1,25 @@
+# docker-compose.yml
+# Runs PostgreSQL only. lakeFS runs as a native binary on the Mac host
+# so it can reach the ONTAP VM on the VMware hostonly network.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: lakefs-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lakefs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lakefs}
+      POSTGRES_DB: ${POSTGRES_DB:-lakefs}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lakefs}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

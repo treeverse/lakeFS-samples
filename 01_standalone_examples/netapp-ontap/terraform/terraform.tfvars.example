@@ -1,0 +1,15 @@
+# Copy this file to terraform.tfvars and fill in your own values.
+# terraform.tfvars is gitignored — never commit real secrets or account IDs.
+
+aws_region = "us-east-1"
+
+# A VPC and a public subnet in that VPC.
+vpc_id    = "vpc-xxxxxxxxxxxxxxxxx"
+subnet_id = "subnet-xxxxxxxxxxxxxxxxx"
+
+# An EC2 key pair that already exists in this account/region (for SSH to the lakeFS host).
+key_pair_name = "your-ec2-key-pair"
+
+# Password for the ONTAP fsxadmin / vsadmin users.
+# Min 8 chars, must include upper, lower, and a number or special char.
+fsxadmin_password = "ChangeMe123!"
