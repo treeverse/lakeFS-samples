@@ -11,8 +11,17 @@ from mount_receipts.validation import (
     business_rule_outcomes,
     check_business_rules,
     gate_input_rows,
+    to_iso_date,
     validate_ledger,
 )
+
+
+def test_to_iso_date_normalises_and_handles_bad_input():
+    assert to_iso_date("2026-03-12") == "2026-03-12"
+    assert to_iso_date("1/20/2026") == "2026-01-20"   # any printed format -> ISO
+    assert to_iso_date("") == ""
+    assert to_iso_date(None) == ""
+    assert to_iso_date("not a date") == ""
 
 TODAY = date(2026, 6, 5)
 

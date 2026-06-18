@@ -28,6 +28,7 @@ from mount_receipts.validation import (
     POLICY_CAP_USD,
     RULES_SPEC,
     business_rule_outcomes,
+    to_iso_date,
 )
 
 MAX_ATTEMPTS = 3
@@ -129,11 +130,18 @@ def generate_and_run_validator(
     output_path = os.path.join(val_dir, "rule_outcomes.json")
     script_path = os.path.join(val_dir, "generated_validator.py")
 
+    # Hand the validator ISO-normalised dates so its (LLM-written) code never does flexible
+    # date parsing — the most error-prone thing it was asked to do. All other fields pass
+    # through as extracted.
+    input_rows = [
+        {"source_file": r["source_file"], "record": {**r["record"], "date": to_iso_date(r["record"].get("date"))}}
+        for r in rows
+    ]
     payload = {
         "today": today.isoformat(),
         "policy_cap": policy_cap,
         "min_year": MIN_YEAR,
-        "rows": rows,
+        "rows": input_rows,
     }
     with open(input_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)

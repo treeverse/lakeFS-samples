@@ -51,8 +51,9 @@ Rules (each applies to a single record on its own):
      as strings like "$1,234.50" — strip "$" and thousands separators before parsing.
   3. If `line_items` is non-empty, `total` must equal the sum of the item `amount`s,
      within a tolerance of {AMOUNT_TOLERANCE}.
-  4. `date` must be present and parseable, must NOT be in the future (after `today`), and
-     its year must be >= {MIN_YEAR}.
+  4. `date` is given as an ISO `YYYY-MM-DD` string ("" if it was missing/unparseable). It
+     must be non-empty, must NOT be after `today` (also ISO `YYYY-MM-DD` — compare the two
+     strings directly, do NOT re-parse), and its year (first 4 chars) must be >= {MIN_YEAR}.
   5. `currency` must be present and equal to "USD" (case-insensitive).
   6. `total` must be <= the policy cap (`policy_cap`, ${POLICY_CAP_USD:.2f}).
 
@@ -68,6 +69,8 @@ I/O contract for the script you write:
                    "record": {{"vendor": str, "date": str, "invoice_no": str,
                                "currency": str, "total": <number|string|null>,
                                "line_items": [{{"name": str, "amount": <number|string>}}]}}}}]}}
+    `record.date` is pre-normalised to ISO `YYYY-MM-DD` (or "" if it couldn't be parsed) and
+    `today` is ISO `YYYY-MM-DD`; other fields are as extracted (amounts may be strings).
   - It must write the output JSON with shape:
       {{"outcomes": [{{"source_file": str, "outcome": "accepted"|"rejected",
                        "reasons": [str]}}]}}
@@ -95,6 +98,22 @@ class FileOutcome:
             "reason": self.reason,
             "record": self.record,
         }
+
+
+def to_iso_date(raw) -> str:
+    """Normalise an extracted date (any printed format) to ISO ``YYYY-MM-DD``.
+
+    Returns ``""`` if missing/unparseable. The host runs this before handing receipts to the
+    generated validator, so the LLM-written code compares plain ISO strings instead of doing
+    flexible date parsing — the most error-prone thing it was asked to do.
+    """
+    raw = (str(raw).strip() if raw is not None else "")
+    if not raw:
+        return ""
+    try:
+        return dateparser.parse(raw).date().isoformat()
+    except (ValueError, OverflowError, TypeError):
+        return ""
 
 
 def _parse_amount(value) -> float | None:
@@ -268,14 +287,8 @@ def gate_input_rows(rows: list[dict], decided: dict[str, str]) -> list[dict]:
         amounts = [_parse_amount(it.get("amount") if isinstance(it, dict) else None) for it in items]
         all_parseable = items and all(a is not None for a in amounts)
 
-        raw_date = (rec.get("date") or "").strip()
-        date_iso, year = "", 0
-        if raw_date:
-            try:
-                parsed = dateparser.parse(raw_date).date()
-                date_iso, year = parsed.isoformat(), parsed.year
-            except (ValueError, OverflowError, TypeError):
-                date_iso, year = "", 0
+        date_iso = to_iso_date(rec.get("date"))
+        year = int(date_iso[:4]) if date_iso else 0
 
         out.append({
             "source_file": sf,

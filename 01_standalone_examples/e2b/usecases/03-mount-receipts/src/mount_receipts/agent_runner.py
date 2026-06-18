@@ -31,7 +31,6 @@ import os
 import sys
 from datetime import date
 
-from dateutil import parser as dateparser
 
 from mount_receipts import codegen
 from mount_receipts.extraction import (
@@ -46,6 +45,7 @@ from mount_receipts.validation import (
     FileOutcome,
     apply_cross_row_uniqueness,
     gate_input_rows,
+    to_iso_date,
     validate_ledger,
 )
 
@@ -141,15 +141,8 @@ def _today() -> date:
 
 
 def _iso_date(raw) -> str:
-    """Normalise an extracted date to ISO ``YYYY-MM-DD`` so the lakeFS gate can re-check it.
-
-    Accepted rows have already passed validation (date is parseable), so this rarely falls
-    through; it returns the raw string defensively if parsing ever fails.
-    """
-    try:
-        return dateparser.parse(str(raw)).date().isoformat()
-    except (ValueError, OverflowError, TypeError):
-        return str(raw or "")
+    """ISO ``YYYY-MM-DD`` for the human-facing ledger (falls back to raw if unparseable)."""
+    return to_iso_date(raw) or str(raw or "")
 
 
 def _total_number(raw) -> str:
