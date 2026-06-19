@@ -18,7 +18,7 @@ USECASE_DIR = _HERE.parents[2]                           # usecases/03-mount-rec
 EVEREST_BIN = USECASE_DIR / "build" / "bin" / "everest"  # gitignored Linux binary
 
 # Only the modules the in-sandbox agent needs (agent_runner + its imports).
-SANDBOX_MODULES = ["__init__.py", "validation.py", "extraction.py", "agent_runner.py"]
+SANDBOX_MODULES = ["__init__.py", "validation.py", "extraction.py", "codegen.py", "agent_runner.py"]
 
 MOUNT_DIR = "/home/user/mnt"
 SANDBOX_PKG_ROOT = "/home/user"                          # so `python -m mount_receipts...` resolves
