@@ -1,11 +1,11 @@
 FROM jupyter/base-notebook:notebook-7.0.6
 
-# Where to install the dvc-to-lakefs package from. Defaults to the public
-# GitHub repository. For local development against an unpublished checkout,
-# build with:
+# Where to install the dvc-to-lakefs package from. Defaults to the published
+# PyPI release. For local development against an unpublished checkout, build
+# with:
 #   --build-arg DVC_TO_LAKEFS_SOURCE="-e /home/jovyan/dvc-to-lakefs-pkg"
 # and mount the checkout at that path (see docker-compose.override.yml.example).
-ARG DVC_TO_LAKEFS_SOURCE="dvc-to-lakefs @ git+https://github.com/treeverse/dvc-to-lakefs.git"
+ARG DVC_TO_LAKEFS_SOURCE="dvc-to-lakefs>=0.1.0"
 
 USER root
 # git is required: dvc-to-lakefs only imports git-backed DVC repositories.

@@ -29,7 +29,7 @@ the **same object store**. In this demo, both use the same local MinIO instance.
 - Docker
 - Docker Compose
 
-The published sample installs `dvc-to-lakefs` from GitHub automatically — no local checkout required.
+The published sample installs `dvc-to-lakefs` from PyPI automatically — no local checkout required.
 
 ## Run it
 
@@ -144,7 +144,7 @@ For a migration to succeed against any DVC repository:
 
 ## Developing against a local `dvc-to-lakefs` checkout
 
-By default the image installs `dvc-to-lakefs` from GitHub. To build against a local checkout instead:
+By default the image installs `dvc-to-lakefs` from PyPI. To build against a local checkout instead:
 
 ```bash
 cp docker-compose.override.yml.example docker-compose.override.yml

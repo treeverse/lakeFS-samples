@@ -1,5 +1,5 @@
 # Local-development override for working against an UNPUBLISHED checkout of
-# dvc-to-lakefs (instead of installing it from GitHub).
+# dvc-to-lakefs (instead of installing it from PyPI).
 #
 # Usage:
 #   1. cp docker-compose.override.yml.example docker-compose.override.yml
@@ -7,7 +7,7 @@
 #   3. docker compose up --build
 #
 # docker-compose.override.yml is git-ignored, so this never affects the
-# published sample, which installs dvc-to-lakefs from GitHub by default.
+# published sample, which installs dvc-to-lakefs from PyPI by default.
 
 services:
   jupyter-notebook:
