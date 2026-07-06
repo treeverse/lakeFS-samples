@@ -4,9 +4,15 @@ The output is intentionally dirty so each of the three agent phases has somethin
 to catch:
 
 - Phase 1 (Triage)   : a corrupt file, an exact duplicate, and a non-receipt image
-- Phase 2 (Extract)  : a low-contrast / rotated receipt that still must be read
-- Phase 3 (Validate) : math mismatch, future date, non-USD currency, duplicate
-                       invoice number, and an over-policy-cap total
+- Phase 2 (Extract)  : a low-contrast / rotated receipt that still must be read (extraction
+                       is robust to moderate degradation — this one still extracts cleanly)
+- Phase 3 (Validate) : math mismatch, future date, a confidently-read non-USD currency,
+                       duplicate invoice number, and an over-policy-cap total (hard
+                       rejects); two OTHER low-contrast receipts where the scan itself is
+                       degraded enough to make a specific value genuinely unclear — no
+                       legible currency indicator on one, a small total/line-item mismatch
+                       on the other (flagged "ambiguous" by the validator — routed to human
+                       review instead of guessed)
 
 Receipts are rendered as images (PNG/JPG) and a couple as PDF using Pillow only
 (no extra dependencies). The data is fully deterministic so the demo is reproducible.
@@ -40,7 +46,7 @@ class Receipt:
     rotate: int = 0
     low_contrast: bool = False
     # demo bookkeeping (not rendered): what should happen to this file, and why
-    expected: str = "accept"        # accept | drop | reject
+    expected: str = "accept"        # accept | drop | reject | pending_review
     reason: str = ""
 
     def computed_total(self) -> float:
@@ -68,15 +74,33 @@ REJECTS: list[Receipt] = [
     Receipt("receipt_future.jpg", "Cafe Tomorrow", "2027-08-01", "CF-6006",
             [("Green Tea", 4.00)], fmt="JPEG",
             expected="reject", reason="future-dated"),
-    Receipt("receipt_euro.jpg", "Paris Bistro", "2026-04-10", "PB-7007",
-            [("Plat du Jour", 24.00)], currency="EUR", fmt="JPEG",
-            expected="reject", reason="non-USD currency"),
     Receipt("receipt_dupinv.jpg", "Quick Mart", "2026-03-02", "QM-5005",
             [("Bottled Water", 1.50)], fmt="JPEG",
             expected="reject", reason="duplicate invoice number (QM-5005)"),
     Receipt("receipt_lux.jpg", "Lux Grand Hotel", "2026-05-01", "LH-8008",
             [("Executive Suite", 600.00)], fmt="JPEG",
             expected="reject", reason=f"total exceeds policy cap ${POLICY_CAP_USD:.0f}"),
+    # A CONFIDENTLY-read non-USD currency is a plain policy violation, not ambiguous — the
+    # ambiguous case (below) is specifically about not being able to tell the currency at all.
+    Receipt("receipt_euro.jpg", "Paris Bistro", "2026-04-10", "PB-7007",
+            [("Plat du Jour", 24.00)], currency="EUR", fmt="JPEG",
+            expected="reject", reason="non-USD currency"),
+]
+
+# --- ambiguous: neither a clean accept nor a clear-cut reject — Phase 3 routes these to a
+# human ("approve"/"reject", or naming the currency) instead of guessing. See
+# validation.RULES_SPEC rule 7. Both are rendered low_contrast=True — the ambiguity here
+# is meant to read as "the scan itself is too degraded to trust," not just a data quirk.
+PENDING: list[Receipt] = [
+    # currency="" -> render_receipt prints bare numbers with no currency mark at all, so
+    # the vision model has no evidence to read a currency from (see extraction.py's
+    # prompt: it's told not to guess). Everything else about the receipt is clean.
+    Receipt("receipt_nocurrency.jpg", "QuickServe Diner", "2026-02-14", "QS-1010",
+            [("Combo Meal", 9.50), ("Drink", 2.50)], currency="", fmt="JPEG", low_contrast=True,
+            expected="pending_review", reason="low-contrast scan — no legible currency indicator, ask a human"),
+    Receipt("receipt_smudged.jpg", "Corner Diner", "2026-03-18", "CD-9009",
+            [("Breakfast Special", 11.00), ("Coffee", 3.00), ("Tip", 1.75)], total=16.25, fmt="JPEG", low_contrast=True,
+            expected="pending_review", reason="total 16.25 vs sum(items) 15.75 — low-contrast scan, possible misread digit, ask a human"),
 ]
 
 
@@ -85,6 +109,12 @@ def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         return ImageFont.load_default(size=size)
     except TypeError:  # very old Pillow
         return ImageFont.load_default()
+
+
+def _fmt_amount(currency: str, amt: float) -> str:
+    """Render an amount with its currency mark — or with none at all when ``currency`` is
+    blank, so a rendered "ambiguous currency" receipt has literally no symbol to read."""
+    return f"{amt:,.2f}" if not currency else f"{currency} {amt:,.2f}"
 
 
 def render_receipt(r: Receipt) -> Image.Image:
@@ -104,12 +134,12 @@ def render_receipt(r: Receipt) -> Image.Image:
 
     for name, amt in r.items:
         d.text((40, y), name, fill=fg, font=body)
-        d.text((W - 150, y), f"{r.currency} {amt:,.2f}", fill=fg, font=body)
+        d.text((W - 150, y), _fmt_amount(r.currency, amt), fill=fg, font=body)
         y += 34
     y += 10
     d.line([(30, y), (W - 30, y)], fill=fg, width=2); y += 20
     d.text((40, y), "TOTAL", fill=fg, font=head)
-    d.text((W - 200, y), f"{r.currency} {r.computed_total():,.2f}", fill=fg, font=head)
+    d.text((W - 200, y), _fmt_amount(r.currency, r.computed_total()), fill=fg, font=head)
 
     d.text((30, H - 50), "Thank you for your business!", fill=fg, font=small)
     if r.rotate:
@@ -143,7 +173,7 @@ def generate(out_dir: str) -> dict:
     def record(filename: str, expected: str, reason: str) -> None:
         manifest.append({"file": filename, "expected": expected, "reason": reason})
 
-    for r in CLEAN + REJECTS:
+    for r in CLEAN + REJECTS + PENDING:
         _save(render_receipt(r), os.path.join(out_dir, r.filename), r.fmt)
         record(r.filename, r.expected, r.reason)
 
@@ -181,6 +211,7 @@ def generate(out_dir: str) -> dict:
         "accept": sum(1 for m in manifest if m["expected"] == "accept"),
         "drop": sum(1 for m in manifest if m["expected"] == "drop"),
         "reject": sum(1 for m in manifest if m["expected"] == "reject"),
+        "pending_review": sum(1 for m in manifest if m["expected"] == "pending_review"),
         "files": manifest,
     }
     with open(os.path.join(out_dir, "_expected_manifest.json"), "w", encoding="utf-8") as f:
@@ -192,7 +223,7 @@ def main() -> None:
     out = sys.argv[1] if len(sys.argv) > 1 else "./sample_inbox"
     summary = generate(out)
     print(f"Wrote {summary['total_files']} files to {out}")
-    print(f"  accept={summary['accept']}  drop={summary['drop']}  reject={summary['reject']}")
+    print(f"  accept={summary['accept']}  drop={summary['drop']}  reject={summary['reject']}  pending_review={summary['pending_review']}")
     for m in summary["files"]:
         tag = m["expected"].upper()
         print(f"  [{tag:<6}] {m['file']}" + (f"  — {m['reason']}" if m["reason"] else ""))

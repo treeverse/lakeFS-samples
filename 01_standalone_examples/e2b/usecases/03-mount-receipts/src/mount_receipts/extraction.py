@@ -24,7 +24,12 @@ EXTRACTION_SYSTEM_PROMPT = (
     '  "vendor": string — merchant/business name, or "" if unknown,\n'
     '  "date": string — the transaction date exactly as printed (any format), or "",\n'
     '  "invoice_no": string — invoice/receipt number, or "",\n'
-    '  "currency": string — ISO 4217 code (e.g. USD, EUR), or "",\n'
+    '  "currency": string — ISO 4217 code (e.g. USD, EUR), or "" if you cannot confidently '
+    "tell which currency this is. A generic symbol alone (e.g. a bare \"$\") is NOT enough "
+    "evidence by itself — several currencies use it (USD, CAD, AUD, SGD, ...). Only return "
+    "a code when the receipt gives a real signal: an explicit code/name printed on it, or "
+    "unambiguous context (language, address, phone format, vendor you recognize as "
+    "region-specific). Do not default to USD just because a symbol looks familiar.\n"
     '  "line_items": array of objects {"name": string, "amount": number},\n'
     '  "total": number or null — the grand total.\n'
     "Use numeric values (not strings) for amounts and total. If the image is not a "
@@ -32,7 +37,10 @@ EXTRACTION_SYSTEM_PROMPT = (
     "Do not guess values that are not visible."
 )
 
-REQUIRED_FIELDS = ("vendor", "date", "currency", "total")
+# "currency" is intentionally NOT required — a blank currency (the model couldn't tell)
+# still reaches Phase 3, where it's handled as an "ambiguous" row instead of an extraction
+# failure (see validation.RULES_SPEC rule 7).
+REQUIRED_FIELDS = ("vendor", "date", "total")
 
 
 def sha256_file(path: str) -> str:

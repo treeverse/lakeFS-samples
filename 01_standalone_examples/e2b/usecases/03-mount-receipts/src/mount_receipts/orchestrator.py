@@ -21,6 +21,7 @@ from lakefs_e2b_common.lakefs_client import (
     write_object,
 )
 from mount_receipts import e2b_session as sess
+from mount_receipts import human_review
 from mount_receipts.config import Config
 
 PHASES = [
@@ -64,6 +65,13 @@ class RunResult:
 
 def _divider() -> None:
     print("─" * 60)
+
+
+def _commit_id(commit_res) -> str:
+    for ln in commit_res.stdout.splitlines():
+        if ln.strip().startswith("ID:"):
+            return ln.split("ID:", 1)[1].strip()
+    return ""
 
 
 def _extract_gate_reason(msg: str) -> str:
@@ -115,16 +123,39 @@ def run(cfg: Config, *, source_branch: str | None = None, do_merge: bool = True,
             summary_line = (r.stdout or r.stderr).strip().splitlines()[-1] if (r.stdout or r.stderr).strip() else ""
             print(f"    {summary_line}")
             commit_res = sess.commit(sbx, f"Phase {i} — {name}")
-            commit_id = ""
-            for ln in commit_res.stdout.splitlines():
-                if ln.strip().startswith("ID:"):
-                    commit_id = ln.split("ID:", 1)[1].strip()
-                    break
+            commit_id = _commit_id(commit_res)
             print(f"    committed: {commit_id[:12] or '(no changes)'}")
             phase_summaries.append({"phase": phase, "name": name, "summary": summary_line, "commit_id": commit_id})
 
         result_json = sess.read_mount_file(sbx, "validation/latest_result.json")
         validation = json.loads(result_json)
+
+        # The (agent-written) Phase-3 validator flagged one or more rows "ambiguous" — pause
+        # the sandbox (no compute billed while waiting), ask a human, and resume once they
+        # reply. Read everything the sandbox needs to give up BEFORE pausing it.
+        if validation.get("status") == "awaiting_review":
+            pending = json.loads(sess.read_mount_file(sbx, "validation/pending_review.json"))
+            _divider()
+            print(f"  {len(pending)} row(s) flagged ambiguous by the validator — pausing sandbox for human review...")
+            sandbox_id = sess.pause(sbx)
+            print(f"  Sandbox paused ({sandbox_id}).")
+            decisions = human_review.collect_decisions(cfg, pending)
+            print("  Resuming sandbox with human decisions...")
+            sbx = sess.resume(sandbox_id, cfg.e2b_api_key)
+            sess.write_mount_json(sbx, "validation/human_decisions.json", decisions)
+            r = sess.run_phase(sbx, "validate")
+            summary_line = (r.stdout or r.stderr).strip().splitlines()[-1] if (r.stdout or r.stderr).strip() else ""
+            print(f"    {summary_line}")
+            commit_res = sess.commit(sbx, f"Phase 3b — Human review ({len(decisions)} decision(s))")
+            commit_id = _commit_id(commit_res)
+            print(f"    committed: {commit_id[:12] or '(no changes)'}")
+            phase_summaries.append({
+                "phase": "human_review", "name": "Human review",
+                "summary": summary_line, "commit_id": commit_id,
+            })
+            result_json = sess.read_mount_file(sbx, "validation/latest_result.json")
+            validation = json.loads(result_json)
+
         # Keep the mount live when keeping the sandbox, so it can be browsed (e.g. the
         # E2B dashboard Filesystem tab shows /home/user/mnt as the live lakeFS branch).
         if not keep_sandbox:
@@ -212,6 +243,8 @@ def print_report(cfg: Config, result: RunResult) -> None:
     if result.validation:
         v = result.validation
         print(f"  Ledger   : {v.get('accepted')} accepted, {v.get('rejected')} rejected, {v.get('dropped')} dropped")
+        if v.get("human_reviewed"):
+            print(f"  Reviewed : {v['human_reviewed']} row(s) resolved by a human (see validation/human_review_log.json)")
         print(f"  Summary  : {v.get('summary')}")
     if result.gate_blocked:
         # The validator passed its own check, but lakeFS's independent gate caught a

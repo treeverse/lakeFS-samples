@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from lakefs_e2b_common.env import optional, require
+from lakefs_e2b_common.env import optional, optional_int, require
 
 
 @dataclass
@@ -25,6 +25,12 @@ class Config:
     # demo controls
     demo_today: str            # pin "today" for reproducible date checks; "" = real today
     demo_tamper: str           # "1" corrupts an accepted row so the lakeFS gate blocks; "" = off
+    # human-in-the-loop review (Phase 3 "ambiguous" rows)
+    slack_bot_token: str       # optional; "" = no Slack, fall back to CLI prompt / auto-decide
+    slack_human_channel: str   # e.g. "#receipts-review"
+    human_review_poll_s: int   # how often to poll Slack for a reply
+    human_review_timeout_s: int  # give up waiting for a human after this long
+    human_review_default: str  # decision used on timeout / no reviewer available
 
     def lakectl_envs(self) -> dict[str, str]:
         """Env vars everest/lakectl read inside the sandbox (creds never passed as CLI flags)."""
@@ -61,4 +67,9 @@ def load_config() -> Config:
         openai_model=optional("OPENAI_MODEL", "gpt-4o"),
         demo_today=optional("DEMO_TODAY"),
         demo_tamper=optional("DEMO_TAMPER"),
+        slack_bot_token=optional("SLACK_BOT_TOKEN"),
+        slack_human_channel=optional("SLACK_HUMAN_CHANNEL", "#receipts-review"),
+        human_review_poll_s=optional_int("HUMAN_REVIEW_POLL_S", 15),
+        human_review_timeout_s=optional_int("HUMAN_REVIEW_TIMEOUT_S", 600),
+        human_review_default=optional("HUMAN_REVIEW_DEFAULT", "reject"),
     )

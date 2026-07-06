@@ -30,6 +30,17 @@ POLICY_CAP_USD = 500.00
 MIN_YEAR = 2023
 AMOUNT_TOLERANCE = 0.01
 
+# Rule 7 (ambiguous) thresholds — a mismatch inside this band reads as a scan/OCR
+# artifact rather than a real discrepancy, so it's worth a human's attention instead
+# of an automatic reject.
+AMBIGUOUS_TOTAL_MIN_USD = 5.00
+AMBIGUOUS_TOTAL_FRACTION = 0.05
+
+# Fixed, illustrative demo rates (NOT live FX) — used only when a human identifies the
+# actual currency on a currency-ambiguous row (the validator itself has no network access
+# and can't look one up).
+FX_TO_USD = {"EUR": 1.08, "GBP": 1.27, "CHF": 1.10, "CAD": 0.73}
+
 
 # The Phase-3 business rules, written as a *specification* rather than as the code that
 # enforces them. At runtime the agent is handed this spec plus the extracted receipts and
@@ -41,9 +52,9 @@ AMOUNT_TOLERANCE = 0.01
 # and as the fallback if code generation can't produce a working validator.
 RULES_SPEC = f"""\
 You are given receipts that were already extracted into structured records. Decide, for
-each record INDEPENDENTLY, whether it is `accepted` or `rejected` under these per-receipt
-business rules. A record is REJECTED if it violates ANY rule; list every violated rule as
-a short reason string.
+each record INDEPENDENTLY, whether it is `accepted`, `rejected`, or `ambiguous` under
+these per-receipt business rules. A record is REJECTED if it violates ANY rule (except as
+carved out by rule 7 below); list every violated rule as a short reason string.
 
 Rules (each applies to a single record on its own):
   1. `vendor` must be a non-empty string.
@@ -56,6 +67,28 @@ Rules (each applies to a single record on its own):
      strings directly, do NOT re-parse), and its year (first 4 chars) must be >= {MIN_YEAR}.
   5. `currency` must be present and equal to "USD" (case-insensitive).
   6. `total` must be <= the policy cap (`policy_cap`, ${POLICY_CAP_USD:.2f}).
+  7. Instead of `rejected`, mark a record `ambiguous` whenever the SCAN ITSELF is too
+     unclear to trust a field on it — a low-contrast, smudged, or otherwise degraded
+     receipt where a value could reasonably be read more than one way. This is not limited
+     to any one field; judge it broadly, the same way a person skimming the image would.
+     YOU decide what counts; there is no fixed list. Two illustrative (non-exhaustive)
+     examples of the kind of thing that qualifies:
+       - `currency` is BLANK because you can't confidently tell which currency this receipt
+         is in (e.g. an illegible symbol, or no currency indicator visible at all) — reason
+         should say the currency couldn't be determined. A CONFIDENTLY-read non-USD currency
+         (e.g. "EUR") is NOT this — that's a straightforward rule-5 reject; only genuine
+         uncertainty about WHICH currency qualifies.
+       - `line_items` is non-empty and `total` differs from sum(`line_items`) by an amount
+         small enough that a smudged or misread digit — not a real discrepancy — is the
+         likely explanation (roughly more than {AMOUNT_TOLERANCE} but no more than
+         max(${AMBIGUOUS_TOTAL_MIN_USD:.2f}, {AMBIGUOUS_TOTAL_FRACTION*100:.0f}% of `total`)) —
+         reason should describe the mismatch, e.g. "total 16.25 vs sum(items) 15.75 (off by 0.50)".
+     These two are examples of the underlying principle, not the full list — a genuinely
+     illegible vendor name, date, or anything else on a poor scan qualifies just as much.
+     Use `ambiguous` for genuine uncertainty about what the scan actually shows, not as an
+     escape hatch from clear violations — a record with other unambiguous problems (a
+     clearly-printed value that's simply out of policy, wildly over cap, a huge mismatch)
+     is still more honestly `rejected` than punted to a human.
 
 Do NOT implement cross-record / uniqueness checks — the host enforces invoice-number
 uniqueness deterministically after your validator runs (and the lakeFS pre-merge gate
@@ -72,7 +105,7 @@ I/O contract for the script you write:
     `record.date` is pre-normalised to ISO `YYYY-MM-DD` (or "" if it couldn't be parsed) and
     `today` is ISO `YYYY-MM-DD`; other fields are as extracted (amounts may be strings).
   - It must write the output JSON with shape:
-      {{"outcomes": [{{"source_file": str, "outcome": "accepted"|"rejected",
+      {{"outcomes": [{{"source_file": str, "outcome": "accepted"|"rejected"|"ambiguous",
                        "reasons": [str]}}]}}
     with EXACTLY ONE outcome per input row (same `source_file`s), and reasons empty for
     accepted rows.
@@ -85,7 +118,7 @@ I/O contract for the script you write:
 class FileOutcome:
     """Final disposition of a single inbox file."""
     source_file: str
-    outcome: str                 # "accepted" | "rejected" | "dropped"
+    outcome: str                 # "accepted" | "rejected" | "dropped" | "pending_review"
     phase: int                   # phase that decided the outcome (3 for accepted)
     reason: str = ""
     record: dict | None = None   # extracted fields, when available
@@ -197,6 +230,124 @@ def check_business_rules(
     return reasons
 
 
+def classify_ambiguous(
+    record: dict,
+    *,
+    today: date,
+    policy_cap: float = POLICY_CAP_USD,
+) -> str | None:
+    """Deterministic approximation of ``RULES_SPEC`` rule 7 — the two illustrative examples
+    from the spec, expressed as code. Used ONLY by the reference/fallback validator
+    (:func:`business_rule_outcomes`), for when the LLM-generated validator can't produce a
+    conforming script at all. Rule 7 itself is deliberately open-ended ("YOU decide what
+    counts; there is no fixed list") — the generated validator's own "ambiguous" calls are
+    trusted as-is by the host and are NOT re-checked against this function. This is only a
+    reasonable fallback approximation for the two cases the spec calls out by name, not the
+    full extent of what "ambiguous" is allowed to mean.
+
+    Returns ``"currency_unclear"`` or ``"total_mismatch"`` when relaxing exactly that one
+    field would make the record pass every other rule, else ``None`` (a hard reject, or
+    the record already passes cleanly).
+    """
+    reasons = check_business_rules(record, today=today, seen_invoice_nos=set(), policy_cap=policy_cap)
+    if not reasons:
+        return None
+
+    currency = (record.get("currency") or "").strip().upper()
+    if not currency:
+        # Blank means the extractor couldn't confidently read a currency at all — that's
+        # the ambiguous case. A CONFIDENTLY-read non-USD currency is a plain rule-5 reject,
+        # not ambiguous (no relaxation attempted for it here).
+        relaxed = {**record, "currency": "USD"}
+        if not check_business_rules(relaxed, today=today, seen_invoice_nos=set(), policy_cap=policy_cap):
+            return "currency_unclear"
+
+    total = _parse_amount(record.get("total"))
+    items = record.get("line_items") or []
+    if total is not None and items:
+        amounts = [_parse_amount(it.get("amount") if isinstance(it, dict) else None) for it in items]
+        if all(a is not None for a in amounts):
+            item_sum = sum(amounts)
+            gap = abs(item_sum - total)
+            band = max(AMBIGUOUS_TOTAL_MIN_USD, AMBIGUOUS_TOTAL_FRACTION * total)
+            if AMOUNT_TOLERANCE < gap <= band:
+                relaxed = {**record, "total": item_sum}
+                if not check_business_rules(relaxed, today=today, seen_invoice_nos=set(), policy_cap=policy_cap):
+                    return "total_mismatch"
+
+    return None
+
+
+def _convert_record_to_usd(record: dict, currency: str, rate: float) -> dict | None:
+    """Convert every line item (and derive the total from THEIR sum, not independently —
+    otherwise rounding could make total != sum(items) and the unchanged lakeFS gate would
+    block a legitimately converted row on a rule it never should have failed). Returns
+    ``None`` if a line item amount couldn't be parsed."""
+    items = record.get("line_items") or []
+    if items:
+        converted_items, running_sum = [], 0.0
+        for it in items:
+            amt = _parse_amount(it.get("amount") if isinstance(it, dict) else None)
+            if amt is None:
+                return None
+            c = round(amt * rate, 2)
+            converted_items.append({**it, "amount": c})
+            running_sum += c
+        record["line_items"] = converted_items
+        record["total"] = round(running_sum, 2)
+    else:
+        total = _parse_amount(record.get("total"))
+        if total is None:
+            return None
+        record["total"] = round(total * rate, 2)
+    record["currency"] = "USD"
+    return record
+
+
+def resolve_ambiguous(item: dict, decision: str) -> dict:
+    """Apply a human's decision to a row the (agent-written) validator flagged ambiguous —
+    for WHATEVER reason it did; this function doesn't need or check the reason.
+
+    ``item`` is ``{"source_file", "record", "reasons"}`` (as surfaced in
+    ``pending_review.json``). ``decision`` is ``"approve"``, ``"reject"``, or a currency the
+    human identified (e.g. ``"USD"``, ``"EUR"``; case-insensitive) — always available as an
+    option regardless of why the row was ambiguous, since the validator has no network
+    access and can't look up an exchange rate itself; naming a currency the fixed demo rate
+    table knows converts the row, and naming "USD" needs no conversion.
+
+    Returns ``{"outcome": "accepted"|"rejected", "record": dict, "reason": str}``.
+
+    ``"approve"`` leaves the record untouched on purpose: an approved-but-still-unresolved
+    problem still fails the lakeFS pre-merge gate's independent policy check — only actually
+    fixing it (or ``"reject"``) changes the merge outcome. No one, not even a human
+    reviewer, bypasses the policy encoded in lakeFS itself.
+    """
+    record = dict(item["record"])
+    reason_hint = "; ".join(item.get("reasons") or []) or "ambiguous"
+
+    if decision == "reject":
+        return {"outcome": "rejected", "record": record, "reason": f"human review: rejected ({reason_hint})"}
+
+    if decision == "approve":
+        return {"outcome": "accepted", "record": record, "reason": ""}
+
+    currency = (decision or "").strip().upper()
+    if currency == "USD":
+        record["currency"] = "USD"
+        return {"outcome": "accepted", "record": record, "reason": "human review: identified as USD"}
+
+    if currency in FX_TO_USD:
+        rate = FX_TO_USD[currency]
+        converted = _convert_record_to_usd(record, currency, rate)
+        if converted is None:
+            return {"outcome": "rejected", "record": record,
+                     "reason": f"human review: identified as {currency} but couldn't convert an unparseable amount"}
+        return {"outcome": "accepted", "record": converted,
+                "reason": f"human review: identified as {currency}, converted to USD at {rate}"}
+
+    return {"outcome": "rejected", "record": record, "reason": f"human review: unrecognised decision {decision!r}"}
+
+
 def business_rule_outcomes(
     rows: list[dict],
     *,
@@ -207,7 +358,8 @@ def business_rule_outcomes(
     """Reference implementation of the business rules over the drafted rows.
 
     ``rows`` is the ``ledger_draft.json`` shape: ``[{"source_file": str, "record": {...}}]``.
-    Returns one ``{"source_file", "outcome", "reasons"}`` dict per row.
+    Returns one ``{"source_file", "outcome", "reasons"}`` dict per row, ``outcome`` one of
+    ``"accepted"``, ``"rejected"``, ``"ambiguous"`` (see rule 7 of :data:`RULES_SPEC`).
 
     With ``include_uniqueness=True`` this is the complete policy (the unit-test oracle).
     With ``include_uniqueness=False`` it covers only the per-receipt rules — matching what
@@ -226,13 +378,21 @@ def business_rule_outcomes(
     for row in sorted(rows, key=lambda r: r["source_file"]):
         rec = row["record"]
         reasons = check_business_rules(rec, today=today, seen_invoice_nos=set(), policy_cap=policy_cap)
+        ambiguity = classify_ambiguous(rec, today=today, policy_cap=policy_cap) if reasons else None
         if include_uniqueness:
             inv = (rec.get("invoice_no") or "").strip()
             if inv and inv_counts.get(inv, 0) > 1:
                 reasons.append(f"duplicate invoice number ({inv})")
+                ambiguity = None  # a clear-cut duplicate doesn't need a human's attention
+        if not reasons:
+            outcome = "accepted"
+        elif ambiguity:
+            outcome = "ambiguous"
+        else:
+            outcome = "rejected"
         outcomes.append({
             "source_file": row["source_file"],
-            "outcome": "rejected" if reasons else "accepted",
+            "outcome": outcome,
             "reasons": reasons,
         })
     return outcomes
@@ -241,11 +401,13 @@ def business_rule_outcomes(
 def apply_cross_row_uniqueness(rows: list[dict], generated: dict[str, dict]) -> dict[str, dict]:
     """Layer deterministic invoice-number uniqueness on top of the per-receipt verdicts.
 
-    The LLM-generated validator judges each receipt on its own (RULES_SPEC rules 1–6) — it
+    The LLM-generated validator judges each receipt on its own (RULES_SPEC rules 1–7) — it
     reliably mishandles the cross-row uniqueness rule, so the host owns that one rule here.
     ``generated`` maps source_file -> {"outcome", "reasons"} (the validator's per-receipt
-    verdict). Any row whose non-empty invoice number repeats across the batch is rejected
-    with a duplicate reason. Returns the final source_file -> {"outcome", "reasons"} map.
+    verdict, one of "accepted"/"rejected"/"ambiguous"). Any row whose non-empty invoice
+    number repeats across the batch is force-rejected with a duplicate reason — a clear-cut
+    duplicate doesn't need a human's attention regardless of what the validator tagged it.
+    Returns the final source_file -> {"outcome", "reasons"} map.
     """
     inv_counts: dict[str, int] = {}
     for row in rows:
@@ -258,11 +420,16 @@ def apply_cross_row_uniqueness(rows: list[dict], generated: dict[str, dict]) -> 
         sf = row["source_file"]
         g = generated.get(sf, {"outcome": "rejected", "reasons": ["validator produced no outcome"]})
         reasons = [r for r in (g.get("reasons") or []) if r]
+        outcome = g.get("outcome")
+        if outcome not in ("accepted", "rejected", "ambiguous"):
+            outcome = "rejected"
+        elif outcome == "accepted" and reasons:
+            outcome = "rejected"  # inconsistent validator output — don't trust a bare "accepted"
         inv = (row["record"].get("invoice_no") or "").strip()
         if inv and inv_counts.get(inv, 0) > 1:
             reasons.append(f"duplicate invoice number ({inv})")
-        accepted = g.get("outcome") == "accepted" and not reasons
-        final[sf] = {"outcome": "accepted" if accepted else "rejected", "reasons": reasons}
+            outcome = "rejected"
+        final[sf] = {"outcome": outcome, "reasons": reasons}
     return final
 
 
@@ -317,15 +484,28 @@ class ValidationResult:
     def accepted(self) -> list[FileOutcome]:
         return [o for o in self.outcomes if o.outcome == "accepted"]
 
+    @property
+    def pending_review(self) -> list[FileOutcome]:
+        return [o for o in self.outcomes if o.outcome == "pending_review"]
+
+    @property
+    def status(self) -> str:
+        """"awaiting_review" takes priority — a run with any pending row is never mergeable,
+        regardless of how the rest of the batch turned out."""
+        if self.pending_review:
+            return "awaiting_review"
+        return "passed" if self.passed else "failed"
+
     def to_dict(self) -> dict:
         return {
-            "status": "passed" if self.passed else "failed",
+            "status": self.status,
             "summary": self.summary,
             "failed_phase": self.failed_phase,
             "inbox_file_count": len(self.inbox_files),
             "accepted": len(self.accepted),
             "rejected": sum(1 for o in self.outcomes if o.outcome == "rejected"),
             "dropped": sum(1 for o in self.outcomes if o.outcome == "dropped"),
+            "pending_review": len(self.pending_review),
             "outcomes": [o.to_dict() for o in self.outcomes],
         }
 
@@ -339,7 +519,9 @@ def validate_ledger(
     """Validate completeness + correctness of a fully-processed inbox.
 
     A run *passes* only when:
-      - every inbox file is accounted for exactly once (accepted / rejected / dropped),
+      - every inbox file is accounted for exactly once (accepted / rejected / dropped /
+        pending_review),
+      - no row is still ``pending_review`` (awaiting a human decision),
       - at least one row was accepted (unless ``require_nonempty`` is False),
       - no accepted row carries a business-rule reason.
 
@@ -368,6 +550,16 @@ def validate_ledger(
             passed=False,
             summary="incomplete accounting — " + "; ".join(problems),
             failed_phase=1,
+            inbox_files=inbox_files,
+            outcomes=outcomes,
+        )
+
+    pending = [o for o in outcomes if o.outcome == "pending_review"]
+    if pending:
+        return ValidationResult(
+            passed=False,
+            summary=f"{len(pending)} row(s) awaiting human review",
+            failed_phase=3,
             inbox_files=inbox_files,
             outcomes=outcomes,
         )

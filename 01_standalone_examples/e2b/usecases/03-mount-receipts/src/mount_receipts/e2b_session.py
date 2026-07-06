@@ -9,6 +9,7 @@ binary installs — the template already contains everest, fuse, the deps, and t
 """
 from __future__ import annotations
 
+import json
 import pathlib
 from dataclasses import dataclass
 
@@ -99,6 +100,33 @@ def mount(sbx, repo: str, branch: str, *, mount_dir: str = MOUNT_DIR) -> None:
         f"sudo -E everest mount lakefs://{repo}/{branch}/ {mount_dir} --protocol fuse --write-mode",
         timeout=180,
     )
+
+
+def pause(sbx) -> str:
+    """Pause the sandbox (E2B beta API): a VM-level pause, not a process suspend — the live
+    ``everest`` FUSE mount survives it untouched, and no compute is billed while paused.
+    Returns the ``sandbox_id`` needed to :func:`resume` it later."""
+    sbx.beta_pause()
+    return sbx.sandbox_id
+
+
+def resume(sandbox_id: str, api_key: str, *, timeout: int = 900):
+    """Resume a paused sandbox. ``Sandbox.connect`` auto-resumes if the sandbox is paused."""
+    from e2b import Sandbox
+
+    return Sandbox.connect(sandbox_id, api_key=api_key, timeout=timeout)
+
+
+def write_mount_json(sbx, rel_path: str, obj, *, mount_dir: str = MOUNT_DIR) -> None:
+    """Write a JSON file into the (root-owned) mount, staged through an unprivileged path
+    since ``sbx.files.write`` writes as the default sandbox user, not root."""
+    staging = f"/home/user/_stage_{rel_path.replace('/', '_')}"
+    sbx.files.write(staging, json.dumps(obj, indent=2))
+    parent = rel_path.rsplit("/", 1)[0] if "/" in rel_path else ""
+    if parent:
+        run(sbx, f"sudo mkdir -p {mount_dir}/{parent}")
+    run(sbx, f"sudo cp {staging} {mount_dir}/{rel_path}")
+    run(sbx, f"rm -f {staging}", check=False)
 
 
 def run_phase(sbx, phase: str, *, mount_dir: str = MOUNT_DIR) -> CmdResult:

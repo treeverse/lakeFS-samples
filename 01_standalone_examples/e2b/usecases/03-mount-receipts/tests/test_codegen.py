@@ -70,7 +70,7 @@ class _StubClient:
 def _rows():
     rec = dict(vendor="Acme", invoice_no="OK-1", date="2026-01-10", currency="USD",
                line_items=[{"name": "x", "amount": 10.0}], total=10.0)
-    bad = dict(rec, invoice_no="BAD-1", currency="EUR")
+    bad = dict(rec, invoice_no="BAD-1", currency="")
     return [{"source_file": "ok.jpg", "record": rec}, {"source_file": "bad.jpg", "record": dict(bad)}]
 
 
@@ -86,7 +86,9 @@ def test_generated_validator_runs_and_is_used(tmp_path):
     assert os.path.exists(tmp_path / "validation" / "rule_outcomes.json")
     by_file = {o["source_file"]: o for o in res["outcomes"]}
     assert by_file["ok.jpg"]["outcome"] == "accepted"
-    assert by_file["bad.jpg"]["outcome"] == "rejected"
+    # "bad.jpg"'s only problem is a blank currency — rule 7 flags that "ambiguous" rather
+    # than an outright reject (see test_validation.py for dedicated rule-7 coverage).
+    assert by_file["bad.jpg"]["outcome"] == "ambiguous"
 
 
 def test_schema_mismatch_triggers_repair(tmp_path):

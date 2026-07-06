@@ -96,7 +96,7 @@ def _validate_output(doc, expected_files: set[str]) -> list[dict]:
         sf = o.get("source_file")
         outcome = o.get("outcome")
         reasons = o.get("reasons", [])
-        if outcome not in ("accepted", "rejected"):
+        if outcome not in ("accepted", "rejected", "ambiguous"):
             raise ValueError(f"bad outcome value for {sf!r}: {outcome!r}")
         if not isinstance(reasons, list):
             raise ValueError(f"reasons must be a list for {sf!r}")
