@@ -51,6 +51,9 @@ lakeFS stores data as content-addressed objects in the ONTAP S3 bucket. From the
 EC2 host:
 
 ```bash
+pip3 install awscli            # installs to ~/.local/bin
+export PATH=$PATH:~/.local/bin
+
 AWS_ACCESS_KEY_ID=<ONTAP_ACCESS_KEY> \
 AWS_SECRET_ACCESS_KEY="<ONTAP_SECRET_KEY>" \
 AWS_DEFAULT_REGION=us-east-1 \
@@ -59,9 +62,10 @@ aws s3 ls s3://lakefs-data/ \
   --endpoint-url http://<SVM_MANAGEMENT_IP>
 ```
 
-The object names are content hashes, not paths — identical content is stored once
-regardless of how many branches or commits reference it. The human-readable paths
-you saw in the UI live in lakeFS metadata, which is also stored in this bucket.
+Objects appear under the repository's storage namespace, with lakeFS metadata
+under a `_lakefs/` prefix and data objects named by content hash rather than by
+path. Identical content is stored once regardless of how many branches or commits
+reference it; the human-readable paths you saw in the UI live in the metadata.
 
 ---
 
@@ -80,9 +84,15 @@ The `lakefs-data` bucket, served by ONTAP's native S3 — no gateway or translat
 layer in front of it.
 
 ```
-vserver object-store-server bucket usage show -vserver fsx
+vserver object-store-server bucket show -vserver fsx -fields bucket,volume,size,logical-used
 ```
-Bucket usage as ONTAP accounts for it.
+Bucket usage as ONTAP accounts for it, and which volume hosts it:
+
+```
+vserver bucket      volume            size  logical-used
+------- ----------- ----------------- ----- ------------
+fsx     lakefs-data fg_oss_1785275435 500GB 296KB
+```
 
 ```
 volume show -vserver fsx -fields size,used,available

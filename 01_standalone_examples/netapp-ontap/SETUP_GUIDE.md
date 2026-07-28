@@ -70,7 +70,7 @@ whatever you prefer, as long as you stay consistent.
 
 ---
 
-### Step 3 — Configure FSx Security Group and NLB
+### Step 3 — Configure the FSx Security Group
 
 **Security group** (allows EC2 → ONTAP traffic):
 
@@ -81,31 +81,14 @@ whatever you prefer, as long as you stay consistent.
    - Source: `lakefs-ontap-demo-sg`
 4. Save rules
 
-**Network Load Balancer** (resolves ONTAP S3 pre-signed URLs — needed for the
-`everest mount` step in Part 2):
-
-5. **Edit inbound rules → Add another rule:**
-   - Type: TCP, Port: 80
-   - Source: **My IP**
-   - Description: `ONTAP S3 HTTP via NLB for pre-signed URLs`
-
-   > ⚠️ **Scope this narrowly.** ONTAP S3 here runs over plaintext HTTP, so S3
-   > traffic and pre-signed URL signatures travel unencrypted. Allow only the
-   > addresses that actually need to resolve pre-signed URLs — for this guide
-   > that is your own IP. **Never use `0.0.0.0/0`:** it publishes an
-   > unencrypted storage endpoint to the internet, where the only thing standing
-   > between a passer-by and your bucket is the ONTAP S3 access key. For any
-   > real use, enable HTTPS on the object-store server and front the NLB with TLS.
-6. Go to **EC2 → Load Balancers → Create load balancer → Network Load Balancer**
-   - Name: `lakefs-ontap-s3`
-   - Scheme: **Internet-facing**
-   - Listener: TCP port 80
-   - Target group: IP type, TCP port 80, target = the SVM management IP (from Step 4)
-7. Note the NLB DNS name — you'll need it for the lakeFS config (`pre_signed_endpoint`)
-
-> **Terraform users:** everything in this step is handled by `terraform apply`.
-> The port-80 source defaults to your current public IP; override it with
-> `ontap_s3_allowed_cidrs` in `terraform.tfvars` only if you need to.
+> **Terraform users:** this step is handled by `terraform apply`.
+>
+> **Note on network exposure.** ONTAP S3 here is reached only over the VPC's
+> private network, from the EC2 host. Nothing about this demo requires exposing
+> the ONTAP S3 endpoint to the internet, and you should not do so: it speaks
+> plaintext HTTP, so the only thing protecting the bucket would be the S3 access
+> key. If you ever need pre-signed URLs to resolve from outside the VPC, enable
+> HTTPS on the object-store server and front it with TLS first.
 
 ---
 
@@ -164,7 +147,7 @@ Type `exit` to leave ONTAP CLI.
 ---
 ### Step 5 — Install and Configure lakeFS Enterprise on EC2
 
-> This demo uses **lakeFS Enterprise** because the `everest mount` workflow relies on pre-signed URLs resolving from outside the VPC (the reason for the NLB in Step 3), and mount is an Enterprise feature. You'll need a license token. (lakeFS OSS also works against ONTAP for the API-only flow — see the footnote at the end of this step.)
+> This demo uses **lakeFS Enterprise**, because the `everest mount` workflow in Part 2 is an Enterprise feature. You'll need a license token; contact your Treeverse account team if you don't have one.
 
 First, copy the lakeFS Enterprise license file from your machine to EC2. Your
 Treeverse account team provides `license.token` along with the current Enterprise
@@ -194,16 +177,14 @@ docker run -d --name postgres \
   --restart unless-stopped \
   postgres:15-alpine
 
-# Install lakeFS Enterprise.
-# Set this to the version your account team provided, or the latest listed at
-# https://docs.lakefs.io/enterprise/
-LAKEFS_VERSION=<LAKEFS_ENTERPRISE_VERSION>
+# Install lakeFS Enterprise. Verified with 1.92.0; check
+# https://hub.docker.com/r/treeverse/lakefs-enterprise/tags for newer releases.
+LAKEFS_VERSION=1.92.0
 curl -L "https://artifacts.lakefs.io/lakefs-enterprise/${LAKEFS_VERSION}/lakefs-enterprise_${LAKEFS_VERSION}_Linux_x86_64.tar.gz" | tar xz
 sudo mv lakefs /usr/local/bin/
 ```
 
-Get the SVM management IP from FSx console → Storage Virtual Machines → fsx → Endpoints → Management IP address.
-Get the NLB DNS from `terraform output ontap_s3_endpoint` or the AWS console.
+Get the SVM management IP from FSx console → Storage Virtual Machines → fsx → Endpoints → Management IP address, or with `terraform output svm_management_ip`.
 
 Create the config file (replace the values in CAPS). Generate the
 `auth.encrypt.secret_key` with `openssl rand -hex 20`:
@@ -229,7 +210,6 @@ blockstore:
   type: s3
   s3:
     endpoint: "http://REPLACE_WITH_SVM_MANAGEMENT_IP"
-    pre_signed_endpoint: "http://REPLACE_WITH_NLB_DNS"
     force_path_style: true
     region: "us-east-1"
     credentials:
@@ -252,27 +232,45 @@ Start lakeFS:
 nohup lakefs run --config ~/lakefs.yaml > ~/lakefs.log 2>&1 &
 ```
 
-> **Footnote — running lakeFS OSS instead.** If you only need the API-only flow (repos, branches, commits, content-addressed blocks on ONTAP) and don't need `everest mount`, you can run lakeFS OSS instead — no license token, and the NLB / `pre_signed_endpoint` plumbing is unnecessary. Swap the Enterprise install for the OSS binary:
-> ```bash
-> LAKEFS_VERSION=$(curl -s https://api.github.com/repos/treeverse/lakeFS/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
-> curl -L "https://github.com/treeverse/lakeFS/releases/download/v${LAKEFS_VERSION}/lakeFS_${LAKEFS_VERSION}_Linux_x86_64.tar.gz" | tar xz
-> sudo mv lakefs /usr/local/bin/
-> ```
-> Then use the same `~/lakefs.yaml` above, minus the `pre_signed_endpoint`, `license`, `features`, and `auth.ui_config` keys.
->
-> `scripts/setup-demo.sh` automates exactly this OSS path (install, Postgres,
-> config, start) if you'd rather not do it by hand:
-> ```bash
-> bash setup-demo.sh <SVM_MANAGEMENT_IP> <ONTAP_ACCESS_KEY> <ONTAP_SECRET_KEY>
-> ```
+Confirm it came up and is pointed at ONTAP:
+```bash
+curl -s http://localhost:8000/api/v1/healthcheck    # expect HTTP 204, no body
+tail -20 ~/lakefs.log
+```
 
 ---
 
 ### Step 6 — Complete lakeFS Setup
 
+lakeFS starts uninitialized and has no users yet. The `installation` block in
+the config above does **not** create the admin account on its own — until you
+finish setup, every API call returns `401`.
+
 1. Open browser: `http://<EC2_PUBLIC_IP>:8000/setup`
-2. Click through setup — it will generate an **Access Key ID** and **Secret Key**
-3. **Save these credentials** — you'll need them to run the demo
+2. Enter `admin` as the username and complete setup
+3. lakeFS shows an **Access Key ID** and **Secret Key**. **Save them** — the
+   secret is displayed only once, and the demo needs both
+
+The demo script defaults to the example credentials in `.env.example`
+(`AKIAIOSFODNN7EXAMPLE` / `wJalrXUtnFEMI/...`). Setup generates different ones,
+so pass the real values when you run it (shown in Part 2). If you would rather
+keep the documented defaults so the demo runs with no arguments, initialize via
+the API instead of the UI and supply them explicitly:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/setup_lakefs \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","key":{
+        "access_key_id":"AKIAIOSFODNN7EXAMPLE",
+        "secret_access_key":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"}}'
+```
+
+Verify setup landed and lakeFS is really pointed at ONTAP:
+```bash
+curl -s http://localhost:8000/api/v1/setup_lakefs        # expect "state":"initialized"
+curl -s -u "<YOUR_KEY>:<YOUR_SECRET>" http://localhost:8000/api/v1/config
+# storage_config.blockstore_type should be "s3"
+```
 
 ---
 
@@ -319,13 +317,12 @@ python3 demo_flow.py
 
 ### Mount the dataset as files (lakeFS Enterprise — `everest mount`):
 
-This is the payoff for the Enterprise setup: mounting a lakeFS path as a local filesystem. `everest` streams objects on demand via pre-signed URLs — which is why Step 3's NLB and the `pre_signed_endpoint` config are required.
+This is the payoff for the Enterprise setup: mounting a lakeFS path as a local filesystem, with objects fetched on demand rather than copied. `everest` reads them via pre-signed URLs, which lakeFS signs against the SVM endpoint — reachable directly from the EC2 host, so no extra networking is needed.
 
 On EC2, install the `everest` binary (ships with lakeFS Enterprise):
 ```bash
-# Set this to the everest version matching your lakeFS Enterprise release
-# (your account team provides it, or see https://docs.lakefs.io/enterprise/)
-EVEREST_VERSION=<EVEREST_VERSION>
+# Verified with everest 0.11.0.
+EVEREST_VERSION=0.11.0
 curl -L "https://artifacts.lakefs.io/everest/${EVEREST_VERSION}/everest_${EVEREST_VERSION}_Linux_x86_64.tar.gz" | tar xz
 sudo mv everest /usr/local/bin/
 ```
@@ -358,13 +355,15 @@ When done, unmount:
 everest umount ~/churn-data
 ```
 
-> If `everest mount` hangs or errors on fetch, the pre-signed URLs aren't reachable — confirm `pre_signed_endpoint` points at the NLB DNS and that the NLB target (the SVM management IP) is healthy.
+> If `everest mount` reports "timeout waiting for mount server", the pre-signed URLs aren't reachable from this host. Confirm `blockstore.s3.endpoint` is the SVM management IP and that `curl http://<SVM_MANAGEMENT_IP>/` from EC2 returns HTTP 403 (not a timeout). If you set a `pre_signed_endpoint`, make sure this host can actually reach it.
 
 ### Inspect the raw S3 objects on ONTAP (optional):
 
-From EC2, install AWS CLI if not already installed:
+From EC2, install the AWS CLI if not already installed. `pip3` puts it in
+`~/.local/bin`, which is not on `PATH` by default on Ubuntu 22.04:
 ```bash
 pip3 install awscli --upgrade
+export PATH=$PATH:~/.local/bin
 ```
 
 Then list all objects lakeFS wrote to ONTAP S3:
@@ -386,31 +385,82 @@ This shows three levels of the stack:
 
 ## PART 3 — Tear Down (After Demo)
 
-**Terraform users:** `terraform destroy` removes everything it created. Verify
-afterwards that the FSx filesystem is really gone — FSx keeps billing until it is.
+**Terraform users:** `terraform destroy` is **not** sufficient on its own — read
+the warning at the end of this section first. The ONTAP S3 bucket's FlexGroup
+volume is created outside Terraform and blocks SVM deletion.
 
 **Manual teardown — delete in this order:**
 
-1. **Network Load Balancer:** EC2 → Load Balancers → `lakefs-ontap-s3` → Delete,
-   then delete its target group. Do this first — it is what makes the ONTAP S3
-   endpoint reachable from outside the VPC.
-2. **FSx Volume:** FSx → lakefs-ontap-demo → Volumes → vol1 → Delete
-3. **FSx SVM:** FSx → lakefs-ontap-demo → Storage Virtual Machines → fsx → Delete
-4. **FSx Filesystem:** FSx → lakefs-ontap-demo → Actions → Delete
-5. **EC2:** EC2 → Instances → lakefs-ontap-demo → Terminate
-6. **Elastic IP:** EC2 → Elastic IPs → Release (otherwise you're charged for unused EIP)
+1. **FSx Volume:** FSx → lakefs-ontap-demo → Volumes → vol1 → Delete
+2. **FSx SVM:** FSx → lakefs-ontap-demo → Storage Virtual Machines → fsx → Delete
+3. **FSx Filesystem:** FSx → lakefs-ontap-demo → Actions → Delete
+4. **EC2:** EC2 → Instances → lakefs-ontap-demo → Terminate
+5. **Elastic IP:** EC2 → Elastic IPs → Release (otherwise you're charged for unused EIP)
 
 > **Teardown is what revokes the ONTAP S3 credentials.** Those keys live in the
-> SVM, so deleting the SVM (step 3) destroys the `lakefs` user and its key pair.
-> Until then the keys remain valid. If you need to revoke them while keeping the
+> SVM, so deleting the SVM destroys the `lakefs` user and its key pair. Until
+> then the keys remain valid. If you need to revoke them while keeping the
 > filesystem, SSH to ONTAP and run
 > `vserver object-store-server user delete -vserver fsx -user lakefs`.
 
-> **Confirm the filesystem is deleted.** An FSx ONTAP filesystem left running
-> costs ~$8.40/day indefinitely and keeps its S3 endpoint live. Check with:
+### ⚠️ `terraform destroy` alone does not finish the job
+
+Enabling ONTAP S3 in Step 4 makes ONTAP create its own FlexGroup volume to back
+the bucket (`fg_oss_*`). Terraform never saw that volume, so it cannot delete it —
+and FSx refuses to delete an SVM that still has non-root volumes. `terraform
+destroy` therefore fails partway with:
+
+```
+Cannot delete storage virtual machine while it has non-root volumes: fsvol-…
+```
+
+**This leaves the filesystem running and billing.**
+
+`aws fsx delete-volume` does *not* work on that volume — the request is accepted
+and the volume briefly reports `DELETING`, then reverts to `CREATED`. The volume
+belongs to the object-store server, so the only way to remove it is to delete the
+**bucket**, from the ONTAP CLI. And ONTAP refuses to delete a bucket that still
+has objects in it.
+
+**So do this while the EC2 host still exists** — once it's gone you have nothing
+left inside the VPC to reach ONTAP from, and you'll have to launch a throwaway
+instance just to finish cleaning up.
+
+On EC2, empty the bucket:
+```bash
+export PATH=$PATH:~/.local/bin
+AWS_ACCESS_KEY_ID=<ONTAP_ACCESS_KEY> \
+AWS_SECRET_ACCESS_KEY="<ONTAP_SECRET_KEY>" \
+AWS_DEFAULT_REGION=us-east-1 \
+aws s3 rm s3://lakefs-data/ --recursive --endpoint-url http://<SVM_MANAGEMENT_IP>
+```
+
+Then from the ONTAP CLI, delete the bucket (this drops the `fg_oss_*` FlexGroup):
+```
+ssh fsxadmin@<FSX_MANAGEMENT_IP>
+vserver object-store-server bucket delete -vserver fsx -bucket lakefs-data
+volume show -vserver fsx -fields size     # only fsx_root should remain
+```
+
+The FSx control plane lags behind ONTAP here: `describe-volumes` keeps listing the
+`fg_oss_*` volume as `CREATED` for a while after ONTAP has dropped it, and SVM
+deletion keeps failing until that record clears. Once the bucket is gone, this
+call succeeds and clears it:
+```bash
+aws fsx delete-volume --volume-id <fsvol-...>   # now works; before, it reverted
+```
+
+Wait until `describe-volumes` lists only `fsx_root`, then run `terraform destroy`
+(or the manual steps above) and it completes cleanly.
+
+> **Always confirm the filesystem is really gone.** It costs ~$8.40/day for as
+> long as it exists, whatever Terraform reported:
 > ```bash
-> aws fsx describe-file-systems --query 'FileSystems[].{Id:FileSystemId,State:Lifecycle}'
+> aws fsx describe-file-systems \
+>   --query 'FileSystems[].{Id:FileSystemId,State:Lifecycle}' --output table
 > ```
+> The list should not contain your filesystem. `terraform destroy` exiting
+> non-zero is not a signal you can ignore.
 
 ---
 
@@ -420,9 +470,8 @@ afterwards that the FSx filesystem is really gone — FSx keeps billing until it
 |----------|------|
 | FSx ONTAP (1TB, 384MB/s) | ~$8.40/day |
 | EC2 t3.small | ~$0.50/day |
-| Network Load Balancer | ~$0.55/day + data processing |
 | Elastic IP (when attached) | Free |
-| **Total per demo day** | **~$9.50/day** |
+| **Total per demo day** | **~$9/day** |
 
 **Tip:** Spin up the morning of the demo, tear down the same evening = ~$10 total.
 
@@ -437,4 +486,4 @@ afterwards that the FSx filesystem is really gone — FSx keeps billing until it
 | Demo script fails with "namespace in use" | Normal on re-run — script uses a new prefix automatically |
 | Can't SSH to ONTAP | Must SSH from EC2 (the management IP is VPC-private), not from your laptop |
 | ONTAP password rejected | Use the `fsxadmin` / `vsadmin` password you set in Step 1. Reset it via FSx → Actions → Update file system if needed |
-| `everest mount` hangs on fetch | Pre-signed URLs aren't resolving — check `pre_signed_endpoint` points at the NLB DNS, the NLB target is healthy, and your IP is in `ontap_s3_allowed_cidrs` |
+| `everest mount` times out waiting for mount server | The host can't fetch objects. From EC2, `curl http://<SVM_MANAGEMENT_IP>/` should return HTTP 403. Also check `~/.everest` is owned by your user, not root |

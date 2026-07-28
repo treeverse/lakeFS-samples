@@ -3,6 +3,11 @@
 
 aws_region = "us-east-1"
 
+# Prefixes every resource name. Change this if you want more than one of these
+# environments in the same account/region, or if a previous teardown left
+# resources behind — load balancer names are unique per region.
+# name_prefix = "lakefs-ontap-demo"
+
 # A VPC and a public subnet in that VPC.
 vpc_id    = "vpc-xxxxxxxxxxxxxxxxx"
 subnet_id = "subnet-xxxxxxxxxxxxxxxxx"
@@ -15,6 +20,3 @@ key_pair_name = "your-ec2-key-pair"
 # Min 8 chars, must include upper, lower, and a number or special char.
 fsxadmin_password = "CHOOSE_YOUR_OWN_PASSWORD"
 
-# Optional: CIDRs allowed to reach the ONTAP S3 HTTP endpoint.
-# Leave commented out to default to your current public IP.
-# ontap_s3_allowed_cidrs = ["203.0.113.10/32"]

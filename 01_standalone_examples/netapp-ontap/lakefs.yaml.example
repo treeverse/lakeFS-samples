@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# lakeFS configuration template for the ONTAP demo.
+# lakeFS Enterprise configuration template for the ONTAP demo.
 # Copy this file to lakefs.yaml and fill in all REPLACE_ME values.
 # lakefs.yaml is gitignored.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -13,6 +13,8 @@ auth:
   encrypt:
     # Must be >= 32 chars. Generate with: openssl rand -hex 20
     secret_key: "REPLACE_WITH_32_CHAR_RANDOM_STRING"
+  ui_config:
+    rbac: internal
 
 installation:
   user_name: admin
@@ -29,10 +31,9 @@ blockstore:
     # HTTPS on the object-store server for any real deployment.
     endpoint: "http://REPLACE_ME_WITH_FSX_SVM_IP"
 
-    # Only needed for lakeFS Enterprise `everest mount`, which resolves
-    # pre-signed URLs from outside the VPC. Set to the NLB DNS name
-    # (`terraform output ontap_s3_endpoint`). Omit for the OSS API-only flow.
-    # pre_signed_endpoint: "http://REPLACE_ME_WITH_NLB_DNS"
+    # No pre_signed_endpoint is set: lakeFS signs URLs against the endpoint
+    # above, which the EC2 host can reach directly. Only set one if you resolve
+    # pre-signed URLs from somewhere that cannot reach the SVM address.
 
     # ONTAP S3 does not support virtual-hosted-style URLs.
     force_path_style: true
@@ -51,3 +52,11 @@ server:
 logging:
   level: "INFO"
   format: "text"
+
+# lakeFS Enterprise license, provided by your Treeverse account team.
+# license.token is gitignored — keep it that way.
+license:
+  path: /home/ubuntu/license.token
+
+features:
+  local_rbac: true

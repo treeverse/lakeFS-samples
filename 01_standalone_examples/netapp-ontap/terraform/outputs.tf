@@ -23,7 +23,3 @@ output "ssh_command" {
   value       = "ssh -i ~/.ssh/${var.key_pair_name}.pem ubuntu@${aws_eip.lakefs.public_ip}"
 }
 
-output "ontap_s3_endpoint" {
-  description = "Public ONTAP S3 endpoint via NLB (use as pre_signed_endpoint in lakeFS config)"
-  value       = "http://${aws_lb.ontap_s3.dns_name}"
-}
