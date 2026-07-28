@@ -3,8 +3,12 @@
 lakefs.yaml
 *.pid
 
-# lakeFS binary (downloaded locally)
-bin/
+# lakeFS Enterprise license — never commit this
+license.token
+*.token
+
+# SSH keys
+*.pem
 
 # Terraform
 .terraform/

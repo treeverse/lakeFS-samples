@@ -10,6 +10,11 @@ subnet_id = "subnet-xxxxxxxxxxxxxxxxx"
 # An EC2 key pair that already exists in this account/region (for SSH to the lakeFS host).
 key_pair_name = "your-ec2-key-pair"
 
-# Password for the ONTAP fsxadmin / vsadmin users.
+# Password for the ONTAP fsxadmin / vsadmin users. These are full storage-admin
+# accounts — choose your own value, do not ship the placeholder below.
 # Min 8 chars, must include upper, lower, and a number or special char.
-fsxadmin_password = "ChangeMe123!"
+fsxadmin_password = "CHOOSE_YOUR_OWN_PASSWORD"
+
+# Optional: CIDRs allowed to reach the ONTAP S3 HTTP endpoint.
+# Leave commented out to default to your current public IP.
+# ontap_s3_allowed_cidrs = ["203.0.113.10/32"]

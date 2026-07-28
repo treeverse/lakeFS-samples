@@ -1,6 +1,16 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# setup-demo.sh — Run this on EC2 after Terraform provisions the infrastructure
+# setup-demo.sh — scripted lakeFS OSS install on the EC2 host.
+#
+# This automates the OSS path described in the footnote to SETUP_GUIDE.md Step 5:
+# Docker + Postgres, latest lakeFS OSS release, config, and start. It does NOT
+# set up lakeFS Enterprise, and it does not configure `pre_signed_endpoint` — so
+# the `everest mount` step in Part 2 will not work against this install. Follow
+# Step 5 by hand if you want the Enterprise flow.
+#
+# Run on EC2, after Terraform has provisioned the infrastructure and you have
+# created the ONTAP S3 user (SETUP_GUIDE.md Step 4).
+#
 # Usage: bash setup-demo.sh <SVM_MANAGEMENT_IP> <ONTAP_ACCESS_KEY> <ONTAP_SECRET_KEY>
 # ─────────────────────────────────────────────────────────────────────────────
 

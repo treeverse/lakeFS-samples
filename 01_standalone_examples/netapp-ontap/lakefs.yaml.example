@@ -22,11 +22,17 @@ installation:
 blockstore:
   type: s3
   s3:
-    # FSx for ONTAP: use the SVM's iSCSI/NFS/S3 endpoint IP (found in FSx console
-    # under Storage Virtual Machines → Endpoints → Management DNS name).
-    # Use http:// to avoid certificate issues in the demo.
-    # Example: http://198.19.255.x  (the SVM management IP shown in FSx console)
+    # The SVM management IP serving ONTAP S3. On FSx: console → Storage Virtual
+    # Machines → fsx → Endpoints → Management IP address, or
+    # `terraform output svm_management_ip`.
+    # http:// is used here to avoid certificate handling in the demo; enable
+    # HTTPS on the object-store server for any real deployment.
     endpoint: "http://REPLACE_ME_WITH_FSX_SVM_IP"
+
+    # Only needed for lakeFS Enterprise `everest mount`, which resolves
+    # pre-signed URLs from outside the VPC. Set to the NLB DNS name
+    # (`terraform output ontap_s3_endpoint`). Omit for the OSS API-only flow.
+    # pre_signed_endpoint: "http://REPLACE_ME_WITH_NLB_DNS"
 
     # ONTAP S3 does not support virtual-hosted-style URLs.
     force_path_style: true

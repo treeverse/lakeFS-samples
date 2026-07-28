@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 1 Demo: lakeFS + NetApp ONTAP S3
+lakeFS + NetApp ONTAP S3 demo
 Use case: Customer Churn — ML Feature Engineering with Dataset Versioning
 
 Demonstrates:
@@ -19,14 +19,16 @@ Run from the demo/ directory (or project root):
 Prerequisites:
   - lakeFS running at http://localhost:8000
   - .env loaded (or env vars set directly)
-  - See README.md for full setup steps.
+  - See README.md and SETUP_GUIDE.md for full setup steps.
+
+WARNING: this script starts from a clean slate. It DELETES any existing
+repository named 'churn-features' on the target lakeFS instance before
+recreating it. Point it at a demo instance, not one holding data you need.
 """
 
 import os
 import sys
 import json
-import time
-import textwrap
 from pathlib import Path
 
 import requests
@@ -76,7 +78,7 @@ def info(msg: str):
 
 def fatal(msg: str):
     print(f"\n   ✗  ERROR: {msg}")
-    print("      See README.md — Troubleshooting section.\n")
+    print("      See SETUP_GUIDE.md — Troubleshooting section.\n")
     sys.exit(1)
 
 
@@ -106,7 +108,7 @@ def check_lakefs():
     except requests.exceptions.ConnectionError:
         fatal(
             f"Cannot connect to lakeFS at {LAKEFS_HOST}\n"
-            "      Is lakeFS running?  bash scripts/start-services.sh"
+            "      Is lakeFS running?  See SETUP_GUIDE.md — 'Before Every Demo Run'."
         )
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401:
@@ -332,7 +334,7 @@ def verify_main_after_merge():
 def main():
     TOTAL = 11
 
-    banner("lakeFS + NetApp ONTAP S3  |  Phase 1 Demo")
+    banner("lakeFS + NetApp ONTAP S3  |  Dataset Versioning Demo")
     print(f"\n   Use case : Customer Churn — ML Feature Engineering")
     print(f"   lakeFS   : {LAKEFS_HOST}")
     print(f"   Bucket   : s3://{ONTAP_S3_BUCKET}  (NetApp ONTAP native S3)")
@@ -348,7 +350,7 @@ def main():
     upload_baseline()
 
     step(4, TOTAL, "Committing baseline to main")
-    main_commit = commit_to_main()
+    commit_to_main()
 
     step(5, TOTAL, "Creating experiment branch")
     create_experiment_branch()
@@ -357,7 +359,7 @@ def main():
     upload_experiment_data()
 
     step(7, TOTAL, "Committing experiment on branch")
-    exp_commit = commit_on_branch()
+    commit_on_branch()
 
     step(8, TOTAL, "Diff: experiment branch vs main")
     show_diff()

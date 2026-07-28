@@ -20,7 +20,7 @@ output "svm_management_ip" {
 
 output "ssh_command" {
   description = "SSH command to connect to EC2"
-  value       = "ssh -i ~/.ssh/lakefs-ontap-demo.pem ubuntu@${aws_eip.lakefs.public_ip}"
+  value       = "ssh -i ~/.ssh/${var.key_pair_name}.pem ubuntu@${aws_eip.lakefs.public_ip}"
 }
 
 output "ontap_s3_endpoint" {

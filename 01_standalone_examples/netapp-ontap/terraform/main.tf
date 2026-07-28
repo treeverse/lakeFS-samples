@@ -32,6 +32,10 @@ data "http" "my_ip" {
 
 locals {
   my_ip = "${chomp(data.http.my_ip.response_body)}/32"
+
+  # Default the ONTAP S3 ingress to this machine's public IP unless the caller
+  # explicitly widens it via var.ontap_s3_allowed_cidrs.
+  ontap_s3_cidrs = var.ontap_s3_allowed_cidrs != null ? var.ontap_s3_allowed_cidrs : [local.my_ip]
 }
 
 # ─── Security Groups ─────────────────────────────────────────────────────────
@@ -80,13 +84,14 @@ resource "aws_security_group" "fsx" {
     description     = "All traffic from EC2"
   }
 
-  # PoC only: exposes ONTAP S3 publicly over plaintext HTTP for pre-signed URL
-  # support. For non-demo use, scope cidr_blocks to a known IP and front with TLS.
+  # ONTAP S3 over plaintext HTTP, for pre-signed URL support (see the NLB below).
+  # Scoped to var.ontap_s3_allowed_cidrs, which defaults to your public IP.
+  # Traffic here is unencrypted — front the NLB with TLS for any real use.
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.ontap_s3_cidrs
     description = "ONTAP S3 HTTP via NLB for pre-signed URLs"
   }
 
@@ -103,13 +108,13 @@ resource "aws_security_group" "fsx" {
 # ─── FSx for NetApp ONTAP ─────────────────────────────────────────────────────
 
 resource "aws_fsx_ontap_file_system" "demo" {
-  storage_capacity     = 1024
-  subnet_ids           = [var.subnet_id]
-  preferred_subnet_id  = var.subnet_id
-  deployment_type      = "SINGLE_AZ_2"
-  throughput_capacity  = 384
-  fsx_admin_password   = var.fsxadmin_password
-  security_group_ids   = [aws_security_group.fsx.id]
+  storage_capacity    = 1024
+  subnet_ids          = [var.subnet_id]
+  preferred_subnet_id = var.subnet_id
+  deployment_type     = "SINGLE_AZ_2"
+  throughput_capacity = 384
+  fsx_admin_password  = var.fsxadmin_password
+  security_group_ids  = [aws_security_group.fsx.id]
 
   tags = { Name = "lakefs-ontap-demo" }
 }
@@ -150,7 +155,9 @@ resource "aws_instance" "lakefs" {
   tags = { Name = "lakefs-ontap-demo" }
 }
 
-# ─── NLB — exposes ONTAP S3 publicly for pre-signed URL support ──────────────
+# ─── NLB — reaches ONTAP S3 for pre-signed URL resolution ────────────────────
+# Internet-facing so pre-signed URLs resolve from outside the VPC, but the FSx
+# security group above restricts who can actually connect.
 
 resource "aws_lb" "ontap_s3" {
   name               = "lakefs-ontap-s3"
