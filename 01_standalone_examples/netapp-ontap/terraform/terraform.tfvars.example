@@ -3,6 +3,11 @@
 
 aws_region = "us-east-1"
 
+# Prefixes every resource name. Change this if you want more than one of these
+# environments in the same account/region, or if a previous teardown left
+# resources behind — load balancer names are unique per region.
+# name_prefix = "lakefs-ontap-demo"
+
 # A VPC and a public subnet in that VPC.
 vpc_id    = "vpc-xxxxxxxxxxxxxxxxx"
 subnet_id = "subnet-xxxxxxxxxxxxxxxxx"
@@ -10,6 +15,8 @@ subnet_id = "subnet-xxxxxxxxxxxxxxxxx"
 # An EC2 key pair that already exists in this account/region (for SSH to the lakeFS host).
 key_pair_name = "your-ec2-key-pair"
 
-# Password for the ONTAP fsxadmin / vsadmin users.
+# Password for the ONTAP fsxadmin / vsadmin users. These are full storage-admin
+# accounts — choose your own value, do not ship the placeholder below.
 # Min 8 chars, must include upper, lower, and a number or special char.
-fsxadmin_password = "ChangeMe123!"
+fsxadmin_password = "CHOOSE_YOUR_OWN_PASSWORD"
+

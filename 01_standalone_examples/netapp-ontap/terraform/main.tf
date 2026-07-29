@@ -37,7 +37,7 @@ locals {
 # ─── Security Groups ─────────────────────────────────────────────────────────
 
 resource "aws_security_group" "ec2" {
-  name        = "lakefs-ontap-demo-sg"
+  name        = "${var.name_prefix}-sg"
   description = "lakeFS demo EC2 security group"
   vpc_id      = var.vpc_id
 
@@ -64,11 +64,11 @@ resource "aws_security_group" "ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "lakefs-ontap-demo-sg" }
+  tags = { Name = "${var.name_prefix}-sg" }
 }
 
 resource "aws_security_group" "fsx" {
-  name        = "lakefs-ontap-fsx-sg"
+  name        = "${var.name_prefix}-fsx-sg"
   description = "FSx for ONTAP security group"
   vpc_id      = var.vpc_id
 
@@ -80,16 +80,6 @@ resource "aws_security_group" "fsx" {
     description     = "All traffic from EC2"
   }
 
-  # PoC only: exposes ONTAP S3 publicly over plaintext HTTP for pre-signed URL
-  # support. For non-demo use, scope cidr_blocks to a known IP and front with TLS.
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "ONTAP S3 HTTP via NLB for pre-signed URLs"
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -97,21 +87,21 @@ resource "aws_security_group" "fsx" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "lakefs-ontap-fsx-sg" }
+  tags = { Name = "${var.name_prefix}-fsx-sg" }
 }
 
 # ─── FSx for NetApp ONTAP ─────────────────────────────────────────────────────
 
 resource "aws_fsx_ontap_file_system" "demo" {
-  storage_capacity     = 1024
-  subnet_ids           = [var.subnet_id]
-  preferred_subnet_id  = var.subnet_id
-  deployment_type      = "SINGLE_AZ_2"
-  throughput_capacity  = 384
-  fsx_admin_password   = var.fsxadmin_password
-  security_group_ids   = [aws_security_group.fsx.id]
+  storage_capacity    = 1024
+  subnet_ids          = [var.subnet_id]
+  preferred_subnet_id = var.subnet_id
+  deployment_type     = "SINGLE_AZ_2"
+  throughput_capacity = 384
+  fsx_admin_password  = var.fsxadmin_password
+  security_group_ids  = [aws_security_group.fsx.id]
 
-  tags = { Name = "lakefs-ontap-demo" }
+  tags = { Name = var.name_prefix }
 }
 
 resource "aws_fsx_ontap_storage_virtual_machine" "demo" {
@@ -120,7 +110,7 @@ resource "aws_fsx_ontap_storage_virtual_machine" "demo" {
   root_volume_security_style = "UNIX"
   svm_admin_password         = var.fsxadmin_password
 
-  tags = { Name = "lakefs-ontap-demo-svm" }
+  tags = { Name = "${var.name_prefix}-svm" }
 }
 
 resource "aws_fsx_ontap_volume" "demo" {
@@ -130,7 +120,7 @@ resource "aws_fsx_ontap_volume" "demo" {
   storage_efficiency_enabled = true
   storage_virtual_machine_id = aws_fsx_ontap_storage_virtual_machine.demo.id
 
-  tags = { Name = "lakefs-ontap-demo-vol" }
+  tags = { Name = "${var.name_prefix}-vol" }
 }
 
 # ─── EC2 Instance ────────────────────────────────────────────────────────────
@@ -147,48 +137,7 @@ resource "aws_instance" "lakefs" {
     volume_size = 20
   }
 
-  tags = { Name = "lakefs-ontap-demo" }
-}
-
-# ─── NLB — exposes ONTAP S3 publicly for pre-signed URL support ──────────────
-
-resource "aws_lb" "ontap_s3" {
-  name               = "lakefs-ontap-s3"
-  internal           = false
-  load_balancer_type = "network"
-  subnets            = [var.subnet_id]
-
-  tags = { Name = "lakefs-ontap-s3-nlb" }
-}
-
-resource "aws_lb_target_group" "ontap_s3" {
-  name        = "lakefs-ontap-s3-tg"
-  port        = 80
-  protocol    = "TCP"
-  vpc_id      = var.vpc_id
-  target_type = "ip"
-
-  health_check {
-    protocol = "TCP"
-    port     = 80
-  }
-}
-
-resource "aws_lb_target_group_attachment" "ontap_s3" {
-  target_group_arn = aws_lb_target_group.ontap_s3.arn
-  target_id        = tolist(aws_fsx_ontap_storage_virtual_machine.demo.endpoints[0].management[0].ip_addresses)[0]
-  port             = 80
-}
-
-resource "aws_lb_listener" "ontap_s3" {
-  load_balancer_arn = aws_lb.ontap_s3.arn
-  port              = 80
-  protocol          = "TCP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ontap_s3.arn
-  }
+  tags = { Name = var.name_prefix }
 }
 
 # ─── Elastic IP (so IP never changes between stops/starts) ───────────────────
@@ -196,5 +145,5 @@ resource "aws_lb_listener" "ontap_s3" {
 resource "aws_eip" "lakefs" {
   instance = aws_instance.lakefs.id
   domain   = "vpc"
-  tags     = { Name = "lakefs-ontap-demo-eip" }
+  tags     = { Name = "${var.name_prefix}-eip" }
 }

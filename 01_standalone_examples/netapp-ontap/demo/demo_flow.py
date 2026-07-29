@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 1 Demo: lakeFS + NetApp ONTAP S3
+lakeFS + NetApp ONTAP S3 demo
 Use case: Customer Churn — ML Feature Engineering with Dataset Versioning
 
 Demonstrates:
@@ -19,14 +19,18 @@ Run from the demo/ directory (or project root):
 Prerequisites:
   - lakeFS running at http://localhost:8000
   - .env loaded (or env vars set directly)
-  - See README.md for full setup steps.
+  - See README.md and SETUP_GUIDE.md for full setup steps.
+
+WARNING: this script starts from a clean slate. It DELETES any existing
+repository named 'churn-features' on the target lakeFS instance before
+recreating it. Point it at a demo instance, not one holding data you need.
 """
 
 import os
 import sys
 import json
 import time
-import textwrap
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -50,10 +54,31 @@ BASE_URL          = f"{LAKEFS_HOST}/api/v1"
 AUTH              = HTTPBasicAuth(LAKEFS_ACCESS_KEY, LAKEFS_SECRET_KEY)
 SEED_DIR          = Path(__file__).parent / "seed_data"
 
+# Repository deletion is asynchronous; how long to wait for the name to free up.
+REPO_DELETE_TIMEOUT = 60
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
+
+def run_id() -> str:
+    """A per-run identifier, used to give each run its own storage namespace."""
+    return datetime.now(timezone.utc).strftime("run-%Y%m%d-%H%M%S")
+
+
+def wait_for_repo_gone() -> bool:
+    """Poll until the demo repository is really gone. True if it disappeared."""
+    deadline = time.monotonic() + REPO_DELETE_TIMEOUT
+    while time.monotonic() < deadline:
+        resp = requests.get(
+            f"{BASE_URL}/repositories/{REPO_NAME}", auth=AUTH, timeout=30
+        )
+        if resp.status_code == 404:
+            return True
+        time.sleep(1)
+    return False
+
 
 def banner(title: str):
     width = 62
@@ -76,15 +101,21 @@ def info(msg: str):
 
 def fatal(msg: str):
     print(f"\n   ✗  ERROR: {msg}")
-    print("      See README.md — Troubleshooting section.\n")
+    print("      See SETUP_GUIDE.md — Troubleshooting section.\n")
     sys.exit(1)
 
 
-def api(method: str, path: str, **kwargs) -> requests.Response:
-    """Authenticated lakeFS REST call. Raises on non-2xx."""
+def api(method: str, path: str, expected_errors=(), **kwargs) -> requests.Response:
+    """Authenticated lakeFS REST call. Raises on non-2xx.
+
+    Status codes in `expected_errors` still raise, but without printing — for
+    cases the caller handles itself, like a 404 when nothing exists yet.
+    """
     url = f"{BASE_URL}{path}"
     resp = requests.request(method, url, auth=AUTH, timeout=30, **kwargs)
     if not resp.ok:
+        if resp.status_code in expected_errors:
+            resp.raise_for_status()
         print(f"\n   ✗  API {method} {path} → HTTP {resp.status_code}")
         try:
             detail = resp.json()
@@ -106,7 +137,7 @@ def check_lakefs():
     except requests.exceptions.ConnectionError:
         fatal(
             f"Cannot connect to lakeFS at {LAKEFS_HOST}\n"
-            "      Is lakeFS running?  bash scripts/start-services.sh"
+            "      Is lakeFS running?  See SETUP_GUIDE.md — 'Before Every Demo Run'."
         )
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401:
@@ -120,39 +151,50 @@ def check_lakefs():
     ok(f"Blockstore type: {blockstore}  (should be 's3' → ONTAP)")
 
 
-def create_repository():
-    """Create (or re-create) the demo repository backed by ONTAP S3."""
+def create_repository() -> str:
+    """Create (or re-create) the demo repository backed by ONTAP S3.
+
+    Returns the storage namespace the repository was created over.
+    """
     info(f"Repository  : {REPO_NAME}")
     info(f"Default branch: {MAIN_BRANCH}")
 
-    # Delete if it already exists so the demo is idempotent
+    # Delete if it already exists so the demo is idempotent.
+    # A 404 is the normal case on a first run, so don't report it as an error.
     try:
-        api("DELETE", f"/repositories/{REPO_NAME}")
+        api("DELETE", f"/repositories/{REPO_NAME}", expected_errors=(404,))
         info("Previous run detected — deleted existing repository (clean start)")
+        # Repository deletion is asynchronous: the DELETE returns 204 while the
+        # repository is still visible and its name still reserved. Creating it
+        # again during that window fails with 409 "not unique", so wait for the
+        # name to actually free up.
+        if not wait_for_repo_gone():
+            fatal(
+                f"Repository '{REPO_NAME}' was still present {REPO_DELETE_TIMEOUT}s "
+                "after deletion.\n      Re-run in a moment, or delete it manually."
+            )
     except requests.exceptions.HTTPError as e:
         if e.response.status_code != 404:
             raise
+        info("No existing repository — starting clean")
 
-    # Try base namespace first, then increment version if namespace is already in use
-    base_ns = STORAGE_NS
-    storage_ns = base_ns
-    for attempt in range(1, 20):
-        try:
-            api("POST", "/repositories", json={
-                "name":              REPO_NAME,
-                "storage_namespace": storage_ns,
-                "default_branch":    MAIN_BRANCH,
-            })
-            break
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 400 and "already in use" in e.response.text:
-                storage_ns = f"{base_ns}-v{attempt + 1}"
-                info(f"Namespace in use — retrying with: {storage_ns}")
-            else:
-                raise
+    # Deleting a lakeFS repository does not erase its data on ONTAP S3, and
+    # lakeFS refuses to create a repository over a storage namespace that still
+    # has objects under it. So each run gets its own namespace rather than
+    # competing for a fixed one.
+    storage_ns = f"{STORAGE_NS}/{run_id()}"
+
+    api("POST", "/repositories", json={
+        "name":              REPO_NAME,
+        "storage_namespace": storage_ns,
+        "default_branch":    MAIN_BRANCH,
+    })
 
     ok(f"Repository '{REPO_NAME}' created")
     ok(f"Data will be stored at: {storage_ns} (on ONTAP S3 bucket '{ONTAP_S3_BUCKET}')")
+    info("Each run uses a fresh namespace; earlier runs' objects remain in the")
+    info("bucket until you delete them (or tear down the filesystem).")
+    return storage_ns
 
 
 def upload_baseline():
@@ -250,25 +292,33 @@ def commit_on_branch() -> str:
 
 
 def show_diff():
-    """Show what changed between the experiment branch and main."""
+    """Show what the experiment branch changes relative to main.
+
+    Ref order matters: lakeFS reports what changed in the right-hand ref
+    relative to the left, so the base branch goes on the left. This is the
+    same orientation as picking `main` as the base in the UI's Compare tab.
+    """
     resp = api(
         "GET",
-        f"/repositories/{REPO_NAME}/refs/{EXP_BRANCH}/diff/{MAIN_BRANCH}",
+        f"/repositories/{REPO_NAME}/refs/{MAIN_BRANCH}/diff/{EXP_BRANCH}",
     )
     results = resp.json().get("results", [])
 
-    if results:
-        ok(f"{len(results)} change(s) detected:")
-        for item in results:
-            path       = item.get("path", "?")
-            change     = item.get("type", "?").upper()
-            size_bytes = item.get("size_bytes", None)
-            size_str   = f"  ({size_bytes:,} bytes)" if size_bytes else ""
-            print(f"       [{change:8s}]  {path}{size_str}")
-    else:
-        info("No differences (unexpected — check upload steps)")
+    if not results:
+        fatal(
+            "Diff returned no changes, but the branch should differ from main.\n"
+            "      Expected exactly one changed file: data/customers.csv"
+        )
 
-    info("This diff proves the branch diverged from main with exactly one change.")
+    ok(f"{len(results)} change(s) detected:")
+    for item in results:
+        path       = item.get("path", "?")
+        change     = item.get("type", "?").upper()
+        size_bytes = item.get("size_bytes", None)
+        size_str   = f"  ({size_bytes:,} bytes)" if size_bytes else ""
+        print(f"       [{change:8s}]  {path}{size_str}")
+
+    info("The branch diverged from main by exactly this set of changes.")
 
 
 def show_commit_log():
@@ -332,7 +382,7 @@ def verify_main_after_merge():
 def main():
     TOTAL = 11
 
-    banner("lakeFS + NetApp ONTAP S3  |  Phase 1 Demo")
+    banner("lakeFS + NetApp ONTAP S3  |  Dataset Versioning Demo")
     print(f"\n   Use case : Customer Churn — ML Feature Engineering")
     print(f"   lakeFS   : {LAKEFS_HOST}")
     print(f"   Bucket   : s3://{ONTAP_S3_BUCKET}  (NetApp ONTAP native S3)")
@@ -342,13 +392,13 @@ def main():
     check_lakefs()
 
     step(2, TOTAL, "Creating repository")
-    create_repository()
+    storage_ns = create_repository()
 
     step(3, TOTAL, "Uploading baseline dataset → main branch")
     upload_baseline()
 
     step(4, TOTAL, "Committing baseline to main")
-    main_commit = commit_to_main()
+    commit_to_main()
 
     step(5, TOTAL, "Creating experiment branch")
     create_experiment_branch()
@@ -357,7 +407,7 @@ def main():
     upload_experiment_data()
 
     step(7, TOTAL, "Committing experiment on branch")
-    exp_commit = commit_on_branch()
+    commit_on_branch()
 
     step(8, TOTAL, "Diff: experiment branch vs main")
     show_diff()
@@ -378,7 +428,7 @@ def main():
     print(f"╠{'═' * width}╣")
     lines = [
         f"Repository : {REPO_NAME}",
-        f"Storage    : {STORAGE_NS}",
+        f"Storage    : {storage_ns}",
         f"           : (data physically on NetApp ONTAP S3)",
         f"UI         : {LAKEFS_HOST}/repositories",
     ]

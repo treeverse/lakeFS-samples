@@ -20,10 +20,6 @@ output "svm_management_ip" {
 
 output "ssh_command" {
   description = "SSH command to connect to EC2"
-  value       = "ssh -i ~/.ssh/lakefs-ontap-demo.pem ubuntu@${aws_eip.lakefs.public_ip}"
+  value       = "ssh -i ~/.ssh/${var.key_pair_name}.pem ubuntu@${aws_eip.lakefs.public_ip}"
 }
 
-output "ontap_s3_endpoint" {
-  description = "Public ONTAP S3 endpoint via NLB (use as pre_signed_endpoint in lakeFS config)"
-  value       = "http://${aws_lb.ontap_s3.dns_name}"
-}
