@@ -1,0 +1,89 @@
+# Docker Compose reads .env automatically for variable substitution.
+# All secrets come from .env — nothing is hardcoded here.
+
+services:
+
+  # ── Metadata store ────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lakefs}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lakefs}
+      POSTGRES_DB: ${POSTGRES_DB:-lakefs}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lakefs} -d ${POSTGRES_DB:-lakefs}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── lakeFS ───────────────────────────────────────────────────────────────
+  lakefs:
+    image: treeverse/lakefs:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      # host:container — lakeFS listens on 8000 inside the container by default
+      - "8000:8000"
+    environment:
+
+      # ── Database ──────────────────────────────────────────────────────────
+      LAKEFS_DATABASE_TYPE: postgres
+      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: >-
+        postgresql://${POSTGRES_USER:-lakefs}:${POSTGRES_PASSWORD:-lakefs}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-lakefs}?sslmode=disable
+
+      # ── Auth encryption ────────────────────────────────────────────────────
+      # Required. Generate with: openssl rand -hex 32
+      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: ${LAKEFS_AUTH_ENCRYPT_SECRET_KEY}
+
+      # ── Blockstore: S3-compatible (OneBucket) ─────────────────────────────
+      LAKEFS_BLOCKSTORE_TYPE: s3
+
+      # The OneBucket S3-compatible endpoint (must include scheme).
+      LAKEFS_BLOCKSTORE_S3_ENDPOINT: ${ONEBUCKET_ENDPOINT}
+      # Disable auto region discovery and use LAKEFS_BLOCKSTORE_S3_REGION below.
+      # Region discovery relies on GetBucketLocation, which S3-compatible
+      # endpoints do not always implement.
+      LAKEFS_BLOCKSTORE_S3_DISCOVER_BUCKET_REGION: "false"
+
+      LAKEFS_BLOCKSTORE_S3_REGION: ${ONEBUCKET_REGION:-us-east-1}
+
+      # Static credentials for lakeFS to authenticate with OneBucket.
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: ${ONEBUCKET_ACCESS_KEY_ID}
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: ${ONEBUCKET_SECRET_ACCESS_KEY}
+
+      # Path-style addressing: required by most S3-compatible stores including OneBucket.
+      LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: ${ONEBUCKET_FORCE_PATH_STYLE:-true}
+
+      # Set to true if OneBucket uses a self-signed or private CA certificate.
+      LAKEFS_BLOCKSTORE_S3_SKIP_VERIFY_HTTPS: ${ONEBUCKET_SKIP_VERIFY:-false}
+
+      # Disable chunked transfer encoding — some S3-compatible APIs reject it.
+      LAKEFS_BLOCKSTORE_S3_STREAMINGCHUNKEDENCODING: "false"
+
+      # ── S3 pre-signed URL signing ─────────────────────────────────────────
+      # Required for lakeFS to sign pre-signed URLs via its gateway.
+      LAKEFS_BLOCKSTORE_SIGNING_SECRET_KEY: ${LAKEFS_BLOCKSTORE_SIGNING_SECRET_KEY}
+
+      # ── Initial admin user (first-run bootstrap) ──────────────────────────
+      # These values are consumed ONLY on the very first start to create the
+      # admin user and complete the setup wizard automatically.
+      # On subsequent starts they are silently ignored.
+      LAKEFS_INSTALLATION_USER_NAME: admin
+      LAKEFS_INSTALLATION_ACCESS_KEY_ID: ${LAKEFS_ACCESS_KEY_ID}
+      LAKEFS_INSTALLATION_SECRET_ACCESS_KEY: ${LAKEFS_SECRET_ACCESS_KEY}
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/_health >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  postgres_data:
