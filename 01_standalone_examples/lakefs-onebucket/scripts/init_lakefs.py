@@ -25,7 +25,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent / ".env", override=True)
 
 HEALTH_RETRIES = 30
 HEALTH_DELAY = 5  # seconds between retries
