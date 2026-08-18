@@ -19,7 +19,7 @@ from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 # Load .env from the project root (one level up from scripts/)
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv(Path(__file__).parent.parent / ".env", override=True)
 
 TEST_PREFIX = "_lakefs_demo_connectivity_check/"
 TEST_KEY = f"{TEST_PREFIX}test.txt"
