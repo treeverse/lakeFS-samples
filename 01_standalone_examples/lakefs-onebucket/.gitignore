@@ -1,0 +1,43 @@
+# Credentials — NEVER commit any .env file except .env.example
+# This pattern catches .env, .env.local, .env.production, .env.staging, etc.
+.env
+.env.*
+# Explicitly re-allow the committed example template
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Virtual envs
+.python-version
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Editor artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker generated state (not committed; managed via docker-compose volumes)
+# If you add local bind-mounts for lakeFS data, exclude them here:
+# data/
+
+# Generated demo output
+output/
+tmp/
