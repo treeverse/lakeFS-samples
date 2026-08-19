@@ -74,9 +74,14 @@ services:
       # These values are consumed ONLY on the very first start to create the
       # admin user and complete the setup wizard automatically.
       # On subsequent starts they are silently ignored.
-      LAKEFS_INSTALLATION_USER_NAME: admin
-      LAKEFS_INSTALLATION_ACCESS_KEY_ID: ${LAKEFS_ACCESS_KEY_ID}
-      LAKEFS_INSTALLATION_SECRET_ACCESS_KEY: ${LAKEFS_SECRET_ACCESS_KEY}
+      LAKECTL_CREDENTIALS_ACCESS_KEY_ID: ${LAKEFS_ACCESS_KEY_ID}
+      LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: ${LAKEFS_SECRET_ACCESS_KEY}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+        - |
+          lakefs setup --user-name admin --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+          lakefs run &
+          wait
 
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8000/_health >/dev/null 2>&1"]
