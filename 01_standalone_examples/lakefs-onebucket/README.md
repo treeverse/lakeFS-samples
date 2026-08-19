@@ -186,8 +186,9 @@ This starts two containers:
 - **postgres** — lakeFS metadata store
 - **lakefs** — lakeFS server (API + S3 Gateway), mapped to `http://localhost:8000`
 
-On first start, lakeFS automatically creates the admin user using the
-`LAKEFS_ACCESS_KEY_ID` and `LAKEFS_SECRET_ACCESS_KEY` from your `.env`.
+On first start, the lakeFS container runs `lakefs setup` automatically, creating the
+admin user from the `LAKEFS_ACCESS_KEY_ID` and `LAKEFS_SECRET_ACCESS_KEY` in your `.env`.
+Later starts detect that setup is already complete and skip it.
 
 Watch startup logs: `make logs`
 

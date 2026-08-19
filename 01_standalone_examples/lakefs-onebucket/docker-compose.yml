@@ -70,18 +70,26 @@ services:
       # Required for lakeFS to sign pre-signed URLs via its gateway.
       LAKEFS_BLOCKSTORE_SIGNING_SECRET_KEY: ${LAKEFS_BLOCKSTORE_SIGNING_SECRET_KEY}
 
-      # ── Initial admin user (first-run bootstrap) ──────────────────────────
-      # These values are consumed ONLY on the very first start to create the
-      # admin user and complete the setup wizard automatically.
-      # On subsequent starts they are silently ignored.
-      LAKECTL_CREDENTIALS_ACCESS_KEY_ID: ${LAKEFS_ACCESS_KEY_ID}
-      LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY: ${LAKEFS_SECRET_ACCESS_KEY}
+      # ── Initial admin user (bootstrap) ────────────────────────────────────
+      # Passed to `lakefs setup` in the command below. Deliberately NOT named
+      # LAKEFS_INSTALLATION_*: those are only honoured when
+      # LAKEFS_DATABASE_TYPE=local, so they do nothing on a postgres install.
+      # See docs/troubleshooting.md.
+      SETUP_ADMIN_ACCESS_KEY_ID: ${LAKEFS_ACCESS_KEY_ID}
+      SETUP_ADMIN_SECRET_ACCESS_KEY: ${LAKEFS_SECRET_ACCESS_KEY}
+
+    # Run setup before starting the server. `setup` is idempotent: on every
+    # start after the first it exits non-zero with "Setup is already
+    # complete.", which `|| true` absorbs.
+    #
+    # `exec` replaces the shell with lakeFS so it becomes PID 1 and receives
+    # SIGTERM directly — without it, `docker compose stop` kills the shell and
+    # lakeFS is SIGKILLed (exit 137) instead of shutting down cleanly.
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
-          lakefs setup --user-name admin --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
-          lakefs run &
-          wait
+          lakefs setup --user-name admin --access-key-id "$$SETUP_ADMIN_ACCESS_KEY_ID" --secret-access-key "$$SETUP_ADMIN_SECRET_ACCESS_KEY" || true
+          exec lakefs run
 
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8000/_health >/dev/null 2>&1"]

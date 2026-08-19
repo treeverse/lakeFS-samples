@@ -65,11 +65,13 @@ This sets `LAKEFS_BLOCKSTORE_S3_SKIP_VERIFY_HTTPS=true` in the lakeFS container 
 
 ## `make init` fails with authentication error after lakeFS starts
 
-`make init` bootstraps the admin user by running `lakefs setup` inside the container
-before calling the Python init script. If authentication still fails:
+The lakeFS container bootstraps the admin user by running `lakefs setup` before
+starting the server (see the `command:` block in `docker-compose.yml`). If
+authentication still fails:
 
 - Verify `LAKEFS_ACCESS_KEY_ID` and `LAKEFS_SECRET_ACCESS_KEY` are set in `.env`.
-- Check whether `lakefs setup` reported an error:
+- Check whether setup reported an error: `docker compose logs lakefs | head -40`
+- Re-run setup by hand:
   ```bash
   docker compose exec lakefs /app/lakefs setup \
     --user-name admin \
@@ -79,10 +81,33 @@ before calling the Python init script. If authentication still fails:
 - If lakeFS was previously initialised with different credentials (stale Postgres volume),
   do a full reset: `make clean && make up && make init`
 
-**Note on `LAKEFS_INSTALLATION_*` env vars:** these are read by lakeFS at startup but only
-trigger auto-setup on a completely empty database. If the database was previously
-initialised (even without completing setup), they are silently skipped. `make init` uses
-`lakefs setup` via docker exec instead, which is reliable regardless of database state.
+**Why not `LAKEFS_INSTALLATION_*`?** Those variables only trigger auto-setup when
+`LAKEFS_DATABASE_TYPE=local`. This example runs on PostgreSQL, where they are ignored
+entirely — so the container calls `lakefs setup` explicitly instead.
+
+---
+
+## `make init` fails with "storage namespace already in use"
+
+```
+failed to create repository: found lakeFS objects in the storage
+namespace(s3://your-bucket/your-prefix/) key(_lakefs/dummy): storage namespace already in use
+```
+
+lakeFS refuses to create a repository over a prefix that already holds lakeFS data.
+This usually means the repository was created before and its metadata is still in
+OneBucket — most often after `make clean`, which removes the PostgreSQL volume but
+does **not** touch the bucket.
+
+Pick one:
+
+- **Point at a fresh prefix** — change `LAKEFS_STORAGE_NAMESPACE` in `.env`
+  (for example `s3://your-bucket/demo-2/`) and re-run `make init`.
+- **Reuse the existing repository** — if the repo still exists in lakeFS, set
+  `CREATE_LAKEFS_REPO=false` in `.env` and `make init` will validate it instead
+  of creating it.
+- **Clear the prefix** — delete the objects under that namespace in OneBucket,
+  then re-run `make init`. This permanently destroys the repository's data.
 
 ---
 

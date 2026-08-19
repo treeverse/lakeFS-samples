@@ -43,13 +43,7 @@ up: _require-env
 	@echo "    When healthy:  make init"
 
 init: _require-env
-	@# Bootstrap the lakeFS admin user on first run via the built-in CLI.
-	@# Safe to re-run — lakeFS exits non-zero if already set up, which we suppress.
-	@$(COMPOSE) exec -T lakefs /app/lakefs setup \
-	  --user-name admin \
-	  --access-key-id "$$(grep '^LAKEFS_ACCESS_KEY_ID=' .env | cut -d= -f2)" \
-	  --secret-access-key "$$(grep '^LAKEFS_SECRET_ACCESS_KEY=' .env | cut -d= -f2)" \
-	  2>&1 | grep -vE "level=(info|warning)" || true
+	@# The admin user is created by the lakefs container itself (see docker-compose.yml).
 	$(PYTHON) scripts/init_lakefs.py
 
 demo: _require-env

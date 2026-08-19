@@ -14,6 +14,9 @@ Flow:
   6. [optional] Merge experiment → main  (MERGE_EXPERIMENT=true)
   7. List objects on both branches
   8. Read objects back
+
+Safe to run more than once: re-runs upload identical content, so the commit
+and merge steps report "no changes" and reuse the existing commits.
 """
 
 import os
@@ -90,6 +93,18 @@ def api(endpoint: str, path: str) -> str:
     return f"{endpoint}/api/v1{path}"
 
 
+def lfs_branch_head(endpoint: str, auth: tuple, repo: str, branch: str) -> str:
+    """Current commit ID at the tip of a branch."""
+    resp = requests.get(
+        api(endpoint, f"/repositories/{repo}/branches/{branch}"),
+        auth=auth,
+        timeout=10,
+    )
+    if resp.status_code != 200:
+        return "unknown"
+    return resp.json().get("commit_id", "unknown")
+
+
 def lfs_commit(endpoint: str, auth: tuple, repo: str, branch: str, message: str) -> str:
     resp = requests.post(
         api(endpoint, f"/repositories/{repo}/branches/{branch}/commits"),
@@ -97,6 +112,12 @@ def lfs_commit(endpoint: str, auth: tuple, repo: str, branch: str, message: str)
         json={"message": message},
         timeout=30,
     )
+    # Re-running the demo uploads byte-identical content, so there is nothing
+    # to commit. That is expected — report the existing head instead of failing.
+    if resp.status_code == 400 and "no changes" in resp.text.lower():
+        head = lfs_branch_head(endpoint, auth, repo, branch)
+        print("    No changes to commit — content is identical to a previous run.")
+        return head
     if resp.status_code not in (200, 201):
         print(f"  ERROR: Commit failed (HTTP {resp.status_code}): {resp.text[:200]}")
         sys.exit(1)
@@ -125,6 +146,11 @@ def lfs_merge(endpoint: str, auth: tuple, repo: str, source: str, dest: str) -> 
         json={},
         timeout=30,
     )
+    # Already merged by a previous run — nothing to do.
+    if resp.status_code == 400 and "no changes" in resp.text.lower():
+        head = lfs_branch_head(endpoint, auth, repo, dest)
+        print(f"    '{source}' is already merged into '{dest}'.")
+        return head
     if resp.status_code not in (200, 201):
         print(f"  ERROR: Merge failed (HTTP {resp.status_code}): {resp.text[:200]}")
         sys.exit(1)
