@@ -6,6 +6,8 @@
 
 ## Let's Get Started 👩🏻‍💻
 
+[Contact Sales](https://lakefs.io/contact-sales/) to get the license file for lakeFS Enterprise.
+
 Clone this repository
 
 ```bash
