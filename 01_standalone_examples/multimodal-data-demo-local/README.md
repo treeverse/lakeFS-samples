@@ -28,12 +28,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
    cd lakeFS-samples/01_standalone_examples/multimodal-data-demo-local
    ```
 
-2. Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise:
-
-   ```bash
-   docker login -u externallakefs
-   ```
-
+2. [Contact Sales](https://lakefs.io/contact-sales/) to get the license file for lakeFS Enterprise.
 
 3. Copy the lakeFS license file to "lakeFS-samples/01_standalone_examples/multimodal-data-demo-local" folder, then change lakeFS license file name and installation ID in the following command and run the command to provision the full stack which includes lakeFS Enterprise, MinIO, Python, Spark, Jupyter Notebook, JDK, Hadoop binaries and lakeFS Python client
 
