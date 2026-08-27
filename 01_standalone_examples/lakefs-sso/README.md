@@ -30,10 +30,7 @@ We will use [Keycloak](https://www.keycloak.org/) Docker image as our local SSO 
    git clone https://github.com/treeverse/lakeFS-samples
    cd lakeFS-samples/01_standalone_examples/lakefs-sso
   ```
-2. Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise:
-  ```bash
-   docker login -u externallakefs
-  ```
+2. [Contact Sales](https://lakefs.io/contact-sales/) to get the license file for lakeFS Enterprise.
 3. Copy the lakeFS license file to `lakeFS-samples/01_standalone_examples/lakefs-sso` folder, then change lakeFS license file name and installation ID in the following command and run the command to provision the full stack which includes lakeFS Enterprise and Keycloak:
   ```bash
    LAKEFS_LICENSE_FILE_NAME=license-org-name-installation-id.token LAKEFS_INSTALLATION_ID=installation-id docker compose up

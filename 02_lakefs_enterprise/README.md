@@ -6,19 +6,13 @@
 
 ## Let's Get Started 👩🏻‍💻
 
+[Contact Sales](https://lakefs.io/contact-sales/) to get the license file for lakeFS Enterprise.
+
 Clone this repository
 
 ```bash
 git clone https://github.com/treeverse/lakeFS-samples.git
 cd lakeFS-samples/02_lakefs_enterprise
-```
-
-##### **Login to Treeverse Dockerhub**
-
-Login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved. [Contact Sales](https://lakefs.io/contact-sales/) to get the token and license file for lakeFS Enterprise:
-
-```bash
-docker login -u externallakefs
 ```
 
 ##### **Multiple Storage Backends**

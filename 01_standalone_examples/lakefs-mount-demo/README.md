@@ -36,13 +36,7 @@ This demo includes a Jupyter Notebook which you can run on your local machine.
 
    ### **Don't have a lakeFS Enterprise Server or Object Store?**
 
-   If you want to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter then first login to [Treeverse Dockerhub](https://hub.docker.com/u/treeverse) by using the granted token so lakeFS Enterprise proprietary image can be retrieved:
-
-   ```bash
-   docker login -u externallakefs
-   ```
-
-   Copy the lakeFS license file to "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder,
+   If you want to provision a lakeFS Enterprise server as well as MinIO for your object store, plus Jupyter then copy the lakeFS license file to "lakeFS-samples/01_standalone_examples/lakefs-mount-demo" folder,
    then change lakeFS license file name and installation ID in the following command and run the command to bring up the full stack:
    ```bash
    LAKEFS_LICENSE_FILE_NAME=license-org-name-installation-id.token LAKEFS_INSTALLATION_ID=installation-id docker compose --profile local-lakefs-enterprise up
