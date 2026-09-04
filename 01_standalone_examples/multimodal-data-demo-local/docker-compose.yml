@@ -51,6 +51,8 @@ services:
       - LAKEFS_FEATURES_ICEBERG_CATALOG=true
       - LAKEFS_LICENSE_PATH=/tmp/lakefs/$LAKEFS_LICENSE_FILE_NAME
       - LAKEFS_INSTALLATION_FIXED_ID=$LAKEFS_INSTALLATION_ID
+      # Prefix under which dataset backing repositories are created; required by the dataset create path.
+      - LAKEFS_DATASETS_STORAGE_NAMESPACE_PREFIX=s3://example/datasets
     volumes:
       - $PWD:/tmp/lakefs
     entrypoint: ["/bin/sh", "-c"]
