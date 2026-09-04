@@ -59,15 +59,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 40s
+      start_period: 120s
     command:
         - |
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
           lakefs run &
           echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
+          wait-for -t 120 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
           echo ""
-          wait-for -t 60 minio:9000 && echo '------------------------------------------------
+          echo '------------------------------------------------
 
                 MinIO admin:   http://127.0.0.1:9003/
                 
@@ -75,7 +75,7 @@ services:
                                Password : minioadmin
                 '
           echo "------------------------------------------------"
-          wait-for -t 60 jupyter-notebook:8888 && echo '
+          echo '
 
                 Jupyter:       http://127.0.0.1:8893/
                 '
@@ -107,15 +107,31 @@ services:
       echo 'LakeFS repository initialization completed';"
 
   lakefs-mds:
-    image: treeverse/mds:latest
+    image: treeverse/lakefs-enterprise:latest
     ports:
       - "8004:8000"
     depends_on:
       lakefs-init:
         condition: service_completed_successfully
+    command: ["mds", "run", "-c", "/app/config.yaml"]
     volumes:
       - $PWD/mds-config.yaml:/app/config.yaml
+      - $PWD:/tmp/lakefs
     environment:
+      LAKEFS_BLOCKSTORE_TYPE: s3
+      LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE: true
+      LAKEFS_BLOCKSTORE_S3_ENDPOINT: http://minio:9000
+      LAKEFS_BLOCKSTORE_S3_REGION: us-east-1
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID: minioadmin
+      LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY: minioadmin
+      LAKEFS_AUTH_ENCRYPT_SECRET_KEY: some random secret string
+      LAKEFS_DATABASE_TYPE: postgres
+      LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING: postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      LAKEFS_LICENSE_PATH: /tmp/lakefs/$LAKEFS_LICENSE_FILE_NAME
+      LAKEFS_INSTALLATION_FIXED_ID: $LAKEFS_INSTALLATION_ID
+      # MinIO S3 configuration for Iceberg catalog
+      AWS_S3_ENDPOINT: http://minio:9000
+      AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin
     restart: unless-stopped  # Restart if it crashes, but not if manually stopped
