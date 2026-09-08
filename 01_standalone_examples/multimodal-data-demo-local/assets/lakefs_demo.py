@@ -9,6 +9,7 @@ from lakefs_enterprise_sdk import (
     DatasetLocator,
     DatasetPublish,
     DatasetRef,
+    DatasetUpdate,
 )
 from lakefs_enterprise_sdk.exceptions import ApiException
 
@@ -64,7 +65,26 @@ def datasets_create_dataset(CONFIGURATION, DATASET_NAME, DATASET_DESCRIPTION, PU
         try:
             dataset = api_instance.create_dataset(dataset_creation)
         except ApiException as e:
-            sys.exit(f"Create failed [{e.status}]: {e.body}")
+            # Dataset names are globally unique and immutable, so re-running the
+            # notebook publishes a new version of the existing dataset instead of
+            # failing on the name conflict.
+            if e.status != 409:
+                raise RuntimeError(f"Create failed [{e.status}]: {e.body}") from e
+            try:
+                dataset = api_instance.update_dataset(
+                    DATASET_NAME,
+                    DatasetUpdate(
+                        definition=dataset_creation.definition,
+                        publish=DatasetPublish(message=PUBLISH_MESSAGE),
+                    ),
+                )
+            except ApiException as e:
+                # Re-running with an unchanged definition has nothing to publish.
+                if e.status == 400 and "no changes" in str(e.body):
+                    dataset = api_instance.get_dataset(DATASET_NAME)
+                    print(f"Dataset '{DATASET_NAME}' is already up to date -> v{dataset.version or 1}")
+                    return
+                raise RuntimeError(f"Update failed [{e.status}]: {e.body}") from e
 
     version = f"v{dataset.version or 1}"
     print(f"Published dataset '{DATASET_NAME}' -> {version}")
