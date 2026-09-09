@@ -33,6 +33,7 @@ RUN mamba create --yes -p "${CONDA_DIR}/envs/${env_name}" \
 # Any additional `pip` installs can be added by using the following line
 # Using `mamba` is highly recommended though
 RUN "${CONDA_DIR}/envs/${env_name}/bin/pip" install --no-cache-dir \
+    'lakefs-enterprise-sdk==1.99.0' \
     'duckdb==1.3.2' \
     'pyiceberg==0.10.0' \
     'pyarrow==22.0.0' \
