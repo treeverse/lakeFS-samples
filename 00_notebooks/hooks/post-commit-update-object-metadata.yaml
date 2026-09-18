@@ -1,0 +1,15 @@
+name: Update Object Metadata
+on:
+  post-commit:
+    branches:
+      - ingestion*
+hooks:
+  - id: update_object_metadata
+    type: lua
+    properties:
+      script_path: scripts/update_object_metadata.lua # location of this script in the repository!
+      args:
+        prefix: 'data/stanfordogsdataset/'
+        annotation_folder_name: 'Annotation_JSON'
+        object_folder_name: 'Images'
+        object_file_name_extension: 'jpg'
