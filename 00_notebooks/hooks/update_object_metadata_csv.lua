@@ -27,7 +27,7 @@ while has_more do
                 error("could not fetch CSV file: HTTP " .. tostring(code) .. "body:\n" .. object_content)
             end
             
-            object_lines = strings.split(object_content, "\n")
+            object_lines = strings.split(object_content, "\r\n")
             column_header = strings.split(object_lines[1], ",")
                         
             for i = 2, #object_lines do
