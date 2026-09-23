@@ -27,7 +27,12 @@ while has_more do
                 error("could not fetch CSV file: HTTP " .. tostring(code) .. "body:\n" .. object_content)
             end
             
-            object_lines = strings.split(object_content, "\r\n")
+            -- Normalise line endings first: splitting on "\r\n" returns the whole
+            -- file as a single line for an LF-only CSV, which silently parses no
+            -- rows, while splitting on "\n" alone leaves a stray "\r" on the last
+            -- column of a CRLF CSV. Normalising handles either file.
+            object_content = strings.replace(object_content, "\r\n", "\n", -1)
+            object_lines = strings.split(object_content, "\n")
             column_header = strings.split(object_lines[1], ",")
                         
             for i = 2, #object_lines do
