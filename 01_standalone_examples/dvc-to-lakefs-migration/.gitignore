@@ -1,0 +1,15 @@
+# Generated DVC project and demo data
+demo-workdir/
+work/
+
+# Local-dev compose override (mounts an unpublished dvc-to-lakefs checkout)
+docker-compose.override.yml
+
+# Local state / logs
+.lakefs/
+.minio/
+logs/
+*.log
+
+# Notebook execution artifacts
+.ipynb_checkpoints/
