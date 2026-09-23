@@ -128,3 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
+
+# lakeFS Enterprise license files and local credentials.
+# Several samples ask you to copy your license into the sample folder - never commit it.
+*.token
+*.license
+.env.*
+!.env.example
