@@ -1,0 +1,8 @@
+# Runtime dependencies bundled into the AgentCore Runtime agent by
+# `agentcore deploy` (direct_code_deploy). Keep in sync with the [agent] extra
+# in pyproject.toml. This is NOT the full dev environment -- `make setup` uses
+# requirements.lock for that.
+strands-agents>=1.0,<2
+bedrock-agentcore>=0.1
+mcp>=1.2
+requests>=2.31,<3

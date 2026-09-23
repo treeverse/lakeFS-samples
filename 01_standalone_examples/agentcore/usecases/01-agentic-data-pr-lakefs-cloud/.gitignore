@@ -1,0 +1,37 @@
+# --- Sensitive: never commit ---
+# Broad by design: `*.env` alone does not match sidecars like `.envorig` or
+# `.env.local`, which is exactly how a real credentials file once got committed.
+.env
+*.env
+.env*
+!.env.example
+
+# --- Per-run generated state and AWS/lakeFS resource records ---
+generated/*
+!generated/.gitkeep
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env.bak
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Lambda build artifacts ---
+gateway/build/
+gateway/*.zip
+
+# --- AgentCore CLI artifacts ---
+.bedrock_agentcore/
+.bedrock_agentcore.yaml
+
+# --- OS ---
+.DS_Store

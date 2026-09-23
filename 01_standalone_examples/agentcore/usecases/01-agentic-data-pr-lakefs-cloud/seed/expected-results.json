@@ -1,0 +1,74 @@
+{
+  "objects": {
+    "notes/handoff.md": {
+      "outcome": "quarantined",
+      "reason_code": "unrecognized_format"
+    },
+    "records/clean-unchanged.json": {
+      "action": "curated_unchanged",
+      "outcome": "curated"
+    },
+    "records/clean-us-approved.json": {
+      "action": "curated_unchanged",
+      "outcome": "curated"
+    },
+    "records/conflict-v1.json": {
+      "outcome": "quarantined",
+      "reason_code": "superseded_by_newer_version"
+    },
+    "records/conflict-v2.json": {
+      "action": "curated_unchanged",
+      "outcome": "curated"
+    },
+    "records/draft-us.json": {
+      "outcome": "quarantined",
+      "reason_code": "draft_status"
+    },
+    "records/dup-a.json": {
+      "action": "curated_unchanged",
+      "outcome": "curated"
+    },
+    "records/dup-b.json": {
+      "outcome": "quarantined",
+      "reason_code": "duplicate_content"
+    },
+    "records/missing-classification.json": {
+      "outcome": "quarantined",
+      "reason_code": "missing_required_field"
+    },
+    "records/missing-title.json": {
+      "outcome": "quarantined",
+      "reason_code": "missing_required_field"
+    },
+    "records/needs-normalization.json": {
+      "action": "curated_corrected",
+      "corrections": [
+        "region 'usa' -> 'US'",
+        "trimmed title whitespace"
+      ],
+      "outcome": "curated"
+    },
+    "records/pii-doc.json": {
+      "outcome": "quarantined",
+      "reason_code": "synthetic_pii"
+    },
+    "records/region-eu.json": {
+      "outcome": "quarantined",
+      "reason_code": "non_us_region"
+    },
+    "records/restricted-doc.json": {
+      "outcome": "quarantined",
+      "reason_code": "restricted_classification"
+    },
+    "records/superseded.json": {
+      "outcome": "quarantined",
+      "reason_code": "superseded_status"
+    }
+  },
+  "summary": {
+    "corrected": 1,
+    "curated": 5,
+    "examined": 15,
+    "quarantined": 10
+  }
+}
