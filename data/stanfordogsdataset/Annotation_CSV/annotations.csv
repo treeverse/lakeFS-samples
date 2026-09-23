@@ -1,0 +1,13 @@
+folder,filename,source_database,size_width,size_height,size_depth,segment,object_name,object_pose,object_truncated,object_difficult,object_bndbox_xmin,object_bndbox_ymin,object_bndbox_xmax,object_bndbox_ymax
+02085620,n02085620_199,ImageNet database,300,430,3,0,Chihuahua,Unspecified,0,0,65,50,249,404
+02085620,n02085620_242,ImageNet database,400,500,3,0,Chihuahua,Unspecified,0,0,113,45,368,486
+02085620,n02085620_275,ImageNet database,500,333,3,0,Chihuahua,Unspecified,0,0,179,53,326,191
+02085620,n02085620_326,ImageNet database,333,500,3,0,Chihuahua,Unspecified,0,0,0,66,264,470
+02085620,n02085620_368,ImageNet database,500,333,3,0,Chihuahua,Unspecified,0,0,155,24,418,316
+02085782,n02085782_1039,ImageNet database,500,375,3,0,Japanese_spaniel,Unspecified,0,0,1,1,374,374
+02085782,n02085782_1058,ImageNet database,240,182,3,0,Japanese_spaniel,Unspecified,0,0,82,53,169,127
+02085782,n02085782_1059,ImageNet database,550,413,3,0,Japanese_spaniel,Unspecified,0,0,142,8,361,410
+02085782,n02085782_1077,ImageNet database,519,334,3,0,Japanese_spaniel,Unspecified,0,0,27,36,505,316
+02086079,n02086079_10059,ImageNet database,250,172,3,0,Pekinese,Unspecified,0,0,1,3,249,169
+02086079,n02086079_10159,ImageNet database,350,265,3,0,Pekinese,Unspecified,0,0,67,8,315,253
+02086079,n02086079_1020,ImageNet database,500,333,3,0,Pekinese,Unspecified,0,0,86,83,383,200
