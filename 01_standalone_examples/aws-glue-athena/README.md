@@ -1,6 +1,6 @@
 # Integration of lakeFS with Glue Catalog and Athena
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes following Glue jobs:
 

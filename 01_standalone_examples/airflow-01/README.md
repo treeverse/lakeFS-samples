@@ -1,6 +1,6 @@
 # Integration of lakeFS with Airflow and Hooks
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes following Jupyter Notebooks which you can run on your local machine:
 

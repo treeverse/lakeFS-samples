@@ -1,6 +1,6 @@
 # Multimodal Data Demo - Run Locally
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes multiple Jupyter Notebook which you can run on your local machine. The notebook demonstrates ML Data Version Control and Reproducibility of Multimodal Data including structured, unstructured and vector database.
 

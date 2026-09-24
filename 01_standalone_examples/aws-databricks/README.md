@@ -1,6 +1,6 @@
 # Integration of lakeFS with Databricks on AWS
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes following Databricks Notebooks which you can run in your Databricks cluster:
 
