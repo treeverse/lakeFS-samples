@@ -1,6 +1,6 @@
 # Fast Data Loading and Reproducibility for Deep Learning Workloads with lakeFS Mount
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This demo includes a Jupyter Notebook which you can run on your local machine.
 

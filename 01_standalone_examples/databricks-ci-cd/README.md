@@ -1,6 +1,6 @@
 # lakeFS-samples-ci-cd
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 Data engineers typically don't develop against production data due to concerns regarding PII, time, and scale. Instead, they develop ETL jobs on a subset of data and promote code via Git. The challenge is that this code is not tested on production data until promotion. This process can lead to issues because the subset of data used will differ from the production environment.
 

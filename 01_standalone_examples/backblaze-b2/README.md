@@ -1,6 +1,6 @@
 # lakeFS on Backblaze B2
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This sample runs lakeFS Enterprise with [Backblaze B2](https://www.backblaze.com/cloud-storage) as its
 underlying storage, and uses [lakeFS Datasets](https://docs.lakefs.io/datasets/) to publish a curated,

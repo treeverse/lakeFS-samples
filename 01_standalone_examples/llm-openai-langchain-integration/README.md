@@ -1,6 +1,6 @@
 # Reproducibility and Building an AI Agent by using lakeFS, LangChain and LLM/OpenAI Models
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes Jupyter Notebooks with LangChain and OpenAI libraries which you can run on your local machine.
 

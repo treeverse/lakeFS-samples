@@ -1,6 +1,6 @@
 # Integration of lakeFS with Glue Catalog and Trino
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This repository includes a Jupyter Notebook which you can run on your local machine. This notebook demonstrates integration of AWS Trino, utilizing Glue Catalog, with lakeFS.
 

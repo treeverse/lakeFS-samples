@@ -1,6 +1,6 @@
 # Running lakeFS with SSO locally
 
-Start by ⭐️ starring [lakeFS open source](https://go.lakefs.io/oreilly-course) project.
+Start by ⭐️ starring [lakeFS Community](https://go.lakefs.io/oreilly-course) project.
 
 This sample explain how to run lakeFS with local SSO (i.e no need for auth0 or azure entra). 
 We will use [Keycloak](https://www.keycloak.org/) Docker image as our local SSO server - A.K.A Identity Provider (IdP).
