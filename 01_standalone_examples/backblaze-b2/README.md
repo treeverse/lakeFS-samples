@@ -34,12 +34,6 @@ B2 bucket. Nothing is stored locally.
    cd lakeFS-samples/01_standalone_examples/backblaze-b2
    ```
 
-2. Log in to Docker Hub with the granted token so the lakeFS Enterprise image can be pulled:
-
-   ```bash
-   docker login -u externallakefs
-   ```
-
 3. Create a Backblaze B2 Application Key.
 
    In the B2 console, go to **Application Keys** and create a new key.
