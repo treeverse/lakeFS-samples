@@ -99,6 +99,7 @@ Under the [standalone_examples](./01_standalone_examples/) folder are a set of e
 * [Kafka integration](./01_standalone_examples/kafka/)
 * [Flink integration](./01_standalone_examples/flink/)
 * [Red Hat OpenShift AI integration](./01_standalone_examples/red-hat-openshift-ai/)
+* [Backblaze B2 integration](./01_standalone_examples/backblaze-b2/) - Run lakeFS Enterprise with Backblaze B2 as its storage, and publish a versioned, shareable **Dataset** from data stored there
 * [How to backup, migrate or clone a repo](./01_standalone_examples/backup-migrate-or-clone-repo/)
 * [Running lakeFS with PostgreSQL as K/V store](./01_standalone_examples/docker-compose-with-postgres/)
 * [Running lakeFS with NetApp ONTAP storage](./01_standalone_examples/netapp-ontap/)

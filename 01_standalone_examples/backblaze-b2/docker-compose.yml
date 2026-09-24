@@ -1,0 +1,106 @@
+name: lakefs-backblaze-b2
+services:
+  jupyter-notebook:
+    build: ./jupyter
+    ports:
+      - 8895:8888 # Jupyter
+    environment:
+      - NOTEBOOK_ARGS=--log-level='WARN' --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/home/jovyan/notebooks
+      # Passed through so the notebook can show the objects arriving in B2 itself,
+      # without you having to paste anything into a cell.
+      - B2_REGION=${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)}
+      - B2_BUCKET=${B2_BUCKET:?set B2_BUCKET in .env - your Backblaze B2 bucket name (see .env.example)}
+      - B2_KEY_ID=${B2_KEY_ID:?set B2_KEY_ID in .env - a B2 Application Key ID, not the Master Application Key (see .env.example)}
+      - B2_APP_KEY=${B2_APP_KEY:?set B2_APP_KEY in .env (see .env.example)}
+    volumes:
+      - $PWD:/home/jovyan/notebooks
+      - $PWD/../../data:/data
+
+  lakefs:
+    image: treeverse/lakefs-enterprise:latest
+    pull_policy: always
+    ports:
+      - "8085:8000"
+    environment:
+      # ---- Backblaze B2 as the lakeFS blockstore -----------------------------
+      # B2 speaks the S3 API, so the blockstore type is "s3". Three settings are
+      # not the S3 defaults and B2 will not connect without them:
+      #   force_path_style        B2 does not serve virtual-host style buckets
+      #   discover_bucket_region  the bucket-region probe is an AWS-ism
+      #   endpoint                your region's S3 endpoint
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=https://s3.${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)}.backblazeb2.com
+      - LAKEFS_BLOCKSTORE_S3_REGION=${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)}
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_DISCOVER_BUCKET_REGION=false
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=${B2_KEY_ID:?set B2_KEY_ID in .env - a B2 Application Key ID, not the Master Application Key (see .env.example)}
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=${B2_APP_KEY:?set B2_APP_KEY in .env (see .env.example)}
+
+      # ---- Datasets ----------------------------------------------------------
+      # Datasets keep their own backing storage. Pointing it at the same B2
+      # bucket keeps every byte of this demo on Backblaze B2.
+      - LAKEFS_DATASETS_STORAGE_NAMESPACE_PREFIX=s3://${B2_BUCKET:?set B2_BUCKET in .env - your Backblaze B2 bucket name (see .env.example)}/datasets
+
+      # ---- lakeFS Enterprise license ----------------------------------------
+      - LAKEFS_LICENSE_PATH=/etc/lakefs/license.token
+      - LAKEFS_INSTALLATION_FIXED_ID=${LAKEFS_INSTALLATION_ID:?set LAKEFS_INSTALLATION_ID in .env - the installation id from your license}
+
+      # ---- Everything below is standard lakeFS sample configuration ----------
+      # lakeFS keeps its own metadata in Postgres. It has to outlive the container:
+      # the data in B2 does, and a fresh metadata store would no longer know about it.
+      - LAKEFS_DATABASE_TYPE=postgres
+      - LAKEFS_DATABASE_POSTGRES_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_AUTH_UI_CONFIG_RBAC=internal
+      - LAKEFS_LOGGING_LEVEL=INFO
+      - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFOLKFSSAMPLES
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://localhost:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Read-only, and from wherever you keep it - never inside this repository.
+      - ${LAKEFS_LICENSE_FILE:?set LAKEFS_LICENSE_FILE in .env - absolute path to your lakeFS Enterprise license, kept outside this repository}:/etc/lakefs/license.token:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+        lakefs run &
+        wait-for -t 60 lakefs:8000
+        echo ""
+        echo "------------------------------------------------"
+        echo ""
+        echo "  lakeFS Web UI : http://127.0.0.1:8085/      >(.＿.)<"
+        echo "                                                (  )_ "
+        echo "  Jupyter       : http://127.0.0.1:8895/"
+        echo ""
+        echo "                  Access Key ID    : AKIAIOSFOLKFSSAMPLES"
+        echo "                  Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        echo ""
+        echo "  Storage       : Backblaze B2, bucket '${B2_BUCKET:?set B2_BUCKET in .env - your Backblaze B2 bucket name (see .env.example)}' (${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)})"
+        echo ""
+        echo "-------- Let's go and have axolotl fun! --------"
+        echo ""
+        wait
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: lakefs
+      POSTGRES_PASSWORD: lakefs
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lakefs"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - lakefs-postgres:/var/lib/postgresql/data
+
+volumes:
+  lakefs-postgres:
+
+networks:
+  default:
+    name: lakefs-backblaze-b2
