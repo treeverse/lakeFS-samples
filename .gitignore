@@ -135,3 +135,6 @@ dmypy.json
 *.license
 .env.*
 !.env.example
+
+# Data folder for lakeFS Enterprise samples
+lakefs-enterprise-samples-data

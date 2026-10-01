@@ -46,12 +46,14 @@ Once you've finished, run the following to remove all the containers:
 ```bash
 docker compose down
 ```
+Data for Postgres, MinIO and Local storage is persisted inside **lakefs-enterprise-samples-data** folder. You can delete this folder once you've finished. If you want to keep the same data before recreating containers then DO NOT delete this folder.
 
 ## Environment Details
 
 * **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
 * **lakeFS Enterprise** is provisioned as part of this environment.
 * **MinIO** is provided as an S3-compatible object store. You can use other S3-compatible object stores include S3, GCS, as well as Azure Blob Storage.
+* Data for Postgres, MinIO and Local storage is persisted inside **lakefs-enterprise-samples-data** folder. You can delete this folder once you've finished. If you want to keep the same data before recreating containers then DO NOT delete this folder.
 
 ### URLs and login details
 
