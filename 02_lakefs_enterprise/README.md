@@ -47,11 +47,25 @@ Once you've finished, run the following to remove all the containers:
 docker compose down
 ```
 
+##### **Persisted data**
+
+Data for Postgres, MinIO and local storage is persisted in the **lakefs-enterprise-samples-data** folder, so your repositories, users and policies are still there after `docker compose down` (or `docker compose down -v`) and `docker compose up`.
+
+Because of this, sample notebooks that create users, groups, policies or repositories fail with `409` (already exists) errors if you run them a second time. To start from a clean environment, remove the containers and delete the folder:
+
+```bash
+docker compose down
+rm -rf lakefs-enterprise-samples-data
+```
+
+On Linux, Docker creates this folder as root and the Postgres data is owned by the container's `postgres` user, so use `sudo rm -rf lakefs-enterprise-samples-data` instead.
+
 ## Environment Details
 
 * **Jupyter Notebook** is based on the [Jupyter PySpark notebook](https://hub.docker.com/r/jupyter/pyspark-notebook/) and provides an interactive environment in which to explore lakeFS using Python and PySpark. 
 * **lakeFS Enterprise** is provisioned as part of this environment.
 * **MinIO** is provided as an S3-compatible object store. You can use other S3-compatible object stores include S3, GCS, as well as Azure Blob Storage.
+* **Postgres, MinIO and local storage data** is persisted in the **lakefs-enterprise-samples-data** folder. See [Persisted data](#persisted-data) to start from a clean environment.
 
 ### URLs and login details
 

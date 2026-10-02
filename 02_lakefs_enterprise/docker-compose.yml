@@ -148,13 +148,16 @@ services:
         ]
     volumes:
       - $PWD:/tmp/lakefs
+      - $PWD/lakefs-enterprise-samples-data/local-data:/tmp/local1
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
+          echo "---- lakeFS setup ----"
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+          echo "---- Starting lakeFS server in background ----"
           lakefs run &
           echo "---- Creating repository ----"
-          wait-for -t 60 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --storage-id minio --sample-data || true
+          wait-for -t 120 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --storage-id minio --sample-data || true
           echo ""
           wait-for -t 60 minio:9000 && echo '------------------------------------------------
 
@@ -191,7 +194,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
-          mc mb lakefs/quickstart lakefs/example lakefs/sample-data
+          mc mb --ignore-existing lakefs/quickstart lakefs/example lakefs/sample-data
           mc cp --recursive /data/* lakefs/sample-data 1>/dev/null # don't be so noisy 🤫
 
   minio:
@@ -200,6 +203,8 @@ services:
       - "9004:9000"
       - "9005:9001"
     entrypoint: ["minio", "server", "/data", "--console-address", ":9001"]
+    volumes:
+      - $PWD/lakefs-enterprise-samples-data/minio-data:/data
 
   postgres:
     image: postgres:14
@@ -208,6 +213,8 @@ services:
     environment:
       POSTGRES_USER: lakefs
       POSTGRES_PASSWORD: lakefs
+    volumes:
+      - $PWD/lakefs-enterprise-samples-data/postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "lakefs"]
       interval: 10s
