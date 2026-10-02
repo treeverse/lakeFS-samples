@@ -6,10 +6,10 @@ This sample runs lakeFS Enterprise with [Backblaze B2](https://www.backblaze.com
 underlying storage, and uses [lakeFS Datasets](https://docs.lakefs.io/datasets/) to publish a curated,
 versioned slice of that data.
 
-B2 exposes an S3-compatible API, so lakeFS talks to it as an `s3` blockstore. Everything the demo
-produces — object data, lakeFS commit metadata, and the dataset's own backing storage — lives in your
-B2 bucket. The only thing kept locally is lakeFS's own record of branches and refs, in the Postgres
-container.
+B2 exposes an S3-compatible API, so lakeFS talks to it as an `s3` blockstore. All of your data lives
+in your B2 bucket: the objects themselves, the files lakeFS writes to describe each commit, and the
+dataset's own backing storage. lakeFS does not store any customer data. The local Postgres database
+holds only metadata: repository and branch names, and commit records that point at objects in B2.
 
 * In this demo you will:
 1. Confirm lakeFS is really using B2 as its blockstore
@@ -107,9 +107,9 @@ lakeFS features that depend on the Iceberg commit protocol — the **Iceberg cat
 from Q1 2027.
 
 One thing worth knowing is that B2 answers a conditional write with `501 NotImplemented`, but some
-clients report it as a dropped connection instead. boto3 does this because it sends `Expect: 100-continue`, and with
-that header removed it gets the `501` like everything else. So a failed conditional write can look
-like a network problem when it is really an unsupported feature.
+clients report it as a dropped connection instead. boto3 does this because it sends
+`Expect: 100-continue`, and with that header removed it gets the `501` too. So a failed conditional
+write can look like a network problem when it is really an unsupported feature.
 
 Datasets, used in this demo, does not depend on conditional writes.
 

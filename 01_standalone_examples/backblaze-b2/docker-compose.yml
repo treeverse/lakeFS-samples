@@ -39,7 +39,7 @@ services:
 
       # ---- Datasets ----------------------------------------------------------
       # Datasets keep their own backing storage. Pointing it at the same B2
-      # bucket keeps every byte of this demo on Backblaze B2.
+      # bucket keeps all of this demo's data on Backblaze B2.
       - LAKEFS_DATASETS_STORAGE_NAMESPACE_PREFIX=s3://${B2_BUCKET:?set B2_BUCKET in .env - your Backblaze B2 bucket name (see .env.example)}/datasets
 
       # ---- lakeFS Enterprise license ----------------------------------------
