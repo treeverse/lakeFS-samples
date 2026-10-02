@@ -194,7 +194,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
         - |
-          mc mb lakefs/quickstart lakefs/example lakefs/sample-data
+          mc mb --ignore-existing lakefs/quickstart lakefs/example lakefs/sample-data
           mc cp --recursive /data/* lakefs/sample-data 1>/dev/null # don't be so noisy 🤫
 
   minio:
