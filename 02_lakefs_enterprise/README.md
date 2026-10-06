@@ -21,6 +21,15 @@ If you want to use lakeFS [Multiple Storage Backends](https://docs.lakefs.io/lat
 
 If you DO NOT want to use lakeFS Multiple Storage Backends feature then don't change the Docker Compose file.
 
+##### **[Iceberg Credentials Vending](https://docs.lakefs.io/iceberg/#credentials-vending)**
+lakeFS can vend short-lived, table-scoped object-store credentials to Iceberg REST Catalog clients. This removes the need to configure Spark, Trino, PyIceberg, or any other compatible client with permanent credentials for the repository's physical storage. This solves the case where an Iceberg client knows only its lakeFS credentials, while the REST Catalog returns physical object-store locations that the client must read from and write to.
+
+If you want to use Iceberg Credentials Vending for S3 Storage Backend then export the following environment variables:
+
+```bash
+export LAKEFS_BLOCKSTORE_S3_CREDENTIALS_VENDING_ROLE_ARN=your_s3_role_arn
+```
+
 ##### **AWS Glue Catalog Sync of Iceberg Tables**
 
 If you want to sync Iceberg tables created in lakeFS to AWS Glue Catalog then export the following environment variables:
