@@ -39,6 +39,14 @@ services:
       - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
       - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minioadmin
       - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minioadmin
+      # Iceberg S3 credentials vending is configured per store (on "minio" below):
+      # lakeFS assumes a role via MinIO's STS endpoint and hands clients
+      # table-scoped, temporary credentials. The role ARN is a placeholder (MinIO
+      # authenticates as the configured user and applies the inline session
+      # policy); sts_endpoint points the STS client at MinIO instead of the public
+      # AWS STS endpoint.
+      - LAKEFS_BLOCKSTORE_S3_STS_ENDPOINT=http://minio:9000
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_VENDING_ROLE_ARN=arn:aws:iam::000000000000:role/lakefs-iceberg-minio-vending
       - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
       - LAKEFS_LOGGING_LEVEL=INFO
       - LAKEFS_STATS_ENABLED=${LAKEFS_STATS_ENABLED:-1}
@@ -64,7 +72,9 @@ services:
       start_period: 120s
     command:
         - |
+          echo "---- lakeFS setup ----"
           lakefs setup --user-name everything-bagel --access-key-id "$$LAKECTL_CREDENTIALS_ACCESS_KEY_ID" --secret-access-key "$$LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY" || true
+          echo "---- Starting lakeFS server in background ----"
           lakefs run &
           echo "---- Creating repository ----"
           wait-for -t 120 lakefs:8000 -- lakectl repo create lakefs://quickstart s3://quickstart --sample-data || true
