@@ -23,11 +23,12 @@ services:
       - "8085:8000"
     environment:
       # ---- Backblaze B2 as the lakeFS blockstore -----------------------------
-      # B2 speaks the S3 API, so the blockstore type is "s3". Three settings are
-      # not the S3 defaults and B2 will not connect without them:
-      #   force_path_style        B2 does not serve virtual-host style buckets
-      #   discover_bucket_region  the bucket-region probe is an AWS-ism
+      # B2 speaks the S3 API, so the blockstore type is "s3". The endpoint is
+      # required. The other two settings are recommended rather than required.
       #   endpoint                your region's S3 endpoint
+      #   force_path_style        B2 accepts both styles, and path style is the usual choice
+      #   discover_bucket_region  skips a region lookup that B2 may refuse, which
+      #                           lakeFS would otherwise log as an error
       - LAKEFS_BLOCKSTORE_TYPE=s3
       - LAKEFS_BLOCKSTORE_S3_ENDPOINT=https://s3.${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)}.backblazeb2.com
       - LAKEFS_BLOCKSTORE_S3_REGION=${B2_REGION:?set B2_REGION in .env - e.g. us-east-005 (see .env.example)}
@@ -38,7 +39,7 @@ services:
 
       # ---- Datasets ----------------------------------------------------------
       # Datasets keep their own backing storage. Pointing it at the same B2
-      # bucket keeps every byte of this demo on Backblaze B2.
+      # bucket keeps all of this demo's data on Backblaze B2.
       - LAKEFS_DATASETS_STORAGE_NAMESPACE_PREFIX=s3://${B2_BUCKET:?set B2_BUCKET in .env - your Backblaze B2 bucket name (see .env.example)}/datasets
 
       # ---- lakeFS Enterprise license ----------------------------------------
