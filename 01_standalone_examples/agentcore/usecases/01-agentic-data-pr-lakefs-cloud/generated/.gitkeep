@@ -1,0 +1,2 @@
+# This directory holds per-run generated state (run-state JSON, resource records,
+# Lambda build artifacts). Everything here except this file is gitignored.

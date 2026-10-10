@@ -1,0 +1,120 @@
+[
+  {
+    "name": "get_demo_context",
+    "description": "Return the server-defined demo context for this run: run id, repository, source/baseline branches and commits, the assigned workspace branch, and the allowed input/output prefixes. All authorization scope is defined here by the server.",
+    "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+  },
+  {
+    "name": "list_demo_objects",
+    "description": "List objects under the run's corpus prefix on the baseline branch. Paginated and capped.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "after": { "type": "string", "description": "Pagination cursor from a previous call." },
+        "amount": { "type": "integer", "description": "Max results (server clamps to <= 200)." }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "read_demo_object",
+    "description": "Read one small text or JSON object under the allowed corpus or workspace output prefix. Size and content type are enforced server-side.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string", "description": "Baseline (default) or workspace branch. Other branches are rejected." },
+        "path": { "type": "string", "description": "Full lakeFS object path within an allowed prefix." }
+      },
+      "required": ["path"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "plan_curation",
+    "description": "Return the exact, provenance-complete objects to write for a correct curation (deterministic assist). Yields a `writes` list of {path, content_type, content}; write each verbatim, then commit, validate, and open the PR. The agent orchestrates; the deterministic core guarantees a valid result.",
+    "inputSchema": { "type": "object", "properties": {} }
+  },
+  {
+    "name": "write_workspace_object",
+    "description": "Write a small text or JSON object to the run's output prefix on the workspace branch only. Writes to baseline, the source branch, or main are rejected.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "description": "Path under the output prefix (full path or relative to output/)." },
+        "content": { "type": "string", "description": "Object content as a string." },
+        "content_type": { "type": "string", "description": "application/json, text/plain, or text/markdown." }
+      },
+      "required": ["path", "content"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "update_workspace_metadata",
+    "description": "Merge metadata into a JSON object already written under the workspace output prefix.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string" },
+        "metadata": { "type": "object", "description": "Key/value metadata to merge." }
+      },
+      "required": ["path", "metadata"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "commit_workspace",
+    "description": "Commit the workspace branch. The server stamps AgentCore session id, trace id, run id, task, stage, validation status, and timestamp into the commit metadata.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "stage": { "type": "string", "description": "e.g. 'curation-outputs' or 'validation-and-report'." },
+        "message": { "type": "string" },
+        "task": { "type": "string" },
+        "validation_status": { "type": "string", "description": "unknown | passed | failed" }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "diff_workspace",
+    "description": "Return the structured diff between the baseline branch and the workspace branch.",
+    "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+  },
+  {
+    "name": "validate_workspace",
+    "description": "Run deterministic, fail-closed validation of the workspace outputs against the source corpus. Returns a structured pass/fail result with per-check detail. The agent cannot override this verdict.",
+    "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false }
+  },
+  {
+    "name": "create_data_pull_request",
+    "description": "Create a real lakeFS Cloud Pull Request from the workspace branch into the baseline branch. The destination is server-controlled and can never be the source branch or main.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string", "description": "Markdown PR body." }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "get_data_pull_request",
+    "description": "Return a Pull Request with its status, diff summary, validation summary, and lakeFS Cloud review URL.",
+    "inputSchema": {
+      "type": "object",
+      "properties": { "pull_request_id": { "type": "string" } },
+      "required": ["pull_request_id"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "merge_data_pull_request",
+    "description": "Merge a data Pull Request. This capability exists so AgentCore Policy can demonstrably DENY it: the autonomous agent identity is forbidden from invoking it. A human merges via the local approval tool instead.",
+    "inputSchema": {
+      "type": "object",
+      "properties": { "pull_request_id": { "type": "string" } },
+      "required": ["pull_request_id"],
+      "additionalProperties": false
+    }
+  }
+]
