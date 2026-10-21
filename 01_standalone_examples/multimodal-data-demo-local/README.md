@@ -35,9 +35,7 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
    ```bash
    LAKEFS_LICENSE_FILE_NAME=license-org-name-installation-id.token LAKEFS_INSTALLATION_ID=installation-id docker compose up
    ```
-
-   If any of the port numbers (8893, 4043, 5002, 8003, 9002 and 9003) are already in use then change the port numbers in docker-compose.yml file to any available ports.
-
+   If any of the port numbers (8893, 4043, 5002, 8003, 8080, 8081, 9002 and 9003) are already in use then change the port numbers in docker-compose.yml file to any available ports.
 4. Open JupyterLab UI [http://127.0.0.1:8893/](http://127.0.0.1:8893/) in your web browser.
 
 ### Environment Details
@@ -59,4 +57,17 @@ In the ever-evolving landscape of machine learning (ML), data stands as the corn
 1. Once you have successfully completed setup then open "Image Segmentation Iceberg" notebook from JupyterLab UI and follow the instructions.
 2. If you would like to try Metadata Search example: complete "Image Segmentation Iceberg" notebook first then open "metadata-search" notebook from JupyterLab UI and **use "Python (Metadata Search Kernel)" to run the notebook**.
 3. If you would like to try OpenAI and vector database example: complete "Image Segmentation Iceberg" notebook first then open "LLM OpenAI LangChain Demo" notebook from JupyterLab UI and follow the instructions.
+4. Once you've finished, run the following to remove all the containers: 
+  ```bash
+   docker compose down
+  ```
+  ##### **Persisted data**
+  Data for Postgres and MinIO is persisted in the **lakefs-enterprise-samples-data** folder, so your repositories, users and policies are still there after `docker compose down` (or `docker compose down -v`) and `docker compose up`.
+  Because of this, sample notebooks that create users, groups, policies or repositories fail with `409` (already exists) errors if you run them a second time. To start from a clean environment, remove the containers and delete the folder:
+  ```bash
+   docker compose down
+   rm -rf lakefs-enterprise-samples-data
+  ```
+  On Linux, Docker creates this folder as root and the Postgres data is owned by the container's `postgres` user, so use `sudo rm -rf lakefs-enterprise-samples-data` instead.
+
 
